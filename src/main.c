@@ -61,12 +61,12 @@ int main()
 	loop1_vec.w = 3;
 	for( int i=0; i<4; i++ ){
 		
-		loop_vec1.x += 0.12;
-		loop_vec1.y += 0.12;
-		loop_vec1.z += 0.12;
-		loop_vec1.w += 0.12;
+		loop1_vec.x += 0.12;
+		loop1_vec.y += 0.12;
+		loop1_vec.z += 0.12;
+		loop1_vec.w += 0.12;
 
-		vec3d_t v_ret = arrput( vertices, loop_vec1 );
+		vec3d_t v_ret = arrput( vertices, loop1_vec );
 		printf( "v_ret: %f, %f, %f, %f\n", v_ret.x, v_ret.y, v_ret.z, v_ret.w );
 	}
 
