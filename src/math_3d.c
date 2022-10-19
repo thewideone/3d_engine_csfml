@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h  // for reading files
+#include <stdlib.h>  // for reading files
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
@@ -358,7 +358,7 @@ mesh_t mesh_makeEmpty(){
     return mesh;
 }
 
-bool mesh_loadFromObjFile( char* filename ){
+bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
     // ifstream f(sFilename);
     // if( !f.is_open() )
         // return false;
@@ -375,7 +375,14 @@ bool mesh_loadFromObjFile( char* filename ){
 
     //int tri_idx = 0;
 
-    while( !f.eof() ){
+    char* line_buf = NULL;
+    size_t line_len = 0;
+    size_t buf_size = 128;
+
+    // while( !f.eof() ){
+    while( ( line_len = getline( &line_buf, &buf_size, file_ptr ) ) != -1 ){
+        printf( line_buf );
+        
         // Create a line buffer anc read a line from file
         // we assume that no line exceeds 128 characters
         // char line[128]; 
@@ -392,14 +399,23 @@ bool mesh_loadFromObjFile( char* filename ){
 
         // We assume we're not generating normals, textures etc.:
         // Add a vertex to the local cache
-        if( line[0] == 'v' ){
-            vec3d v;
-            s >> letter >> v.x >> v.y >> v.z;
-            vertices.push_back(v);
-            vertex_cnt++;
+        if( line_buf[0] == 'v' ){
+            vec3d_t v;
+            int values_read = sscanf( line_buf, "%c %f %f %f", &letter, &v.x, &v.y, &v.z );
+
+            if( values_read != 4 ){
+                printf( "Error: in mesh_loadFromObjFile() could not read 4 values from line\n" );
+                return false;
+            }
+            // s >> letter >> v.x >> v.y >> v.z;
+            // vertices.push_back(v);
+            arrput( mesh->vertices, v );
+
+            mesh->vertex_cnt++;
         }
         // Add a face to the mesh
-        if( line[0] == 'f' ){
+        if( line_buf[0] == 'f' ){
+            /*
             //int f[3];
             //vector<int> point_ids;
             s >> letter;// >> f[0] >> f[1] >> f[2];
@@ -439,18 +455,18 @@ bool mesh_loadFromObjFile( char* filename ){
             // "-1" because .obj indexes start from 1 and our from 0 
             //tris.push_back( { verts[ f[0]-1 ], verts[ f[1]-1 ], verts[ f[2]-1 ] } );
             //tris.p.push_back?
+            */
         }
     }
-    transformedVertices.reserve( vertex_cnt );
+    // transformedVertices.reserve( vertex_cnt );
     //visFaceIDs.reserve( face_cnt );
 
-    cout<<"Mesh loaded. Vertex count: "<<vertex_cnt;
-    cout<<", face count: "<<face_cnt<<endl;
-
+    // cout<<"Mesh loaded. Vertex count: "<<vertex_cnt;
+    // cout<<", face count: "<<face_cnt<<endl;
+    
+    
     return true;
 }
-
-*/
 
 void mesh_printVisFaceIDs( mesh_t* mesh ){
     // cout << "IDs of visible faces (" << visFaceIDs.size() << " in total):" << endl;

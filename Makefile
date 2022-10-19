@@ -12,7 +12,11 @@ CFLAGS	:= -Wall -Wextra -g
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS = -lwinmm -lcsfml-graphics -lcsfml-window -lcsfml-system
+ifeq ($(OS),Windows_NT)
+LFLAGS = -lcsfml-graphics -lcsfml-window -lcsfml-system -lwinmm
+else
+LFLAGS = -lcsfml-graphics -lcsfml-window -lcsfml-system -lm
+endif
 
 # define output directory
 OUTPUT	:= output

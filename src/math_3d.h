@@ -98,6 +98,7 @@ typedef struct {
 // with info just after its declaration
 mesh_t mesh_makeEmpty();
 
+bool mesh_loadFromObjFile( mesh_t* mesh, char* filename );
 void mesh_printVisFaceIDs( mesh_t* mesh );
 void mesh_printVisEdgeVec( mesh_t* mesh );
 

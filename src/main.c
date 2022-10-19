@@ -131,6 +131,19 @@ int main()
 	// 	// printf( "%f %f %f %f\n", mat.m[3][i], mat.m[3][i+1], mat.m[3][i+2], mat.m[3][i+3] );
 	// }
 
+	mesh_t mesh;
+	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
+
+	printf( "mesh.vertices: cap = %lld, len = %lld\n", arrcap(mesh.vertices), arrlen(mesh.vertices) );
+
+	printf( "mesh.vertices:\n" );
+	for( int i=0; i<arrlen( mesh.vertices ); i++ ){
+		vec3d_t loop_vec = mesh.vertices[i];
+		printf( " -> v%d: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
+	}
+
+	arrfree( mesh.vertices );
+
 	while (sfRenderWindow_isOpen(window)){
 		/* Process events */
         while (sfRenderWindow_pollEvent(window, &event)){
