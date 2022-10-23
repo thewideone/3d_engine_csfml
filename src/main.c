@@ -67,6 +67,28 @@ void binary_tree_map_test( void ){
 	vmap_free( map );
 }
 
+void meshTest( void ){
+	mesh_t mesh = mesh_makeEmpty();
+	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
+
+	printf( "mesh.vertices: cap = %lld, len = %lld\n", arrcap(mesh.vertices), arrlen(mesh.vertices) );
+
+	printf( "mesh.vertices (%d):\n", mesh.vertex_cnt );
+	for( int i=0; i < mesh.vertex_cnt; i++ ){
+		vec3d_t loop_vec = mesh.vertices[i];
+		printf( " -> v%d: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
+	}
+
+	printf( "mesh.faces (%d):\n", mesh.face_cnt );
+	for( int i=0; i < mesh.face_cnt; i++ ){
+		polygon_t poly = mesh.faces[i];
+		printf( "Face %d: ", i );
+		printPolygon( &poly );
+	}
+
+	mesh_free( &mesh );
+}
+
 int main()
 {
 	// Create a window:
@@ -131,18 +153,7 @@ int main()
 	// 	// printf( "%f %f %f %f\n", mat.m[3][i], mat.m[3][i+1], mat.m[3][i+2], mat.m[3][i+3] );
 	// }
 
-	mesh_t mesh;
-	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
-
-	printf( "mesh.vertices: cap = %lld, len = %lld\n", arrcap(mesh.vertices), arrlen(mesh.vertices) );
-
-	printf( "mesh.vertices:\n" );
-	for( int i=0; i<arrlen( mesh.vertices ); i++ ){
-		vec3d_t loop_vec = mesh.vertices[i];
-		printf( " -> v%d: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
-	}
-
-	arrfree( mesh.vertices );
+	meshTest();
 
 	while (sfRenderWindow_isOpen(window)){
 		/* Process events */

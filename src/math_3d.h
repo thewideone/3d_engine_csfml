@@ -11,6 +11,7 @@
 /*
  TODO:
     - add type-initiators like polygon_t poly = createPolygon(); ?
+    - add "destructors" to free for example meshes' dynamic arrays
     - tests of everything XD
 
  */
@@ -94,9 +95,13 @@ typedef struct {
 // #endif
 } mesh_t;
 
+polygon_t polygonMakeEmpty( void );
+void printPolygon( polygon_t* poly );
+
 // Idk if it makes sense because a mesh should be loaded
 // with info just after its declaration
 mesh_t mesh_makeEmpty();
+void mesh_free( mesh_t* mesh );
 
 bool mesh_loadFromObjFile( mesh_t* mesh, char* filename );
 void mesh_printVisFaceIDs( mesh_t* mesh );

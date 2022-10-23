@@ -343,6 +343,21 @@ mat4x4_t matrixQuickInverse(mat4x4_t* m){
 }
 #endif
 
+polygon_t polygonMakeEmpty( void ){
+    polygon_t poly;
+    poly.p = NULL;
+    poly.p_count = 0;
+    
+    return poly;
+}
+
+void printPolygon( polygon_t* poly ){
+    for( int i=0; i < poly->p_count; i++ ){
+        printf( "%d ", poly->p[i] );
+    }
+    printf( "\n" );
+}
+
 mesh_t mesh_makeEmpty(){
     mesh_t mesh;
     mesh.face_cnt = 0;
@@ -358,40 +373,34 @@ mesh_t mesh_makeEmpty(){
     return mesh;
 }
 
+void mesh_free( mesh_t* mesh ){
+    arrfree( mesh->faces );
+    arrfree( mesh->transformedVertices );
+    vmap_free( mesh->vert2DSpaceMap );
+    arrfree( mesh->vertices );
+    arrfree( mesh->vis_edge_vec );
+    arrfree( mesh->visFaceIDs );
+}
+
 bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
-    // ifstream f(sFilename);
-    // if( !f.is_open() )
-        // return false;
+    
     FILE* file_ptr;
     file_ptr = fopen( filename, "r" );
 
     if( file_ptr == NULL ){
         printf( "Error: in mesh_loadFromObjFile(): could not open the file\n" );
-        return 1;
+        return false;
     }
 
-    // Local cache of vertices:
-    //vector<vec3d> verts;
-
-    //int tri_idx = 0;
+    // Create a line buffer anc read a line from file
+    // we assume that no line exceeds 128 characters
 
     char* line_buf = NULL;
-    size_t line_len = 0;
+    size_t line_len;
     size_t buf_size = 128;
 
-    // while( !f.eof() ){
+    // printf( "Starting to read the file...\n" );
     while( ( line_len = getline( &line_buf, &buf_size, file_ptr ) ) != -1 ){
-        printf( line_buf );
-        
-        // Create a line buffer anc read a line from file
-        // we assume that no line exceeds 128 characters
-        // char line[128]; 
-        // f.getline( line, 128 );
-
-        // strstream s;
-        // s << line;
-
-        // fscanf( file_ptr, "" )
 
         // Each line of .obj starts with
         // 'v' for vertex or 'f' for face
@@ -407,63 +416,63 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
                 printf( "Error: in mesh_loadFromObjFile() could not read 4 values from line\n" );
                 return false;
             }
-            // s >> letter >> v.x >> v.y >> v.z;
-            // vertices.push_back(v);
+            // printf( "Putting vertex...\n" );
             arrput( mesh->vertices, v );
-
+            // printf( "Incrementing vertex count...\n" );
             mesh->vertex_cnt++;
         }
         // Add a face to the mesh
         if( line_buf[0] == 'f' ){
-            /*
-            //int f[3];
-            //vector<int> point_ids;
-            s >> letter;// >> f[0] >> f[1] >> f[2];
-            // Read what points make up our face (n-gon):
-            polygon new_face;
-            int point_count=0;
+            
+            if( sscanf( line_buf, "%c ", &letter ) != 1 ){
+                printf( "Error: in mesh_loadFromObjFile() could not read first letter from line\n" );
+                return false;
+            }
 
-            int point_ID;
+            // Read what points make up our face (n-gon):
+            polygon_t new_face = polygonMakeEmpty();
+            // int point_count=0;
+
             // For all numbers in this line, we read IDs of vertices
-            while( s >> point_ID ){
+            int point_ID;
+            int chars_read_total = 0;   // total of chars read from the buffer
+            int chars_read; // records the last position read in the buffer
+
+            // printf( "Face: " );
+            // printf( "Scanning from face-string...\n" );
+            while( 1 == sscanf( line_buf + chars_read_total,
+                   "%*[^0123456789]%d%n", &point_ID, &chars_read ) ){
+                
+                chars_read_total += chars_read;
+
                 // Indexes of .obj start from 1 and ours from 0,
                 // so subtract 1
                 point_ID -= 1;
 
-                new_face.p.push_back( point_ID );
-                //new_face.p.push_back( verts[point_ID] );
-                //cout<<"Pushed new vertex to n-gon of id = "<<point_ID+1<<endl;
-                point_count++;
-            }
+                // printf( "%d ", point_ID );
 
-            new_face.p_count = point_count;
+                arrput( new_face.p, point_ID );
+                // point_count++;
+                new_face.p_count++;
+            }
+            // printf( "\ttotal: %d\n", chars_read_total );
+            
+            // new_face.p_count = point_count;
+
             // Apply a random colour:
             //new_face.colour = sf::Color( 255, 255, 255 );
-            int random_r =  100+( std::rand() % ( 255-100+1 ) );
-            int random_g =  100+( std::rand() % ( 255-100+1 ) );
-            int random_b =  100+( std::rand() % ( 255-100+1 ) );
-            new_face.colour = sf::Color( random_r, random_g, random_b );
+            // int random_r =  100+( std::rand() % ( 255-100+1 ) );
+            // int random_g =  100+( std::rand() % ( 255-100+1 ) );
+            // int random_b =  100+( std::rand() % ( 255-100+1 ) );
+            // new_face.colour = sf::Color( random_r, random_g, random_b );
+
             // Add the face to our mesh
-            faces.push_back( new_face );
-            face_cnt++;
-            // v tris = faces v
-            //cout<<"Pushed new n-gon: "<<tris[tri_idx].p_count<<" vertices"<<endl;
-            //tri_idx++;
-            //copy( istream_iterator<int>( line ), istream_iterator<int>(), back_inserter( point_ids ) );
-            //while( s >> point_ids ){
-            //}
-            // "-1" because .obj indexes start from 1 and our from 0 
-            //tris.push_back( { verts[ f[0]-1 ], verts[ f[1]-1 ], verts[ f[2]-1 ] } );
-            //tris.p.push_back?
-            */
+            arrput( mesh->faces, new_face );
+            mesh->face_cnt++;            
         }
     }
     // transformedVertices.reserve( vertex_cnt );
     //visFaceIDs.reserve( face_cnt );
-
-    // cout<<"Mesh loaded. Vertex count: "<<vertex_cnt;
-    // cout<<", face count: "<<face_cnt<<endl;
-    
     
     return true;
 }
