@@ -351,11 +351,21 @@ polygon_t polygonMakeEmpty( void ){
     return poly;
 }
 
-void printPolygon( polygon_t* poly ){
-    for( int i=0; i < poly->p_count; i++ ){
-        printf( "%d ", poly->p[i] );
+void polygon_free( polygon_t* poly ){
+    arrfree( poly->p );
+    poly->p = NULL;
+    poly->p_count = 0;
+}
+
+void polygon_print( polygon_t* poly ){
+    if( poly == NULL || poly->p_count == 0 )
+        printf( "Empty\n" );
+    else {
+        for( int i=0; i < poly->p_count; i++ ){
+            printf( "%d ", poly->p[i] );
+        }
+        printf( "\n" );
     }
-    printf( "\n" );
 }
 
 mesh_t mesh_makeEmpty(){
@@ -374,6 +384,8 @@ mesh_t mesh_makeEmpty(){
 }
 
 void mesh_free( mesh_t* mesh ){
+    for( int i=0; i < mesh->face_cnt; i++ )
+        polygon_free( &mesh->faces[i] );
     arrfree( mesh->faces );
     arrfree( mesh->transformedVertices );
     vmap_free( mesh->vert2DSpaceMap );
@@ -468,12 +480,18 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
 
             // Add the face to our mesh
             arrput( mesh->faces, new_face );
-            mesh->face_cnt++;            
+            mesh->face_cnt++;
+
+            // Destroy the face, copy of which has just been added
+            // to the mesh
+            // polygon_free( &new_face );
+            // free( &new_face.p );
+            // arrfree( new_face.p );
         }
     }
     // transformedVertices.reserve( vertex_cnt );
     //visFaceIDs.reserve( face_cnt );
-    
+
     return true;
 }
 

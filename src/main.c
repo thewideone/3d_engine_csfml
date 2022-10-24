@@ -83,7 +83,7 @@ void meshTest( void ){
 	for( int i=0; i < mesh.face_cnt; i++ ){
 		polygon_t poly = mesh.faces[i];
 		printf( "Face %d: ", i );
-		printPolygon( &poly );
+		polygon_print( &poly );
 	}
 
 	mesh_free( &mesh );

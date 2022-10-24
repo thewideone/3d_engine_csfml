@@ -10,7 +10,6 @@
 
 /*
  TODO:
-    - add type-initiators like polygon_t poly = createPolygon(); ?
     - add "destructors" to free for example meshes' dynamic arrays
     - tests of everything XD
 
@@ -40,7 +39,7 @@ typedef struct {
     // vector<int> p;
     int* p;
     // Number of vertices;
-    // ( faster access than vector.size() I guess )
+    // ( faster access than arrlen() I guess )
 	int p_count;
 } polygon_t;
 
@@ -78,7 +77,6 @@ typedef struct {
     int* visFaceIDs;
     // map<int, vec3d> vert2DSpaceMap; // vertex ID, vertex object
     vmap_t* vert2DSpaceMap;
-    // #warning "Add map type"
     
     // vis_edge_vec:
     // Each entry is 4x int
@@ -92,11 +90,14 @@ typedef struct {
 // #ifdef REMOVE_HIDDEN_LINES
     // map<int, bool> visVertexMap; // vertex ID, vertex visibility flag
     // vmap_t* visVertexMap;
+    // Functionality of the visVertexMap replaced by
+    // storing "visible" flag in vmap_t type
 // #endif
 } mesh_t;
 
 polygon_t polygonMakeEmpty( void );
-void printPolygon( polygon_t* poly );
+void polygon_print( polygon_t* poly );
+void polygon_free( polygon_t* poly );
 
 // Idk if it makes sense because a mesh should be loaded
 // with info just after its declaration
