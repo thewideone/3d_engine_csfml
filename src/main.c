@@ -11,7 +11,38 @@
 
 #include "graphics.h"
 
-void dynamic_array_test( void ){
+void mathTest( void ){
+	vec3d_t v1 = { 1.0, 1.0, 1.0, 0 },
+			v2 = { 2.5, 3.5, 4.5, 0 };
+
+	printf( "v1: %f, %f, %f, %f\n", v1.x, v1.y, v1.z, v1.w );
+	printf( "v2: %f, %f, %f, %f\n", v2.x, v2.y, v2.z, v2.w );
+
+	vec3d_t v3 = vectorAdd( &v1, &v2 );
+	printf( "vectorAdd(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+
+	v3 = vectorSub( &v1, &v2 );
+	printf( "vectorSub(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+
+	v3 = vectorMul( &v2, 4.5 );
+	printf( "vectorMul(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+
+	v3 = vectorDiv( &v2, 3.0 );
+	printf( "vectorDiv(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+
+	// printVec3D( &v3, "v3: " );
+
+	mat4x4_t mat = matrixMakeIdentity();
+	printMatrix( &mat );
+	// for( int i=0; i<16; i+=4 ){
+	// 	printf( "%f %f %f %f\n", mat.m[i%4][i/4], mat.m[i%4][i/4+1], mat.m[i/4%4][i/4+2], mat.m[i%4][i/4+3] );
+	// 	// printf( "%f %f %f %f\n", mat.m[1][i], mat.m[1][i+1], mat.m[1][i+2], mat.m[1][i+3] );
+	// 	// printf( "%f %f %f %f\n", mat.m[2][i], mat.m[2][i+1], mat.m[2][i+2], mat.m[2][i+3] );
+	// 	// printf( "%f %f %f %f\n", mat.m[3][i], mat.m[3][i+1], mat.m[3][i+2], mat.m[3][i+3] );
+	// }
+}
+
+void dynamicArrayTest( void ){
 	vec3d_t* vertices = NULL;
 
 	printf( "Putting vertices.\n" );
@@ -42,7 +73,7 @@ void dynamic_array_test( void ){
 	arrfree( vertices );
 }
 
-void binary_tree_map_test( void ){
+void binaryTreeMapTest( void ){
 	vec3d_t v1;
 	v1.x = 0;
 	v1.y = 1;
@@ -89,6 +120,14 @@ void meshTest( void ){
 	mesh_free( &mesh );
 }
 
+void graphicsTest( sfRenderWindow* renderWindow ){
+	drawLine( 50, 50, 100, 100, sfWhite, renderWindow );
+
+	char str[20];
+	sprintf( str, "Hello putText %d", 123 );
+	putText( str, 150, 150, 50, sfMagenta, renderWindow );
+}
+
 int main()
 {
 	// Create a window:
@@ -106,6 +145,8 @@ int main()
         return 1;
 	}
 
+	initGraphics();
+
 	/* Create a graphical text to display */
     font = sfFont_createFromFile("Minecraft.ttf");
     if (!font){
@@ -122,38 +163,9 @@ int main()
 	// sf::CircleShape circle(2.0);
 
 	// TODO: see math_3d.h
-	// print matrixMakeIdentity()
 
-	vec3d_t v1 = { 1.0, 1.0, 1.0, 0 },
-			v2 = { 2.5, 3.5, 4.5, 0 };
-
-	printf( "v1: %f, %f, %f, %f\n", v1.x, v1.y, v1.z, v1.w );
-	printf( "v2: %f, %f, %f, %f\n", v2.x, v2.y, v2.z, v2.w );
-
-	vec3d_t v3 = vectorAdd( &v1, &v2 );
-	printf( "vectorAdd(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
-
-	v3 = vectorSub( &v1, &v2 );
-	printf( "vectorSub(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
-
-	v3 = vectorMul( &v2, 4.5 );
-	printf( "vectorMul(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
-
-	v3 = vectorDiv( &v2, 3.0 );
-	printf( "vectorDiv(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
-
-	// printVec3D( &v3, "v3: " );
-
-	mat4x4_t mat = matrixMakeIdentity();
-	printMatrix( &mat );
-	// for( int i=0; i<16; i+=4 ){
-	// 	printf( "%f %f %f %f\n", mat.m[i%4][i/4], mat.m[i%4][i/4+1], mat.m[i/4%4][i/4+2], mat.m[i%4][i/4+3] );
-	// 	// printf( "%f %f %f %f\n", mat.m[1][i], mat.m[1][i+1], mat.m[1][i+2], mat.m[1][i+3] );
-	// 	// printf( "%f %f %f %f\n", mat.m[2][i], mat.m[2][i+1], mat.m[2][i+2], mat.m[2][i+3] );
-	// 	// printf( "%f %f %f %f\n", mat.m[3][i], mat.m[3][i+1], mat.m[3][i+2], mat.m[3][i+3] );
-	// }
-
-	meshTest();
+	// mathTest();
+	// meshTest();
 
 	while (sfRenderWindow_isOpen(window)){
 		/* Process events */
@@ -169,15 +181,8 @@ int main()
 		/* Draw the text */
         sfRenderWindow_drawText(window, text, NULL);
 
-		// char str[16];
-		// sprintf( str, "Hello putText %d", 123 );
-		// putText( str, 150, 150, 50, sfMagenta, window );
 
-		// Does not work! VV
-		// drawLine( 60, 60, 150, 150, sfWhite, window );
-
-
-
+		graphicsTest( window );
 
 		/* Update the window */
         sfRenderWindow_display(window);

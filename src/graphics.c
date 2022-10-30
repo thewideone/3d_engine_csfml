@@ -5,6 +5,17 @@
 
 #include "stb_ds.h"
 
+sfFont* font;
+
+int initGraphics( void ){
+    font = sfFont_createFromFile("Minecraft.ttf");
+    if ( !font ){
+		printf( "Error: Could not load a font.\n" );
+        return 1;
+	}
+    return 0;
+}
+
 int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWindow* windowToDrawOnto ){
     // sf::Font font;
     // if (!font.loadFromFile("Minecraft.ttf"))
@@ -19,12 +30,6 @@ int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWind
     // text.setFillColor( colour );
     // text.setPosition( x, y );
     // windowToDrawOnto.draw(text);
-
-    sfFont* font = sfFont_createFromFile("Minecraft.ttf");
-    if ( !font ){
-		printf( "Error: Could not load a font.\n" );
-        return 1;
-	}
 
     sfText* text = sfText_create();
     sfText_setString( text, str );
@@ -42,26 +47,22 @@ int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWind
 }
 
 void drawLine( float x0, float y0, float x1, float y1, sfColor colour, sfRenderWindow* renderWindow ){
-    // sfVertexArray line[] = {
-    //     sfVertex(sfVector2f(x0, y0), colour ),
-    //     sfVertex(sfVector2f(x1, y1), colour )
-    // };
-    // sfRenderWindow_drawLine();
-    // windowToDrawOnto.draw(line, 2, sfLines);
-    sfRenderStates renderer;
-
     sfVertexArray* vert_array;
     vert_array = sfVertexArray_create();
+
+    sfVertexArray_setPrimitiveType( vert_array, sfLines );
 
     sfVertex v1, v2;
     v1.position.x = x0;
     v1.position.y = y0;
     v2.position.x = x1;
     v2.position.y = y1;
+    v1.color = colour;
+    v2.color = colour;
     sfVertexArray_append( vert_array, v1 );
     sfVertexArray_append( vert_array, v2 );
 
-    sfRenderWindow_drawVertexArray( renderWindow, vert_array, &renderer);
+    sfRenderWindow_drawVertexArray( renderWindow, vert_array, NULL );
 }
 
 vec3d_t findCentre( mesh_t* mesh, int face_ID ){

@@ -1,8 +1,10 @@
 #ifndef _MATH_3D_H_
 #define _MATH_3D_H_
 
-#include <SFML/Graphics.h>
 #include <math.h>
+
+#include <SFML/Graphics.h>
+
 #include "config.h"
 
 // Do not include this here

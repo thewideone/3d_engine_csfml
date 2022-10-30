@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include <stdlib.h>  // for reading files
+#include <stdlib.h>      // for reading files
+#include "pc_routines.h" // for reading lines of files
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 
 #include "math_3d.h"
-
 #include "graphics.h"
 
 vmap_t* vmap_createNode( int key, vec3d_t v, int vis_flag ){

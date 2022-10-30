@@ -4,7 +4,6 @@
 #include <SFML/Graphics.h>
 
 #include "math_3d.h"
-
 #include "config.h"
 
 // #include <vector>
@@ -16,8 +15,7 @@
 // for random stuff:
 #include <stdlib.h>     /* srand, rand */
 
-// using namespace std;
-
+int initGraphics( void );
 void drawLine( float x0, float y0, float x1, float y1, sfColor colour, sfRenderWindow* windowToDrawOnto );
 int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWindow* windowToDrawOnto );
 vec3d_t findCentre( mesh_t* mesh, int face_ID );
