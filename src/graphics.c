@@ -16,7 +16,11 @@ int initGraphics( void ){
     return 0;
 }
 
-int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWindow* windowToDrawOnto ){
+void freeGraphics( void ){
+    sfFont_destroy(font);
+}
+
+int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWindow* renderWindow ){
     // sf::Font font;
     // if (!font.loadFromFile("Minecraft.ttf"))
     //     cout<<"Failed to load Minecraft.ttf\n";
@@ -29,7 +33,7 @@ int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWind
     // // set the color
     // text.setFillColor( colour );
     // text.setPosition( x, y );
-    // windowToDrawOnto.draw(text);
+    // renderWindow.draw(text);
 
     sfText* text = sfText_create();
     sfText_setString( text, str );
@@ -41,7 +45,9 @@ int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWind
 
     sfText_setColor( text, colour );
 
-    sfRenderWindow_drawText( windowToDrawOnto, text, NULL );
+    sfRenderWindow_drawText( renderWindow, text, NULL );
+
+    sfText_destroy(text);
 
     return 0;
 }

@@ -181,7 +181,6 @@ int main()
 		/* Draw the text */
         sfRenderWindow_drawText(window, text, NULL);
 
-
 		graphicsTest( window );
 
 		/* Update the window */
@@ -191,6 +190,8 @@ int main()
 	sfRenderWindow_destroy(window);
 	sfText_destroy(text);
     sfFont_destroy(font);
+	
+	freeGraphics();
 
 	return (0);
 }
