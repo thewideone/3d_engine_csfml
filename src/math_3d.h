@@ -97,6 +97,8 @@ typedef struct {
 // #endif
 } mesh_t;
 
+void vec3d_print( vec3d_t* v, int new_line_flag );
+
 polygon_t polygonMakeEmpty( void );
 void polygon_print( polygon_t* poly );
 void polygon_free( polygon_t* poly );
@@ -105,14 +107,13 @@ void polygon_free( polygon_t* poly );
 // with info just after its declaration
 mesh_t mesh_makeEmpty();
 void mesh_free( mesh_t* mesh );
-
 bool mesh_loadFromObjFile( mesh_t* mesh, char* filename );
 void mesh_printVisFaceIDs( mesh_t* mesh );
 void mesh_printVisEdgeVec( mesh_t* mesh );
 
-vmap_t* vmap_createNode( int key, vec3d_t v, int vis_flag );
+vmap_t* vmap_createNode( int key, vec3d_t* v, int vis_flag );
 vmap_t* vmap_search( vmap_t* root, int key );
-vmap_t* vmap_insertNode( vmap_t* root, int key, vec3d_t v, int vis_flag );
+vmap_t* vmap_insertNode( vmap_t* root, int key, vec3d_t* v, int vis_flag );
 void vmap_print( vmap_t* root );
 void vmap_free( vmap_t* root );
 
@@ -143,34 +144,34 @@ vec3d_t vectorNormalise( vec3d_t* v );
 
 // Matrix operator functions:
 // Multiply matrix by vector ( m - input matrix, i - input vector ):
-vec3d_t matrixMulVector( mat4x4_t* m, vec3d_t* i );
+vec3d_t matrix_mulVector( mat4x4_t* m, vec3d_t* i );
 
 mat4x4_t matrix_makeEmpty();
 
-mat4x4_t matrixMakeIdentity();
+mat4x4_t matrix_makeIdentity();
 
-mat4x4_t matrixMakeRotZ( float fAngleRad );
+mat4x4_t matrix_makeRotZ( float fAngleRad );
 
-mat4x4_t matrixMakeRotX( float fAngleRad );
+mat4x4_t matrix_makeRotX( float fAngleRad );
 
 #ifdef USE_CAMERA
-mat4x4_t matrixMakeRotY(float fAngleRad);
+mat4x4_t matrix_makeRotY(float fAngleRad);
 #endif
 
-mat4x4_t matrixMakeTranslation( float x, float y, float z );
+mat4x4_t matrix_makeTranslation( float x, float y, float z );
 
-mat4x4_t matrixMakeProjection( float fFovDegrees, float fAspectRatio, float fNear, float fFar );
+mat4x4_t matrix_makeProjection( float fFovDegrees, float fAspectRatio, float fNear, float fFar );
 
-mat4x4_t matrixMulMatrix( mat4x4_t* m1, mat4x4_t* m2 );
+mat4x4_t matrix_mulMatrix( mat4x4_t* m1, mat4x4_t* m2 );
 
 #ifdef USE_CAMERA
 //  pos - where the object should be
 //  target - "forward" vector for that object
 //  up - "up" vector
-mat4x4_t matrixPointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up );
+mat4x4_t matrix_pointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up );
 
 // Works only for Rotation/Translation Matrices
-mat4x4_t matrixQuickInverse(mat4x4_t* m);
+mat4x4_t matrix_quickInverse(mat4x4_t* m);
 #endif
 
 bool areCollinear( vec3d_t* v1, vec3d_t* v2, vec3d_t* v3, bool object_num, sfRenderWindow* windowToDrawOnto );

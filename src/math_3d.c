@@ -8,12 +8,17 @@
 #include "math_3d.h"
 #include "graphics.h"
 
-vmap_t* vmap_createNode( int key, vec3d_t v, int vis_flag ){
+vmap_t* vmap_createNode( int key, vec3d_t* v, int vis_flag ){
     vmap_t* new_node_ptr = (vmap_t*) malloc( sizeof( vmap_t ) );
 
     new_node_ptr->key = key;
-    new_node_ptr->v = v;    // shallow copy is enough for this type
+    new_node_ptr->v.x = v->x;    // shallow copy is enough for this type
+    new_node_ptr->v.y = v->y;
+    new_node_ptr->v.z = v->z;
+    new_node_ptr->v.w = v->w;
+#ifdef RENDER_VISIBLE_ONLY
     new_node_ptr->visible = vis_flag;
+#endif
     new_node_ptr->left = NULL;
     new_node_ptr->right = NULL;
 
@@ -46,7 +51,7 @@ vmap_t* vmap_search( vmap_t* root, int key ){
 // key      - key of
 // v        - vector to be added
 // vis_flag - visibility flag of the vector
-vmap_t* vmap_insertNode( vmap_t* root, int key, vec3d_t v, int vis_flag ){
+vmap_t* vmap_insertNode( vmap_t* root, int key, vec3d_t* v, int vis_flag ){
     vmap_t* new_node_ptr = vmap_createNode( key, v, vis_flag );
 
     vmap_t* search_head_ptr = root;
@@ -60,10 +65,13 @@ vmap_t* vmap_insertNode( vmap_t* root, int key, vec3d_t v, int vis_flag ){
             search_head_ptr = search_head_ptr->right;
     }
 
+    if( root == NULL )
+        root = new_node_ptr;
     // If the root is NULL (the tree is empty)
     // The new node is the root node
     if( search_tail_ptr == NULL ){
         search_tail_ptr = new_node_ptr;
+        // root = new_node_ptr;
     }
 
     // If the new key is less than the leaf node key
@@ -87,7 +95,8 @@ void vmap_print( vmap_t* root ){
         return;
     else {
         vmap_print(root->left);
-        printf( "%d ", root->key);
+        printf( "Key: %d, v: ", root->key );
+        vec3d_print( &(root->v), 1 );
         vmap_print(root->right);
     }
 }
@@ -158,7 +167,7 @@ vec3d_t vectorMul( vec3d_t* v, float k ){
     // v_ret.z = v->z * k;
     // v_ret.w = 0;
     // return v_ret;
-    return (vec3d_t){ v->x * k, v->y * k, v->z * k, 0 };
+    return (vec3d_t){ v->x * k, v->y * k, v->z * k, v->w };
 }
 // Divide:
 vec3d_t vectorDiv( vec3d_t* v, float k ){
@@ -168,7 +177,11 @@ vec3d_t vectorDiv( vec3d_t* v, float k ){
     // v_ret.z = v->z / k;
     // v_ret.w = 0;
     // return v_ret;
-    return (vec3d_t){ v->x / k, v->y / k, v->z / k, 0 };
+    if( k == 0.0 ){
+        printf( "Error: in vectorDiv() division by 0. Aborting." );
+        exit(0);    // maybe replace with something better
+    }
+    return (vec3d_t){ v->x / k, v->y / k, v->z / k, v->w };
 }
 // Dot product:
 float vectorDotProduct( vec3d_t* v1, vec3d_t* v2 ){
@@ -176,7 +189,7 @@ float vectorDotProduct( vec3d_t* v1, vec3d_t* v2 ){
 }
 // Cross product:
 vec3d_t vectorCrossProduct( vec3d_t* v1, vec3d_t* v2 ){
-    vec3d_t v;
+    static vec3d_t v;
 	v.x = (v1->y) * (v2->z) - (v1->z) * (v2->y);
 	v.y = (v1->z) * (v2->x) - (v1->x) * (v2->z);
 	v.z = (v1->x) * (v2->y) - (v1->y) * (v2->x);
@@ -195,23 +208,11 @@ vec3d_t vectorNormalise( vec3d_t* v ){
     // v_ret.z = v->z / l;
     // v_ret.w = 0;
     // return v_ret;
-    return (vec3d_t){ v->x / l, v->y / l, v->z / l, 0 };
-}
-
-// Matrix operator functions:
-// Multiply matrix by vector ( m - input matrix, i - input vector ):
-vec3d_t matrixMulVector( mat4x4_t* m, vec3d_t* i ){
-    vec3d_t v;
-	v.x = i->x * m->m[0][0] + i->y * m->m[1][0] + i->z * m->m[2][0] + i->w * m->m[3][0];
-	v.y = i->x * m->m[0][1] + i->y * m->m[1][1] + i->z * m->m[2][1] + i->w * m->m[3][1];
-	v.z = i->x * m->m[0][2] + i->y * m->m[1][2] + i->z * m->m[2][2] + i->w * m->m[3][2];
-    v.w = i->x * m->m[0][3] + i->y * m->m[1][3] + i->z * m->m[2][3] + i->w * m->m[3][3];
-	
-	return v;
+    return (vec3d_t){ v->x / l, v->y / l, v->z / l, v->w };
 }
 
 mat4x4_t matrix_makeEmpty(){
-    mat4x4_t matrix;
+    static mat4x4_t matrix;
 
     // int j=0;
     // for( int i=0; i<4; i++ )
@@ -222,7 +223,7 @@ mat4x4_t matrix_makeEmpty(){
     return matrix;
 }
 
-mat4x4_t matrixMakeIdentity(){
+mat4x4_t matrix_makeIdentity(){
     mat4x4_t matrix = matrix_makeEmpty();
     
     matrix.m[0][0] = 1.0f;
@@ -233,8 +234,8 @@ mat4x4_t matrixMakeIdentity(){
     return matrix;
 }
 
-mat4x4_t matrixMakeRotZ( float fAngleRad ){
-    mat4x4_t matrix;
+mat4x4_t matrix_makeRotZ( float fAngleRad ){
+    static mat4x4_t matrix;
     matrix.m[0][0] = cosf( fAngleRad );
     matrix.m[0][1] = sinf( fAngleRad );
     matrix.m[1][0] = -sinf( fAngleRad );
@@ -244,8 +245,8 @@ mat4x4_t matrixMakeRotZ( float fAngleRad ){
     return matrix;
 }
 
-mat4x4_t matrixMakeRotX( float fAngleRad ){
-    mat4x4_t matrix;
+mat4x4_t matrix_makeRotX( float fAngleRad ){
+    static mat4x4_t matrix;
     matrix.m[0][0] = 1.0f;
     matrix.m[1][1] = cosf( fAngleRad );
     matrix.m[1][2] = sinf( fAngleRad );
@@ -256,8 +257,8 @@ mat4x4_t matrixMakeRotX( float fAngleRad ){
 }
 
 #ifdef USE_CAMERA
-mat4x4_t matrixMakeRotY(float fAngleRad){
-	mat4x4_t matrix;
+mat4x4_t matrix_makeRotY(float fAngleRad){
+	static mat4x4_t matrix;
 	matrix.m[0][0] = cosf(fAngleRad);
 	matrix.m[0][2] = sinf(fAngleRad);
 	matrix.m[2][0] = -sinf(fAngleRad);
@@ -268,8 +269,20 @@ mat4x4_t matrixMakeRotY(float fAngleRad){
 }
 #endif
 
-mat4x4_t matrixMakeTranslation( float x, float y, float z ){
-    mat4x4_t matrix;
+// Matrix operator functions:
+// Multiply matrix by vector ( m - input matrix, i - input vector ):
+vec3d_t matrix_mulVector( mat4x4_t* m, vec3d_t* i ){
+    vec3d_t v;
+	v.x = i->x * m->m[0][0] + i->y * m->m[1][0] + i->z * m->m[2][0] + i->w * m->m[3][0];
+	v.y = i->x * m->m[0][1] + i->y * m->m[1][1] + i->z * m->m[2][1] + i->w * m->m[3][1];
+	v.z = i->x * m->m[0][2] + i->y * m->m[1][2] + i->z * m->m[2][2] + i->w * m->m[3][2];
+    v.w = i->x * m->m[0][3] + i->y * m->m[1][3] + i->z * m->m[2][3] + i->w * m->m[3][3];
+	
+	return v;
+}
+
+mat4x4_t matrix_makeTranslation( float x, float y, float z ){
+    static mat4x4_t matrix;
     matrix.m[0][0] = 1.0f;
     matrix.m[1][1] = 1.0f;
     matrix.m[2][2] = 1.0f;
@@ -280,11 +293,11 @@ mat4x4_t matrixMakeTranslation( float x, float y, float z ){
     return matrix;
 }
 
-mat4x4_t matrixMakeProjection( float fFovDegrees, float fAspectRatio, float fNear, float fFar ){
+mat4x4_t matrix_makeProjection( float fFovDegrees, float fAspectRatio, float fNear, float fFar ){
     // Fov coefficient in radians
     float fFovRad = 1.0f / tanf( fFovDegrees * 0.5f / 180.0f * 3.14159f );
 
-    mat4x4_t matrix;
+    static mat4x4_t matrix;
     matrix.m[0][0] = fAspectRatio * fFovRad;
     matrix.m[1][1] = fFovRad;
     matrix.m[2][2] = fFar / ( fFar - fNear );
@@ -294,8 +307,8 @@ mat4x4_t matrixMakeProjection( float fFovDegrees, float fAspectRatio, float fNea
     return matrix;
 }
 
-mat4x4_t matrixMulMatrix( mat4x4_t* m1, mat4x4_t* m2 ){
-    mat4x4_t matrix;
+mat4x4_t matrix_mulMatrix( mat4x4_t* m1, mat4x4_t* m2 ){
+    static mat4x4_t matrix;
 	for (int c = 0; c < 4; c++)
 		for (int r = 0; r < 4; r++)
 			matrix.m[r][c] = m1->m[r][0] * m2->m[0][c] + m1->m[r][1] * m2->m[1][c] + m1->m[r][2] * m2->m[2][c] + m1->m[r][3] * m2->m[3][c];
@@ -306,7 +319,7 @@ mat4x4_t matrixMulMatrix( mat4x4_t* m1, mat4x4_t* m2 ){
 //  pos - where the object should be
 //  target - "forward" vector for that object
 //  up - "up" vector
-mat4x4_t matrixPointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
+mat4x4_t matrix_pointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
     // Calculate new forward direction:
     vec3d_t newForward = vectorSub( target, pos );
     newForward = vectorNormalise( &newForward );
@@ -320,7 +333,7 @@ mat4x4_t matrixPointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
     vec3d_t newRight = vectorCrossProduct( &newUp, &newForward );
 
     // Construct Dimensioning and Translation Matrix	
-	mat4x4_t matrix;
+	static mat4x4_t matrix;
 	matrix.m[0][0] = newRight.x;	    matrix.m[0][1] = newRight.y;	    matrix.m[0][2] = newRight.z;	    matrix.m[0][3] = 0.0f;
 	matrix.m[1][0] = newUp.x;		    matrix.m[1][1] = newUp.y;		    matrix.m[1][2] = newUp.z;		    matrix.m[1][3] = 0.0f;
 	matrix.m[2][0] = newForward.x;	    matrix.m[2][1] = newForward.y;	    matrix.m[2][2] = newForward.z;	    matrix.m[2][3] = 0.0f;
@@ -330,8 +343,8 @@ mat4x4_t matrixPointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
 }
 
 // Works only for Rotation/Translation Matrices
-mat4x4_t matrixQuickInverse(mat4x4_t* m){
-	mat4x4_t matrix;
+mat4x4_t matrix_quickInverse(mat4x4_t* m){
+	static mat4x4_t matrix;
 	matrix.m[0][0] = m->m[0][0]; matrix.m[0][1] = m->m[1][0]; matrix.m[0][2] = m->m[2][0]; matrix.m[0][3] = 0.0f;
 	matrix.m[1][0] = m->m[0][1]; matrix.m[1][1] = m->m[1][1]; matrix.m[1][2] = m->m[2][1]; matrix.m[1][3] = 0.0f;
 	matrix.m[2][0] = m->m[0][2]; matrix.m[2][1] = m->m[1][2]; matrix.m[2][2] = m->m[2][2]; matrix.m[2][3] = 0.0f;
@@ -342,6 +355,12 @@ mat4x4_t matrixQuickInverse(mat4x4_t* m){
 	return matrix;
 }
 #endif
+
+void vec3d_print( vec3d_t* v, int new_line_flag ){
+    printf( "\t%f %f %f %f", v->x, v->y, v->z, v->w );
+    if( new_line_flag )
+        printf( "\n" );
+}
 
 polygon_t polygonMakeEmpty( void ){
     polygon_t poly;
