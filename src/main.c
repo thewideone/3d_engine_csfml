@@ -7,6 +7,8 @@
 #include "config.h"
 
 #include "math_3d.h"
+#include "vmap/vmap.h"
+#include "mesh_3d.h"
 
 #include "stb_ds.h"
 
@@ -82,12 +84,16 @@ void binaryTreeMapTest( void ){
 	v1.w = 3;
 	vec3d_t v2 = v1;
 	vec3d_t v3;
+	v3.x = 0.3;
+	v3.y = 1.3;
+	v3.z = 2.3;
+	v3.w = 3.3;
 
 	vmap_t* map = NULL;
 
-	map = vmap_insertNode( map, 0, &v1, 0 );
-	vmap_insertNode( map, 1, &v2, 1 );
-	vmap_insertNode( map, 2, &v3, 0 );
+	vmap_insertNode( &map, 0, &v1, 0 );
+	vmap_insertNode( &map, 1, &v2, 1 );
+	vmap_insertNode( &map, 2, &v3, 0 );
 
 	for( int i=0; i<3; i++ ){
 		vmap_t* found_node = vmap_search( map, i );
@@ -413,7 +419,7 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 	
             // But since the result is in range of -1 to 1,
             // we have to scale it into view:
-            vec3d_t vOffsetView = { 1, 1, 0 };
+            vec3d_t vOffsetView = { 1, 1, 0, 0 };
             vertProjected = vectorAdd( &vertProjected, &vOffsetView );
 			printf( "vertProjected with offset: " );
 			vec3d_print( &vertProjected, 1 );
@@ -633,6 +639,8 @@ int main()
 	// mathTest();
 	// meshTest();
 
+	binaryTreeMapTest();
+
 	setup3D();
 
 	float f_theta = 0;
@@ -678,7 +686,7 @@ int main()
 		float elapsed_time = (float)(t2-t1);// /CLOCKS_PER_SEC;
 		t1 = t2;
 
-		update3DFrame( window, elapsed_time, &f_theta );
+		// update3DFrame( window, elapsed_time, &f_theta );
 
 		/* Update the window */
         sfRenderWindow_display(window);

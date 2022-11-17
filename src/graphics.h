@@ -3,8 +3,9 @@
 
 #include <SFML/Graphics.h>
 
-#include "math_3d.h"
 #include "config.h"
+#include "math_3d.h"
+#include "mesh_3d.h"
 
 // #include <vector>
 #include <math.h>
