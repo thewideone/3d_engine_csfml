@@ -108,7 +108,8 @@ mat4x4_t matrix_pointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up );
 mat4x4_t matrix_quickInverse(mat4x4_t* m);
 #endif
 
-bool areCollinear( vec3d_t* v1, vec3d_t* v2, vec3d_t* v3, bool object_num, sfRenderWindow* windowToDrawOnto );
-void computePlaneCoefficients( float* A, float* B, float* C, float* D, vec3d_t* vert1, vec3d_t* vert2, vec3d_t* vert3 );
+// Move these to a some other file, like hidden line related one:
+// bool areCollinear( vec3d_t* v1, vec3d_t* v2, vec3d_t* v3, bool object_num, sfRenderWindow* windowToDrawOnto );
+// void computePlaneCoefficients( float* A, float* B, float* C, float* D, vec3d_t* vert1, vec3d_t* vert2, vec3d_t* vert3 );
 
 #endif /* _MATH_3D_H_ */

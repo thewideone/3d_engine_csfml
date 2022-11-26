@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 mesh_t mesh_makeEmpty(){
-    mesh_t mesh;
+    static mesh_t mesh;
     mesh.face_cnt = 0;
     mesh.faces = NULL;
     // mesh.matRotX = matrixMakeRotX();
@@ -60,6 +60,7 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
         if( line_buf[0] == 'v' ){
             vec3d_t v;
             int values_read = sscanf( line_buf, "%c %f %f %f", &letter, &v.x, &v.y, &v.z );
+            v.w = 1;    // default value for 'w' member
 
             if( values_read != 4 ){
                 printf( "Error: in mesh_loadFromObjFile() could not read 4 values from line\n" );

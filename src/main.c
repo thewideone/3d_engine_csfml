@@ -91,14 +91,23 @@ void binaryTreeMapTest( void ){
 
 	vmap_t* map = NULL;
 
+#ifdef REMOVE_HIDDEN_LINES
 	vmap_insertNode( &map, 0, &v1, 0 );
 	vmap_insertNode( &map, 1, &v2, 1 );
 	vmap_insertNode( &map, 2, &v3, 0 );
+#else
+	vmap_insertNode( &map, 0, &v1 );
+	vmap_insertNode( &map, 1, &v2 );
+	vmap_insertNode( &map, 2, &v3 );
+#endif
+
+	if( map == NULL )
+		printf( "map == NULL!\n" );
 
 	for( int i=0; i<3; i++ ){
 		vmap_t* found_node = vmap_search( map, i );
 		if( found_node != NULL )
-#if RENDER_VISIBLE_ONLY
+#ifdef REMOVE_HIDDEN_LINES
 			printf( "Found node of key %d: %f, %f, %f, %f, %d\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w, found_node->visible );
 #else
 			printf( "Found node of key %d: %f, %f, %f, %f\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w );
@@ -116,16 +125,16 @@ void meshTest( void ){
 
 	printf( "mesh.vertices: cap = %lld, len = %lld\n", arrcap(mesh.vertices), arrlen(mesh.vertices) );
 
-	printf( "mesh.vertices (%d):\n", mesh.vertex_cnt );
-	for( int i=0; i < mesh.vertex_cnt; i++ ){
+	printf( "mesh.vertices (%lld):\n", mesh.vertex_cnt );
+	for( size_t i=0; i < mesh.vertex_cnt; i++ ){
 		vec3d_t loop_vec = mesh.vertices[i];
-		printf( " -> v%d: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
+		printf( " -> v%lld: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
 	}
 
-	printf( "mesh.faces (%d):\n", mesh.face_cnt );
-	for( int i=0; i < mesh.face_cnt; i++ ){
+	printf( "mesh.faces (%lld):\n", mesh.face_cnt );
+	for( size_t i=0; i < mesh.face_cnt; i++ ){
 		polygon_t poly = mesh.faces[i];
-		printf( "Face %d: ", i );
+		printf( "Face %lld: ", i );
 		polygon_print( &poly );
 	}
 
@@ -153,6 +162,7 @@ float f_yaw;
 #endif
 
 void setup3D( void ){
+	mesh = mesh_makeEmpty();
 	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
 
 	mat_proj = matrix_makeProjection(
@@ -192,7 +202,7 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     // My trial of implementing left and right strafing
     // I've changd some control bindings
     // pls at least change the name of this vector:
-    vec3d_t temp_vUp = { 0, 1, 0 };
+    vec3d_t temp_vUp = { 0, 1, 0, 1 };
     // Calculate the right direction:
     vec3d_t v_right_raw = vectorCrossProduct( &temp_vUp, &v_forward );
     //					  v seems 2 big
@@ -210,9 +220,9 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
         //f_yaw -= 2.0f * f_elapsed_time;
     
     //v_look_dir = { 0, 0, 1 };
-    vec3d_t v_up = { 0, 1, 0 };
+    vec3d_t v_up = { 0, 1, 0, 1 };
     //vec3d_t v_target = vectorAdd( v_camera, v_look_dir );
-    vec3d_t v_target = { 0, 0, 1 };
+    vec3d_t v_target = { 0, 0, 1, 1 };
     mat4x4_t mat_camera_rot = matrix_makeRotY( f_yaw );
     v_look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
     v_target = vectorAdd( &v_camera, &v_look_dir );
@@ -231,8 +241,8 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     // if( animate )
         // *f_theta += 1.0 * f_elapsed_time;
 
-    vec3d_t pos1 = { 0.0f, 0.0f, 2.0f };
-    vec3d_t pos2 = { 0.0f, 0.0f, 4.0f };
+    vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
+    vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
 
 	// Pass f_theta by value
 	// float rot_x = *f_theta;
@@ -244,7 +254,7 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     processMesh( &mesh, &pos1, &mat_view, 1.0f, 0.5f );
 #else
 	mat4x4_t dummy;
-	processMesh( &mesh, &pos1, &dummy, 1.0f, 0.5f );
+	processMesh( &mesh, &pos1, &dummy, 0.0f, 0.0f );
 #endif
 	draw_mesh( &mesh, renderWindow );
 
@@ -256,10 +266,18 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
     // Apply rotation in X axis:
     mat4x4_t matRotX = matrix_makeRotX( rot_angle_x );
 
+	printf( "matRotZ:\n" );
+	printMatrix( &matRotZ );
+	printf( "matRotX:\n" );
+	printMatrix( &matRotX );
+
     // Translation matrix
     // mat4x4 matTrans;
     // mesh.matTrans = matrixMakeTranslation( 0.0f, 0.0f, 2.0f );
     mat4x4_t matTrans = matrix_makeTranslation( pos->x, pos->y, pos->z );
+
+	printf( "matTrans:\n" );
+	printMatrix( &matTrans );
 
     // World matrix:
     // mat4x4 matWorld;
@@ -276,7 +294,6 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
     // of RAM space exactly equal to our needs
 	// arrsetcap( mesh->transformedVertices, mesh->vertex_cnt );
 
-	
 	// Transform every vertex of the mesh
     for( size_t i=0; i < mesh->vertex_cnt; i++ ){
 		vec3d_t vertex = mesh->vertices[i];
@@ -287,24 +304,31 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 		arrput( mesh->transformedVertices, v_transformed );
     }
 	
-
-	for( size_t i=0; i < mesh->vertex_cnt; i++ )
-		printf( "%f %f %f\n", mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z );
+	// printf( "mesh->vertices:\n" );
+	// for( size_t i=0; i < mesh->vertex_cnt; i++ )
+	// 	printf( "%f %f %f\n", mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z );
 
 	// Vector storing only IDs of visible faces
 	arrfree( mesh->visFaceIDs );
 	// mesh->visFaceIDs = NULL;
 	// arrsetcap( mesh->visFaceIDs, mesh->face_cnt );	// is it needed?
 
-	printf( "mesh.faces (%d):\n", mesh->face_cnt );
-	for( int i=0; i < mesh->face_cnt; i++ ){
+	printf( "mesh.vertices (%lld):\n", mesh->vertex_cnt );
+	for( size_t i=0; i < mesh->vertex_cnt; i++ ){
+		vec3d_t v = mesh->vertices[i];
+		printf( "v %lld: ", i );
+		vec3d_print( &v, 1 );
+	}
+
+	printf( "mesh.faces (%lld):\n", mesh->face_cnt );
+	for( size_t i=0; i < mesh->face_cnt; i++ ){
 		polygon_t poly = mesh->faces[i];
-		printf( "Face %d: ", i );
+		printf( "Face %lld: ", i );
 		polygon_print( &poly );
 	}
 
-	printf( "mesh.transformedVertices (%d):\n", arrlen(mesh->transformedVertices) );
-	for( int i=0; i < arrlen(mesh->transformedVertices); i++ ){
+	printf( "mesh.transformedVertices (%lld):\n", arrlen(mesh->transformedVertices) );
+	for( size_t i=0; i < arrlen(mesh->transformedVertices); i++ ){
 		vec3d_t v = mesh->transformedVertices[i];
 		vec3d_print( &v, 1 );
 	}
@@ -313,9 +337,9 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
     int face_id = 0;
     for( size_t i=0; i < mesh->face_cnt; i++ ){ 
 		polygon_t face = mesh->faces[i];	// idk how but it works
-		printf( "Face %d: ", i );
-		polygon_print( &face );
 #ifdef RENDER_VISIBLE_ONLY
+		printf( "Face %lld: ", i );
+		polygon_print( &face );
         // Use cross-product to get surface normal:
         vec3d_t normal, edge1, edge2;
         edge1 = vectorSub( &mesh->transformedVertices[face.p[2]],
@@ -342,11 +366,11 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 		// if( vectorDotProduct( &normal, &v_camera_ray ) < 0.0f ){
 			// printf( ", visible" );
             arrput( mesh->visFaceIDs, face_id );
-		// }      
+		// }   
+		printf("\n");   
 #else
 		arrput( mesh->visFaceIDs, face_id );
 #endif
-		printf("\n");
 		face_id++;
     }
 
@@ -358,9 +382,9 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 	vmap_free( mesh->vert2DSpaceMap );
 	mesh->vert2DSpaceMap = NULL;
 
-	printf( "Freed vert2DSpaceMap. Transforming vertices (%d)...\n", mesh->vertex_cnt );
+	printf( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", mesh->vertex_cnt );
 
-#if RENDER_VISIBLE_ONLY
+#ifdef RENDER_VISIBLE_ONLY
 	// Transform only visible vertices
     for( int curr_vert_id = 0; curr_vert_id < mesh->vertex_cnt; curr_vert_id++ ){
         // For all visible faces
@@ -431,19 +455,42 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 	
             // Add this vertex and its ID into the map
 			// vmap_t* vmap_el = vmap_createNode( curr_vert_id, &vertProjected, 1 );
-	
+			printf( "Inserting vert %d...\n", curr_vert_id );
+#ifdef REMOVE_HIDDEN_LINES
+			vmap_insertNode( &mesh->vert2DSpaceMap,
+							curr_vert_id,
+							 &vertProjected, 1 );
+#else
+			vmap_insertNode( &mesh->vert2DSpaceMap,
+							 curr_vert_id,
+							 &vertProjected );
+#endif
+/*	
 			if( mesh->vert2DSpaceMap == NULL ){
 				printf( "mesh->vert2DSpaceMap is empty. Inserting the first node...\n" );
-				mesh->vert2DSpaceMap = vmap_insertNode( mesh->vert2DSpaceMap,
+#ifdef REMOVE_HIDDEN_LINES
+				mesh->vert2DSpaceMap = vmap_insertNode( &mesh->vert2DSpaceMap,
 														curr_vert_id,
 														&vertProjected, 1 );
+#else
+				mesh->vert2DSpaceMap = vmap_insertNode( &mesh->vert2DSpaceMap,
+														curr_vert_id,
+														&vertProjected );
+#endif		
 			}
-			else{
+			else {
 				printf( "Inserting vert %d...\n", curr_vert_id );
-				vmap_insertNode( mesh->vert2DSpaceMap,
+#ifdef REMOVE_HIDDEN_LINES
+				vmap_insertNode( &mesh->vert2DSpaceMap,
 								 curr_vert_id,
-								 &vertProjected, 1  );
+								 &vertProjected, 1 );
+#else
+				vmap_insertNode( &mesh->vert2DSpaceMap,
+								 curr_vert_id,
+								 &vertProjected );
+#endif
 			}
+*/
             // mesh.vert2DSpaceMap.insert( pair<int, vec3d> ( curr_vert_id, vertProjected ) );
             // Then access to it is: vertProjected=mesh.vert2DSpaceMap.find(vertexID)->second
     
@@ -527,7 +574,7 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 }
 
 void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
-	printf( "Drawing mesh (%d visible edges):\n", arrlen(mesh->vis_edge_vec)/4 );
+	printf( "Drawing mesh (%lld visible edges):\n", arrlen(mesh->vis_edge_vec)/4 );
 	// printf();
     // Draw every visible edge
     // Debug (commented): print the visible edge array
@@ -639,7 +686,7 @@ int main()
 	// mathTest();
 	// meshTest();
 
-	binaryTreeMapTest();
+	// binaryTreeMapTest();
 
 	setup3D();
 
@@ -686,7 +733,7 @@ int main()
 		float elapsed_time = (float)(t2-t1);// /CLOCKS_PER_SEC;
 		t1 = t2;
 
-		// update3DFrame( window, elapsed_time, &f_theta );
+		update3DFrame( window, elapsed_time, &f_theta );
 
 		/* Update the window */
         sfRenderWindow_display(window);

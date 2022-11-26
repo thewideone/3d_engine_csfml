@@ -13,8 +13,8 @@ typedef struct {
     polygon_t* faces;
     // vector<vec3d> vertices;
     vec3d_t* vertices;
-    int face_cnt;//=0;
-    int vertex_cnt;//=0;
+    size_t face_cnt;//=0;
+    size_t vertex_cnt;//=0;
 
     mat4x4_t matRotZ, matRotX, matRotY;
     mat4x4_t matTrans;

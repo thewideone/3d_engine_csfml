@@ -5,6 +5,8 @@
 
 #include "stb_ds.h"
 
+#include "vmap/vmap.h"
+
 sfFont* font;
 
 int initGraphics( void ){

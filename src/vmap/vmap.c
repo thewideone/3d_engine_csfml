@@ -1,6 +1,13 @@
 #include "vmap.h"
 
+#include <stdio.h>  // for printf
+#include <stdlib.h> // for malloc
+
+#ifdef REMOVE_HIDDEN_LINES
 vmap_t* vmap_createNode( int key, vec3d_t* v, int vis_flag ){
+#else
+vmap_t* vmap_createNode( int key, vec3d_t* v ){
+#endif
     vmap_t* new_node_ptr = (vmap_t*) malloc( sizeof( vmap_t ) );
 
     new_node_ptr->key = key;
@@ -17,11 +24,19 @@ vmap_t* vmap_createNode( int key, vec3d_t* v, int vis_flag ){
     return new_node_ptr;
 }
 
+// 
 // Search the map
-// root - a tree to be searched, if the function
-//        returns 1
+// 
+// root - tree to be searched
 // key  - key of the node of interest
+// 
+// Return address of the found node, or NULL if not found.
+// 
 vmap_t* vmap_search( vmap_t* root, int key ){
+
+    if( root == NULL )
+        return NULL;
+    
     vmap_t* found_node_ptr = NULL;
 
     while( root != NULL ){
@@ -38,16 +53,29 @@ vmap_t* vmap_search( vmap_t* root, int key ){
     return found_node_ptr;
 }
 
+// 
 // Insert node to map
 // root     - pointer to pointer of the root of the tree
 // key      - key of
 // v        - pointer to vector to be added
 // vis_flag - visibility flag of the vector
+// 
+#ifdef REMOVE_HIDDEN_LINES
 vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v, int vis_flag ){
-    // Search for the element of given key and
-    // add a new element iff the element does not exist already
-    // move to separate files
+#else
+vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v ){
+#endif
+
+    // If key already exists, return
+    if( vmap_search( *root, key ) != NULL )
+        return NULL;
+
+    // Create a new node
+#ifdef REMOVE_HIDDEN_LINES
     vmap_t* new_node_ptr = vmap_createNode( key, v, vis_flag );
+#else
+    vmap_t* new_node_ptr = vmap_createNode( key, v );
+#endif
 
     vmap_t* search_head_ptr = *root;
     vmap_t* parent_ptr = NULL;
@@ -58,10 +86,12 @@ vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v, int vis_flag ){
             search_head_ptr = search_head_ptr->left;
         else if( key > search_head_ptr->key )
             search_head_ptr = search_head_ptr->right;
-        else
+        else {
             // Given key has been found,
             // we don't want duplicates
+            free(new_node_ptr);
             return NULL;
+        }
     }
 
     if( *root == NULL )
@@ -78,17 +108,18 @@ vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v, int vis_flag ){
     else if( key < parent_ptr->key )
         parent_ptr->left = new_node_ptr;
     
-    // Else
-    // Assign the new node to be its right child
+    // Else, assign the new node to be its right child
     else
         parent_ptr->right = new_node_ptr;
     
-    // Return the pointer to where the new node is
+    // Return a pointer to where the new node is
     // inserted
     return parent_ptr;
 }
 
+// 
 // Print binary tree map in order of ascending keys
+// 
 void vmap_print( vmap_t* root ){
     if (root == NULL)
         return;
@@ -100,7 +131,9 @@ void vmap_print( vmap_t* root ){
     }
 }
 
+// 
 // Delete whole map
+// 
 void vmap_free( vmap_t* root ){
     if (root == NULL)
         return;

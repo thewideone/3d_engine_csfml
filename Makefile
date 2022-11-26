@@ -22,13 +22,13 @@ endif
 OUTPUT	:= output
 
 # define source directory
-SRC		:= src
+SRC		:= src src/vmap
 
 # define include directory
 INCLUDE	:= include
 
 # define lib directory
-LIB		:= #lib
+LIB		:= lib
 
 ifeq ($(OS),Windows_NT)
 MAIN	:= main.exe

@@ -40,7 +40,7 @@ vec3d_t vectorAdd( vec3d_t* v1, vec3d_t* v2 ){
     // v.z = v1->z + v2->z;
     // v.w = 0;    // idk what to put in here
     // return v;
-    return (vec3d_t){ v1->x + v2->x, v1->y + v2->y, v1->z + v2->z, 0 };
+    return (vec3d_t){ v1->x + v2->x, v1->y + v2->y, v1->z + v2->z, 1 };
 }
 // Subtract:
 vec3d_t vectorSub( vec3d_t* v1, vec3d_t* v2 ){
@@ -50,7 +50,7 @@ vec3d_t vectorSub( vec3d_t* v1, vec3d_t* v2 ){
     // v.z = v1->z - v2->z;
     // v.w = 0;
     // return v;
-    return (vec3d_t){ v1->x - v2->x, v1->y - v2->y, v1->z - v2->z, 0 };
+    return (vec3d_t){ v1->x - v2->x, v1->y - v2->y, v1->z - v2->z, 1 };
 }
 // Multiply:
 vec3d_t vectorMul( vec3d_t* v, float k ){
@@ -86,6 +86,7 @@ vec3d_t vectorCrossProduct( vec3d_t* v1, vec3d_t* v2 ){
 	v.x = (v1->y) * (v2->z) - (v1->z) * (v2->y);
 	v.y = (v1->z) * (v2->x) - (v1->x) * (v2->z);
 	v.z = (v1->x) * (v2->y) - (v1->y) * (v2->x);
+    v.w = 1;
 	return v;
 }
 // Length:
@@ -308,6 +309,7 @@ bool areCollinear( vec3d_t* v1, vec3d_t* v2, vec3d_t* v3, bool object_num, sfRen
     return false;
 }
 
+/*
 void computePlaneCoefficients( float* A, float* B, float* C, float* D, vec3d_t* vert1, vec3d_t* vert2, vec3d_t* vert3 ){
     *A = vert1->y*(vert2->z - vert3->z) + vert2->y*(vert3->z - vert1->z) + vert3->y*(vert1->z - vert2->z);
     *B = vert1->z*(vert2->x - vert3->x) + vert2->z*(vert3->x - vert1->x) + vert3->z*(vert1->x - vert2->x);
@@ -343,3 +345,4 @@ void calcFaceBoundaries( mesh_t* mesh, int face_id, int* min_x, int* max_x, int*
         }
     }
 }
+*/
