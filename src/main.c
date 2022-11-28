@@ -232,29 +232,23 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     // Make view matrix from camera:
     mat4x4_t mat_view = matrix_quickInverse( &mat_camera );
 
-	printf( "MatView:\n" );
-	printMatrix( &mat_view );	
+	// printf( "MatView:\n" );
+	// printMatrix( &mat_view );	
 #endif
 
 	// mat4x4 matRotZ, matRotX;
     // Current angle:
-    // if( animate )
-        // *f_theta += 1.0 * f_elapsed_time;
+    if( animate )
+        *f_theta += 1.0 * f_elapsed_time;
 
     vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
     vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
-
-	// Pass f_theta by value
-	// float rot_x = *f_theta;
-	// float rot_z = *f_theta*0.5;
-	// printf( "rot_x = %f, rot_z = %f, f_elapsed_time = %f\n", rot_x, rot_z, f_elapsed_time );
 	
-    // processMesh( &mesh, &pos1, &mat_view, *f_theta, (*f_theta)*0.5 );
 #ifdef USE_CAMERA
-    processMesh( &mesh, &pos1, &mat_view, 1.0f, 0.5f );
+    processMesh( &mesh, &pos1, &mat_view, *f_theta, (*f_theta)*0.5 );
 #else
 	mat4x4_t dummy;
-	processMesh( &mesh, &pos1, &dummy, 0.0f, 0.0f );
+	processMesh( &mesh, &pos1, &dummy, *f_theta, (*f_theta)*0.5 );
 #endif
 	draw_mesh( &mesh, renderWindow );
 
@@ -266,18 +260,10 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
     // Apply rotation in X axis:
     mat4x4_t matRotX = matrix_makeRotX( rot_angle_x );
 
-	printf( "matRotZ:\n" );
-	printMatrix( &matRotZ );
-	printf( "matRotX:\n" );
-	printMatrix( &matRotX );
-
     // Translation matrix
     // mat4x4 matTrans;
     // mesh.matTrans = matrixMakeTranslation( 0.0f, 0.0f, 2.0f );
     mat4x4_t matTrans = matrix_makeTranslation( pos->x, pos->y, pos->z );
-
-	printf( "matTrans:\n" );
-	printMatrix( &matTrans );
 
     // World matrix:
     // mat4x4 matWorld;
@@ -285,8 +271,14 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
     matWorld = matrix_mulMatrix( &matRotZ, &matRotX );     // order important
     matWorld = matrix_mulMatrix( &matWorld, &matTrans );   // second
 
-	printf( "MatWorld:\n" );
-	printMatrix( &matWorld );	// wrong values; make matrices local not belongin to the mesh??
+	// printf( "matRotZ:\n" );
+	// printMatrix( &matRotZ );
+	// printf( "matRotX:\n" );
+	// printMatrix( &matRotX );
+	// printf( "matTrans:\n" );
+	// printMatrix( &matTrans );
+	// printf( "MatWorld:\n" );
+	// printMatrix( &matWorld );
 
 	arrfree( mesh->transformedVertices );
 	// mesh->transformedVertices = NULL;
@@ -299,20 +291,20 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 		vec3d_t vertex = mesh->vertices[i];
         // Convert to world space
         vec3d_t v_transformed = matrix_mulVector( &matWorld, &vertex );
-        // vec3d_print( &vertex, 0 );
-		// vec3d_print( &v_transformed, 1 );
 		arrput( mesh->transformedVertices, v_transformed );
     }
-	
-	// printf( "mesh->vertices:\n" );
-	// for( size_t i=0; i < mesh->vertex_cnt; i++ )
-	// 	printf( "%f %f %f\n", mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z );
 
 	// Vector storing only IDs of visible faces
 	arrfree( mesh->visFaceIDs );
 	// mesh->visFaceIDs = NULL;
 	// arrsetcap( mesh->visFaceIDs, mesh->face_cnt );	// is it needed?
 
+	/* // Debug print:
+
+	printf( "mesh->vertices:\n" );
+	for( size_t i=0; i < mesh->vertex_cnt; i++ )
+		printf( "%f %f %f\n", mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z );
+	
 	printf( "mesh.vertices (%lld):\n", mesh->vertex_cnt );
 	for( size_t i=0; i < mesh->vertex_cnt; i++ ){
 		vec3d_t v = mesh->vertices[i];
@@ -332,22 +324,19 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 		vec3d_t v = mesh->transformedVertices[i];
 		vec3d_print( &v, 1 );
 	}
+	*/
 
 	// Add each visible face's ID to the visFaceIDs vector
     int face_id = 0;
     for( size_t i=0; i < mesh->face_cnt; i++ ){ 
 		polygon_t face = mesh->faces[i];	// idk how but it works
 #ifdef RENDER_VISIBLE_ONLY
-		printf( "Face %lld: ", i );
-		polygon_print( &face );
         // Use cross-product to get surface normal:
         vec3d_t normal, edge1, edge2;
         edge1 = vectorSub( &mesh->transformedVertices[face.p[2]],
                            &mesh->transformedVertices[face.p[1]] );
         edge2 = vectorSub( &mesh->transformedVertices[face.p[0]],
                            &mesh->transformedVertices[face.p[1]] );
-        vec3d_print( &edge1, 0 );
-		vec3d_print( &edge2, 1 );
 		// The normal vector is a cross product of two edges of the face:
         normal = vectorCrossProduct( &edge1, &edge2 );
         // Normalise the normal (normalised length = 1.0 unit):
@@ -358,23 +347,14 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
                                       &v_camera );
         // If the ray is aligned with normal, then face is visible:
         // Use '>' to render in inverse (like a view from inside):
-		printf( "normal: " );
-		vec3d_print( &normal, 0 );
-		printf( " v_camera_ray: " );
-		vec3d_print( &v_camera_ray, 0 );
-		printf( ", dp=%f", vectorDotProduct( &normal, &v_camera_ray ) );
-		// if( vectorDotProduct( &normal, &v_camera_ray ) < 0.0f ){
-			// printf( ", visible" );
+		if( vectorDotProduct( &normal, &v_camera_ray ) < 0.0f ){
             arrput( mesh->visFaceIDs, face_id );
-		// }   
-		printf("\n");   
+		}
 #else
 		arrput( mesh->visFaceIDs, face_id );
 #endif
 		face_id++;
     }
-
-	mesh_printVisFaceIDs( mesh );
 
 	// Map of projected vertices
     // (only the visible ones are projected)
@@ -382,19 +362,15 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 	vmap_free( mesh->vert2DSpaceMap );
 	mesh->vert2DSpaceMap = NULL;
 
-	printf( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", mesh->vertex_cnt );
+	// printf( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", mesh->vertex_cnt );
 
 #ifdef RENDER_VISIBLE_ONLY
 	// Transform only visible vertices
     for( int curr_vert_id = 0; curr_vert_id < mesh->vertex_cnt; curr_vert_id++ ){
-        // For all visible faces
-		printf( "Vert %d: ", curr_vert_id );
-	
+        // For all visible faces	
         for( int i=0; i < arrlen(mesh->visFaceIDs); i++ ){
-			printf( "for of ID %d: ", mesh->visFaceIDs[i] );
             // For all vertices in a face
             for( int j=0; j < mesh->faces[ mesh->visFaceIDs[i] ].p_count; j++ ){
-				printf( "point %d: ", j );
                 // If an ID of a vertex in face == ID of the current vertex
                 if( mesh->faces[ mesh->visFaceIDs[i] ].p[j] == curr_vert_id ){
                     // We're using a label here as it's the easiest
@@ -407,7 +383,6 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
         // Oh you're here? Didn't jump to the label?
         // Seems like the vertex is not visible then,
         // so skip it
-        // cout<<"Vertex "<<curr_vert_id<<" not visible. Skipping\n";
         continue;
 
         LABEL_VERTEX_VISIBLE:
@@ -417,95 +392,44 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 #endif
             // transform current vertex
 #ifdef USE_CAMERA
-			printf( "\nMultiplying by vertex of ID %d (", curr_vert_id );
-			vec3d_print( &mesh->transformedVertices[curr_vert_id], 0 );
-			printf( ")\n" );
             // Convert world space to view space
             vec3d_t vertViewed = matrix_mulVector( matView, &mesh->transformedVertices[curr_vert_id] );
             vec3d_t vertProjected = matrix_mulVector( &mat_proj, &vertViewed );
-			printf( "vertViewed: " );
-			vec3d_print( &vertViewed, 1 );
-			printf( "vertProjected: " );
-			vec3d_print( &vertProjected, 1 );
-
 #else   // NOT USING CAMERA
             vec3d_t vertProjected = matrix_mulVector( &mat_proj, &mesh->transformedVertices[curr_vert_id] );
-			
-			printf( "vertProjected init: " );
-			vec3d_print( &vertProjected, 1 );
 #endif
             // Scale into view, we moved the normalising into cartesian space
             // out of the matrix.vector function from the previous versions, so
             // do this manually:
             vertProjected = vectorDiv( &vertProjected, vertProjected.w );
-			printf( "vertProjected after div: " );
-			vec3d_print( &vertProjected, 1 );
 	
             // But since the result is in range of -1 to 1,
             // we have to scale it into view:
             vec3d_t vOffsetView = { 1, 1, 0, 0 };
             vertProjected = vectorAdd( &vertProjected, &vOffsetView );
-			printf( "vertProjected with offset: " );
-			vec3d_print( &vertProjected, 1 );
             vertProjected.x *= 0.5f * (float)SCREEN_WIDTH;
             vertProjected.y *= 0.5f * (float)SCREEN_HEIGHT;
-
-			printf( "vertProjected done: " );
-			vec3d_print( &vertProjected, 1 );
 	
             // Add this vertex and its ID into the map
-			// vmap_t* vmap_el = vmap_createNode( curr_vert_id, &vertProjected, 1 );
-			printf( "Inserting vert %d...\n", curr_vert_id );
 #ifdef REMOVE_HIDDEN_LINES
 			vmap_insertNode( &mesh->vert2DSpaceMap,
-							curr_vert_id,
+							 curr_vert_id,
 							 &vertProjected, 1 );
 #else
 			vmap_insertNode( &mesh->vert2DSpaceMap,
 							 curr_vert_id,
 							 &vertProjected );
 #endif
-/*	
-			if( mesh->vert2DSpaceMap == NULL ){
-				printf( "mesh->vert2DSpaceMap is empty. Inserting the first node...\n" );
-#ifdef REMOVE_HIDDEN_LINES
-				mesh->vert2DSpaceMap = vmap_insertNode( &mesh->vert2DSpaceMap,
-														curr_vert_id,
-														&vertProjected, 1 );
-#else
-				mesh->vert2DSpaceMap = vmap_insertNode( &mesh->vert2DSpaceMap,
-														curr_vert_id,
-														&vertProjected );
-#endif		
-			}
-			else {
-				printf( "Inserting vert %d...\n", curr_vert_id );
-#ifdef REMOVE_HIDDEN_LINES
-				vmap_insertNode( &mesh->vert2DSpaceMap,
-								 curr_vert_id,
-								 &vertProjected, 1 );
-#else
-				vmap_insertNode( &mesh->vert2DSpaceMap,
-								 curr_vert_id,
-								 &vertProjected );
-#endif
-			}
-*/
-            // mesh.vert2DSpaceMap.insert( pair<int, vec3d> ( curr_vert_id, vertProjected ) );
-            // Then access to it is: vertProjected=mesh.vert2DSpaceMap.find(vertexID)->second
-    
 	}
 
+	// printf( "mesh->vert2DSpaceMap:\n" );
+	// vmap_print( mesh->vert2DSpaceMap );
 
-	printf( "mesh->vert2DSpaceMap:\n" );
-	vmap_print( mesh->vert2DSpaceMap );
-
-	// Each entry is 4x int
+	// Each entry is 4x int:
     // 1: start_vert_ID
     // 2: end_vert_ID
     // 3: num_of_faces_which_the_edge_belongs_to (1-2)
     // 4: ID_of_1st_face
-    // vector<int> vis_edge_vec;
     arrfree(mesh->vis_edge_vec);
     // Reserve max number of visible edges? (9 for cube)
     //vis_edge_vec.reserve( 9*sizeof(int) );
@@ -513,20 +437,30 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 	// Fill the visible edge vector
     // For each visible face
     for( int i=0; i < arrlen(mesh->visFaceIDs); i++ ){
+
         int vert_cnt = mesh->faces[ mesh->visFaceIDs[i] ].p_count;
         
-        // For each point except the last one which will be handled separately
-        for( int vert_id = 0; vert_id < vert_cnt - 1; vert_id++ ){
-            int edge_start_v_id = mesh->faces[ mesh->visFaceIDs[i] ].p[vert_id];
-            int edge_end_v_id   = mesh->faces[ mesh->visFaceIDs[i] ].p[vert_id + 1];
+        // For each point
+        for( int vert_id = 0; vert_id < vert_cnt; vert_id++ ){
 
-            int presence_flag = 0;
+			int edge_start_v_id, edge_end_v_id;
+			bool presence_flag = 0;
+
+			edge_start_v_id = mesh->faces[ mesh->visFaceIDs[i] ].p[vert_id];
+			
+			if( vert_id == vert_cnt - 1 )
+				// For the last edge
+				edge_end_v_id = mesh->faces[ mesh->visFaceIDs[i] ].p[0];
+			else 
+				edge_end_v_id = mesh->faces[ mesh->visFaceIDs[i] ].p[vert_id + 1];
 
             // For the whole visible edge array
             for( int j=0; j < arrlen(mesh->vis_edge_vec); j+=4 ){                
                 // If the edge exists in the visible edge array
-                if( (mesh->vis_edge_vec[j] == edge_start_v_id && mesh->vis_edge_vec[j+1] == edge_end_v_id   ) || 
-                    (mesh->vis_edge_vec[j] == edge_end_v_id   && mesh->vis_edge_vec[j+1] == edge_start_v_id ) ){
+                if( (mesh->vis_edge_vec[j]   == edge_start_v_id &&
+					 mesh->vis_edge_vec[j+1] == edge_end_v_id   ) || 
+                    (mesh->vis_edge_vec[j]   == edge_end_v_id   &&
+					 mesh->vis_edge_vec[j+1] == edge_start_v_id ) ){
                     presence_flag = 1;
                     // (j+2) - occurence count
                     mesh->vis_edge_vec[j+2]++;
@@ -541,49 +475,21 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 				arrput( mesh->vis_edge_vec, mesh->visFaceIDs[i] );
             }
         }
-        // For the last edge
-        int edge_start_v_id = mesh->faces[ mesh->visFaceIDs[i] ].p[vert_cnt-1];
-        int edge_end_v_id = mesh->faces[ mesh->visFaceIDs[i] ].p[0];
-
-        int presence_flag = 0;
-
-        // For the whole visible edge array
-        for( int j=0; j < arrlen(mesh->vis_edge_vec); j+=4 ){
-
-            // If the edge exists in the visible edge array
-            if( ((mesh->vis_edge_vec[j] == edge_start_v_id) && (mesh->vis_edge_vec[j+1] == edge_end_v_id)   ) || 
-                ((mesh->vis_edge_vec[j] == edge_end_v_id)   && (mesh->vis_edge_vec[j+1] == edge_start_v_id) ) ){
-
-                presence_flag = 1;
-                // (j+2) - occurence count
-                mesh->vis_edge_vec[j+2]++;
-                break;
-            }
-        }
-        // If the edge doesn't exist in the visible edge array, add it
-        if( presence_flag == 0 ){
-            arrput( mesh->vis_edge_vec, edge_start_v_id );
-			arrput( mesh->vis_edge_vec, edge_end_v_id );
-			arrput( mesh->vis_edge_vec, 1 );
-			arrput( mesh->vis_edge_vec, mesh->visFaceIDs[i] );
-        }
     }
 
-	mesh_printVisEdgeVec( mesh );
-
+	// mesh_printVisEdgeVec( mesh );
 }
 
 void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
-	printf( "Drawing mesh (%lld visible edges):\n", arrlen(mesh->vis_edge_vec)/4 );
-	// printf();
     // Draw every visible edge
     // Debug (commented): print the visible edge array
     for( int i=0; i<arrlen(mesh->vis_edge_vec); i+=4 ){
         // Draw only outline of the mesh
-        // if( mesh.vis_edge_vec[ i + 2 ] > 1 )
+		// Useful for debugging, TRY IT!!!
+        // if( mesh->vis_edge_vec[ i + 2 ] > 1 )
         //     continue;
 
-		printf( "Looking for verts %d and %d...\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1] );
+		// printf( "Looking for verts %d and %d...\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1] );
         
 		vmap_t* v_proj_el = NULL;
 		v_proj_el = vmap_search( mesh->vert2DSpaceMap, mesh->vis_edge_vec[i] );
@@ -595,7 +501,7 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
 		vec3d_t vertProjected1 = v_proj_el->v;
 		int vert1_ID = v_proj_el->key;
 
-		vec3d_print( &v_proj_el->v, 0 );
+		// vec3d_print( &v_proj_el->v, 0 );
 
 		v_proj_el = NULL;
 		v_proj_el = vmap_search( mesh->vert2DSpaceMap, mesh->vis_edge_vec[i+1] );
@@ -607,7 +513,7 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
 		vec3d_t vertProjected2 = v_proj_el->v;
 		int vert2_ID = v_proj_el->key;
 
-		vec3d_print( &v_proj_el->v, 1 );
+		// vec3d_print( &v_proj_el->v, 1 );
 
 		// vec3d_print( &vertProjected1, 0 );
 		// vec3d_print( &vertProjected2, 1 );
@@ -641,6 +547,7 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
         // cout<<"\nEdge "<<i/4<<": "<<mesh.vis_edge_vec[i]<<" "<<mesh.vis_edge_vec[i+1];//<<" "<<mesh.vis_edge_vec[i+2]<<" "<<mesh.vis_edge_vec[i+3];
         // cout<<": ("<<vertProjected1.x<<", "<<vertProjected1.y<<")-("<<vertProjected2.x<<", "<<vertProjected2.y<<")";
 #endif /* VERTEX_ID_DEBUG */
+
         drawLine( vertProjected1.x, vertProjected1.y,
                   vertProjected2.x, vertProjected2.y,
                   sfWhite, render_window );
@@ -730,7 +637,7 @@ int main()
 		// graphicsTest( window );
 
 		t2 = clock();
-		float elapsed_time = (float)(t2-t1);// /CLOCKS_PER_SEC;
+		float elapsed_time = (float)(t2-t1) / CLOCKS_PER_SEC;
 		t1 = t2;
 
 		update3DFrame( window, elapsed_time, &f_theta );

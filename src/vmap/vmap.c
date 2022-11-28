@@ -140,7 +140,7 @@ void vmap_free( vmap_t* root ){
     else{
         vmap_free(root->left);
         vmap_free(root->right);
-        printf("Freeing node of key %d\n", root->key );
+        // printf("Freeing node of key %d\n", root->key );
         free( root );
         root = NULL;
     }
