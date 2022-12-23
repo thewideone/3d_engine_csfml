@@ -4,6 +4,15 @@
 #include "config.h"
 #include "vmap/vmap.h"
 
+// 
+// TODO:
+//  - make transformedVertices static (dynamic functionality is not used)
+//  - ifndef RENDER_VISIBLE_ONLY make visFaceIDs,
+//    vert2DSpaceMap and vis_edge_vec also static,
+//    maybe there are more optimization possibilities?
+//  - instead of clearing and filling vert2DSpaceMap,
+//    update it with new values
+
 // Mesh:
 // Vertex and face count limits are the limits of
 // types of vertex_cnt and face_cnt variables

@@ -387,10 +387,10 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 
         LABEL_VERTEX_VISIBLE:
 #else
-	// Transform only visible vertices
+	// Transform all vertices
     for( int curr_vert_id = 0; curr_vert_id < mesh->vertex_cnt; curr_vert_id++ ){
 #endif
-            // transform current vertex
+            // Transform current vertex
 #ifdef USE_CAMERA
             // Convert world space to view space
             vec3d_t vertViewed = matrix_mulVector( matView, &mesh->transformedVertices[curr_vert_id] );
