@@ -40,6 +40,8 @@
 
 fxp_t floatingToFixed( flp_t num );
 flp_t fixedToFloating( fxp_t num );
+fxp_t fixedMul( fxp_t a, fxp_t b );
+fxp_t fixedDiv( fxp_t a, fxp_t b );
 
 // Matrix 4x4:
 typedef struct {

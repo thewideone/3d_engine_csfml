@@ -557,8 +557,12 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
 int main()
 {
 
-	fxp_t a = floatingToFixed( 3.5 );
-	printf( "3.5 = %d = %f\n", a, fixedToFloating( a ) );
+	// fxp_t a = floatingToFixed( 5.6 );
+	// fxp_t b = floatingToFixed( 2.7 );
+	// fxp_t c = fixedMul( a, b );
+	// fxp_t d = fixedDiv( a, b );
+	// printf( "a=%f, b=%f, c=%f, d=%f\n", fixedToFloating(a), fixedToFloating(b), fixedToFloating(c), fixedToFloating(d) );
+	// printf( "3.5 = %d = %f\n", a, fixedToFloating( a ) );
 
 	// Create a window:
 	sfVideoMode videoMode = {800, 600, 24};
@@ -588,7 +592,6 @@ int main()
     sfText_setFont(text, font);
     sfText_setCharacterSize(text, 50);
 	// window.setFramerateLimit( 144 );
-	printf("Hello World!\n");
 
 	// sf::CircleShape circle(2.0);
 
@@ -605,6 +608,8 @@ int main()
 	clock_t t1 = clock();
 	clock_t t2 = clock();
 
+
+	printf( "Setup complete.\n" );
 
 	while (sfRenderWindow_isOpen(window)){
 		/* Process events */
