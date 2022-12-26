@@ -23,8 +23,8 @@ typedef struct vmap_t {
 } vmap_t;
 
 #ifdef REMOVE_HIDDEN_LINES
-vmap_t* vmap_createNode( int key, vec3d_t* v, int vis_flag );
-vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v, int vis_flag );
+vmap_t* vmap_createNode( int key, vec3d_t* v, bool vis_flag );
+vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v, bool vis_flag );
 #else
 vmap_t* vmap_createNode( int key, vec3d_t* v );
 vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v );

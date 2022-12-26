@@ -3,6 +3,9 @@
 
 #include <math.h>
 
+// For fixed point arithmetic
+#include <inttypes.h>
+
 #include <SFML/Graphics.h>
 
 #include "config.h"
@@ -21,6 +24,22 @@
 #define false 0
 
 #define bool int
+
+// Fixed point arithmetic:
+// Taken from javidx9 "Back To Basics!
+// Fixed Point Numbers in C++" video
+
+// Floating point number type
+#define flp_t float
+// Fixed point number type
+#define fxp_t int32_t
+// Twice-wide fixed point number type
+#define fxp2_t int64_t
+// Number of binary digits after the decimal place
+#define FP_DP 16
+
+fxp_t floatingToFixed( flp_t num );
+flp_t fixedToFloating( fxp_t num );
 
 // Matrix 4x4:
 typedef struct {

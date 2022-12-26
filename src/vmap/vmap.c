@@ -4,7 +4,7 @@
 #include <stdlib.h> // for malloc
 
 #ifdef REMOVE_HIDDEN_LINES
-vmap_t* vmap_createNode( int key, vec3d_t* v, int vis_flag ){
+vmap_t* vmap_createNode( int key, vec3d_t* v, bool vis_flag ){
 #else
 vmap_t* vmap_createNode( int key, vec3d_t* v ){
 #endif
@@ -61,7 +61,7 @@ vmap_t* vmap_search( vmap_t* root, int key ){
 // vis_flag - visibility flag of the vector
 // 
 #ifdef REMOVE_HIDDEN_LINES
-vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v, int vis_flag ){
+vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v, bool vis_flag ){
 #else
 vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v ){
 #endif

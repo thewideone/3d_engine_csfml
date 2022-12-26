@@ -556,6 +556,10 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
 
 int main()
 {
+
+	fxp_t a = floatingToFixed( 3.5 );
+	printf( "3.5 = %d = %f\n", a, fixedToFloating( a ) );
+
 	// Create a window:
 	sfVideoMode videoMode = {800, 600, 24};
     sfRenderWindow* window;

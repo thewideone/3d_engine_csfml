@@ -7,6 +7,14 @@
 #include "math_3d.h"
 #include "graphics.h"
 
+fxp_t floatingToFixed( flp_t num ){
+    return (fxp_t)( num * (flp_t)( 1 << FP_DP ) + ( num >= 0 ? 0.5 : -0.5 ) );
+}
+
+flp_t fixedToFloating( fxp_t num ){
+    return (flp_t)(num) / (flp_t)( 1 << FP_DP );
+}
+
 // void printVec3D( vec3d_t* v, char* name ){
 //     char vec_val[30];
 //     sprintf( vec_val, "{%f, %f, %f, %f}", v->x, v->y, v->z, v->w );
