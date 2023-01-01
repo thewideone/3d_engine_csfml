@@ -5,7 +5,7 @@
 #include "../math_3d.h"
 
 // TODO:
-//  - change implementation to some autobalanced tree like AVL or Red-Black ones
+//  - change implementation to some autobalanced tree like AVL or Red-Black one
 
 // 
 // Binary tree map for storing 3D vectors and their visibility flags

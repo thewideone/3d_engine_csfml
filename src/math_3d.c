@@ -31,16 +31,20 @@ fxp_t fixedDiv( fxp_t a, fxp_t b ){
 void printMatrix( mat4x4_t* mat ){
     for( int i=0; i<4; i++ ){
         for( int j=0; j<4; j++ )
+#ifdef USE_FIXED_POINT_ARITHMETIC
+            printf( "%d ", mat->m[i][j] );
+#else
 			printf( "%f ", mat->m[i][j] );
+#endif
 		printf( "\n" );
 	}
 }
 
-float minF( float a, float b ){
+rtnl_t minF( rtnl_t a, rtnl_t b ){
     return !( b < a ) ? a : b;
 }
 
-float maxF( float a, float b ){
+rtnl_t maxF( rtnl_t a, rtnl_t b ){
     return ( a < b ) ? b : a;
 }
 
@@ -66,17 +70,21 @@ vec3d_t vectorSub( vec3d_t* v1, vec3d_t* v2 ){
     return (vec3d_t){ v1->x - v2->x, v1->y - v2->y, v1->z - v2->z, 1 };
 }
 // Multiply:
-vec3d_t vectorMul( vec3d_t* v, float k ){
+vec3d_t vectorMul( vec3d_t* v, rtnl_t k ){
     // vec3d_t v_ret;
     // v_ret.x = v->x * k;
     // v_ret.y = v->y * k;
     // v_ret.z = v->z * k;
     // v_ret.w = 0;
     // return v_ret;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    return (vec3d_t){ fixedMul(v->x, k), fixedMul(v->y, k), fixedMul(v->z, k), v->w };
+#else
     return (vec3d_t){ v->x * k, v->y * k, v->z * k, v->w };
+#endif
 }
 // Divide:
-vec3d_t vectorDiv( vec3d_t* v, float k ){
+vec3d_t vectorDiv( vec3d_t* v, rtnl_t k ){
     // vec3d_t v_ret;
     // v_ret.x = v->x / k;
     // v_ret.y = v->y / k;
@@ -87,35 +95,57 @@ vec3d_t vectorDiv( vec3d_t* v, float k ){
         printf( "Error: in vectorDiv() division by 0. Aborting." );
         exit(0);    // maybe replace with something better
     }
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    return (vec3d_t){ fixedDiv(v->x, k), fixedDiv(v->y, k), fixedDiv(v->z, k), v->w };
+#else
     return (vec3d_t){ v->x / k, v->y / k, v->z / k, v->w };
+#endif
 }
 // Dot product:
-float vectorDotProduct( vec3d_t* v1, vec3d_t* v2 ){
+rtnl_t vectorDotProduct( vec3d_t* v1, vec3d_t* v2 ){
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    return fixedMul(v1->x, v2->x) + fixedMul( v1->y, v2->y ) + fixedMul( v1->z, v2->z );
+#else
     return (v1->x)*(v2->x) + (v1->y)*(v2->y) + (v1->z) * (v2->z);
+#endif
 }
 // Cross product:
 vec3d_t vectorCrossProduct( vec3d_t* v1, vec3d_t* v2 ){
     static vec3d_t v;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    v.x = fixedMul( v1->y, v2->z ) - fixedMul( v1->z, v2->y );
+	v.y = fixedMul( v1->z, v2->x ) - fixedMul( v1->x, v2->z );
+	v.z = fixedMul( v1->x, v2->y ) - fixedMul( v1->y, v2->x );
+#else
 	v.x = (v1->y) * (v2->z) - (v1->z) * (v2->y);
 	v.y = (v1->z) * (v2->x) - (v1->x) * (v2->z);
 	v.z = (v1->x) * (v2->y) - (v1->y) * (v2->x);
+#endif
     v.w = 1;
 	return v;
 }
 // Length:
-float vectorLength( vec3d_t* v ){
+rtnl_t vectorLength( vec3d_t* v ){
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    return sqrt( vectorDotProduct(v, v) );
+#else
     return sqrtf( vectorDotProduct(v, v) );
+#endif
 }
 // Normalise:
 vec3d_t vectorNormalise( vec3d_t* v ){
-    float l = vectorLength( v );
+    rtnl_t l = vectorLength( v );
     // vec3d_t v_ret;
     // v_ret.x = v->x / l;
     // v_ret.y = v->y / l;
     // v_ret.z = v->z / l;
     // v_ret.w = 0;
     // return v_ret;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    return (vec3d_t){ fixedDiv( v->x, l ), fixedDiv( v->y, l), fixedDiv( v->z, l ), v->w };
+#else
     return (vec3d_t){ v->x / l, v->y / l, v->z / l, v->w };
+#endif
 }
 
 mat4x4_t matrix_makeEmpty(){
@@ -141,37 +171,64 @@ mat4x4_t matrix_makeIdentity(){
     return matrix;
 }
 
-mat4x4_t matrix_makeRotZ( float fAngleRad ){
+mat4x4_t matrix_makeRotZ( rtnl_t fAngleRad ){
     static mat4x4_t matrix;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    matrix.m[0][0] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+    matrix.m[0][1] = floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+    matrix.m[1][0] = -floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+    matrix.m[1][1] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+    matrix.m[2][2] = floatingToFixed( 1.0f );
+    matrix.m[3][3] = floatingToFixed( 1.0f );
+#else
     matrix.m[0][0] = cosf( fAngleRad );
     matrix.m[0][1] = sinf( fAngleRad );
     matrix.m[1][0] = -sinf( fAngleRad );
     matrix.m[1][1] = cosf( fAngleRad );
     matrix.m[2][2] = 1.0f;
     matrix.m[3][3] = 1.0f;
+#endif
     return matrix;
 }
 
-mat4x4_t matrix_makeRotX( float fAngleRad ){
+mat4x4_t matrix_makeRotX( rtnl_t fAngleRad ){
     static mat4x4_t matrix;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    matrix.m[0][0] = floatingToFixed( 1.0f );
+    matrix.m[1][1] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+    matrix.m[1][2] = floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+    matrix.m[2][1] = -floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+    matrix.m[2][2] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+    matrix.m[3][3] = floatingToFixed( 1.0f );
+#else
     matrix.m[0][0] = 1.0f;
     matrix.m[1][1] = cosf( fAngleRad );
     matrix.m[1][2] = sinf( fAngleRad );
     matrix.m[2][1] = -sinf( fAngleRad );
     matrix.m[2][2] = cosf( fAngleRad );
     matrix.m[3][3] = 1.0f;
+#endif
     return matrix;
 }
 
 #ifdef USE_CAMERA
-mat4x4_t matrix_makeRotY(float fAngleRad){
+mat4x4_t matrix_makeRotY(rtnl_t fAngleRad){
 	static mat4x4_t matrix;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    matrix.m[0][0] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+	matrix.m[0][2] = floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+	matrix.m[2][0] = -floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+	matrix.m[1][1] = floatingToFixed( 1.0f );
+	matrix.m[2][2] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+	matrix.m[3][3] = floatingToFixed( 1.0f );
+#else
 	matrix.m[0][0] = cosf(fAngleRad);
 	matrix.m[0][2] = sinf(fAngleRad);
 	matrix.m[2][0] = -sinf(fAngleRad);
 	matrix.m[1][1] = 1.0f;
 	matrix.m[2][2] = cosf(fAngleRad);
 	matrix.m[3][3] = 1.0f;
+#endif
 	return matrix;
 }
 #endif
@@ -180,37 +237,63 @@ mat4x4_t matrix_makeRotY(float fAngleRad){
 // Multiply matrix by vector ( m - input matrix, i - input vector ):
 vec3d_t matrix_mulVector( mat4x4_t* m, vec3d_t* i ){
     vec3d_t v;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    v.x = fixedMul( i->x, m->m[0][0] ) + fixedMul( i->y, m->m[1][0] ) + fixedMul( i->z, m->m[2][0] ) + fixedMul( i->w, m->m[3][0] );
+    v.y = fixedMul( i->x, m->m[0][1] ) + fixedMul( i->y, m->m[1][1] ) + fixedMul( i->z, m->m[2][1] ) + fixedMul( i->w, m->m[3][1] );
+    v.z = fixedMul( i->x, m->m[0][2] ) + fixedMul( i->y, m->m[1][2] ) + fixedMul( i->z, m->m[2][2] ) + fixedMul( i->w, m->m[3][2] );
+    v.w = fixedMul( i->x, m->m[0][3] ) + fixedMul( i->y, m->m[1][3] ) + fixedMul( i->z, m->m[2][3] ) + fixedMul( i->w, m->m[3][3] );
+#else
 	v.x = i->x * m->m[0][0] + i->y * m->m[1][0] + i->z * m->m[2][0] + i->w * m->m[3][0];
 	v.y = i->x * m->m[0][1] + i->y * m->m[1][1] + i->z * m->m[2][1] + i->w * m->m[3][1];
 	v.z = i->x * m->m[0][2] + i->y * m->m[1][2] + i->z * m->m[2][2] + i->w * m->m[3][2];
     v.w = i->x * m->m[0][3] + i->y * m->m[1][3] + i->z * m->m[2][3] + i->w * m->m[3][3];
-	
+#endif
 	return v;
 }
 
-mat4x4_t matrix_makeTranslation( float x, float y, float z ){
+mat4x4_t matrix_makeTranslation( rtnl_t x, rtnl_t y, rtnl_t z ){
     static mat4x4_t matrix;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    matrix.m[0][0] = floatingToFixed( 1.0f );
+    matrix.m[1][1] = floatingToFixed( 1.0f );
+    matrix.m[2][2] = floatingToFixed( 1.0f );
+    matrix.m[3][3] = floatingToFixed( 1.0f );
+#else
     matrix.m[0][0] = 1.0f;
     matrix.m[1][1] = 1.0f;
     matrix.m[2][2] = 1.0f;
     matrix.m[3][3] = 1.0f;
+#endif
     matrix.m[3][0] = x;
     matrix.m[3][1] = y;
     matrix.m[3][2] = z;
     return matrix;
 }
 
-mat4x4_t matrix_makeProjection( float fFovDegrees, float fAspectRatio, float fNear, float fFar ){
-    // Fov coefficient in radians
-    float fFovRad = 1.0f / tanf( fFovDegrees * 0.5f / 180.0f * 3.14159f );
-
+mat4x4_t matrix_makeProjection( rtnl_t fFovDegrees, rtnl_t fAspectRatio, rtnl_t fNear, rtnl_t fFar ){
     static mat4x4_t matrix;
+    
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    // Fov coefficient in radians
+    rtnl_t fFovRad = fixedDiv( floatingToFixed( 1.0f ), floatingToFixed( tanf( fixedToFloating( fFovDegrees ) * 0.5f / 180.0f * 3.14159f ) ) );
+    
+    matrix.m[0][0] = fixedMul( fAspectRatio, fFovRad );
+    matrix.m[1][1] = fFovRad;
+    matrix.m[2][2] = fixedDiv( fFar, ( fFar - fNear ) );
+    matrix.m[3][2] = fixedDiv( fixedMul( -fFar, fNear ), ( fFar - fNear ) );
+    matrix.m[2][3] = floatingToFixed( 1.0f );
+    matrix.m[3][3] = floatingToFixed( 0.0f );
+#else
+    // Fov coefficient in radians
+    rtnl_t fFovRad = 1.0f / tanf( fFovDegrees * 0.5f / 180.0f * 3.14159f );
+    
     matrix.m[0][0] = fAspectRatio * fFovRad;
     matrix.m[1][1] = fFovRad;
     matrix.m[2][2] = fFar / ( fFar - fNear );
     matrix.m[3][2] = ( -fFar * fNear ) / ( fFar - fNear );
     matrix.m[2][3] = 1.0f;
     matrix.m[3][3] = 0.0f;
+#endif
     return matrix;
 }
 
@@ -218,7 +301,11 @@ mat4x4_t matrix_mulMatrix( mat4x4_t* m1, mat4x4_t* m2 ){
     static mat4x4_t matrix;
 	for (int c = 0; c < 4; c++)
 		for (int r = 0; r < 4; r++)
+#ifdef USE_FIXED_POINT_ARITHMETIC
+            matrix.m[r][c] = fixedMul( m1->m[r][0], m2->m[0][c] ) + fixedMul( m1->m[r][1], m2->m[1][c] ) + fixedMul( m1->m[r][2], m2->m[2][c] ) + fixedMul( m1->m[r][3], m2->m[3][c] );
+#else
 			matrix.m[r][c] = m1->m[r][0] * m2->m[0][c] + m1->m[r][1] * m2->m[1][c] + m1->m[r][2] * m2->m[2][c] + m1->m[r][3] * m2->m[3][c];
+#endif
 	return matrix;
 }
 
@@ -255,19 +342,38 @@ mat4x4_t matrix_quickInverse(mat4x4_t* m){
 	matrix.m[0][0] = m->m[0][0]; matrix.m[0][1] = m->m[1][0]; matrix.m[0][2] = m->m[2][0]; matrix.m[0][3] = 0.0f;
 	matrix.m[1][0] = m->m[0][1]; matrix.m[1][1] = m->m[1][1]; matrix.m[1][2] = m->m[2][1]; matrix.m[1][3] = 0.0f;
 	matrix.m[2][0] = m->m[0][2]; matrix.m[2][1] = m->m[1][2]; matrix.m[2][2] = m->m[2][2]; matrix.m[2][3] = 0.0f;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    matrix.m[3][0] = -( fixedMul( m->m[3][0], matrix.m[0][0] ) + fixedMul( m->m[3][1], matrix.m[1][0] ) + fixedMul( m->m[3][2], matrix.m[2][0] ) );
+    matrix.m[3][0] = -( fixedMul( m->m[3][0], matrix.m[0][1] ) + fixedMul( m->m[3][1], matrix.m[1][1] ) + fixedMul( m->m[3][2], matrix.m[2][1] ) );
+    matrix.m[3][0] = -( fixedMul( m->m[3][0], matrix.m[0][2] ) + fixedMul( m->m[3][1], matrix.m[1][2] ) + fixedMul( m->m[3][2], matrix.m[2][2] ) );
+    matrix.m[3][3] = floatingToFixed( 1.0f );
+#else
 	matrix.m[3][0] = -(m->m[3][0] * matrix.m[0][0] + m->m[3][1] * matrix.m[1][0] + m->m[3][2] * matrix.m[2][0]);
 	matrix.m[3][1] = -(m->m[3][0] * matrix.m[0][1] + m->m[3][1] * matrix.m[1][1] + m->m[3][2] * matrix.m[2][1]);
 	matrix.m[3][2] = -(m->m[3][0] * matrix.m[0][2] + m->m[3][1] * matrix.m[1][2] + m->m[3][2] * matrix.m[2][2]);
 	matrix.m[3][3] = 1.0f;
-	return matrix;
+#endif
+    return matrix;
 }
 #endif
 
 void vec3d_print( vec3d_t* v, int new_line_flag ){
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    printf( "\t%f %f %f %f", fixedToFloating(v->x), fixedToFloating(v->y), fixedToFloating(v->z), fixedToFloating(v->w) );
+#else
+    printf( "\t%f %f %f %f", v->x, v->y, v->z, v->w );
+#endif
+    if( new_line_flag )
+        printf( "\n" );
+}
+
+#ifdef USE_FIXED_POINT_ARITHMETIC
+void vec3d_printAsFixed( vec3d_t* v, int new_line_flag ){
     printf( "\t%f %f %f %f", v->x, v->y, v->z, v->w );
     if( new_line_flag )
         printf( "\n" );
 }
+#endif
 
 polygon_t polygonMakeEmpty( void ){
     polygon_t poly;
@@ -297,9 +403,12 @@ void polygon_print( polygon_t* poly ){
 // Line equation calculated from v1 and v2,
 // v3 tested if is lying on it
 // The collinearity test has a threshold of 1 pixel (usage of floor())
+#ifdef USE_FIXED_POINT_ARITHMETIC
+#warning "Function areCollinear() in math_3d.c not ported to fixed point arithmetic yet!"
+#endif
 bool areCollinear( vec3d_t* v1, vec3d_t* v2, vec3d_t* v3, bool object_num, sfRenderWindow* windowToDrawOnto ){
-    float m, b; // line equation coefficients
-    float y_expected;
+    rtnl_t m, b; // line equation coefficients
+    rtnl_t y_expected;
 
     m = (v2->y - v1->y) / (v2->x - v1->x);
 

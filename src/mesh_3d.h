@@ -12,6 +12,7 @@
 //    maybe there are more optimization possibilities?
 //  - instead of clearing and filling vert2DSpaceMap,
 //    update it with new values
+//  - add loading from program memory
 
 // Mesh:
 // Vertex and face count limits are the limits of

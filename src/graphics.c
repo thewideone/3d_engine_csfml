@@ -5,6 +5,7 @@
 
 #include "stb_ds.h"
 
+#include "math_3d.h"
 #include "vmap/vmap.h"
 
 sfFont* font;
@@ -22,7 +23,11 @@ void freeGraphics( void ){
     sfFont_destroy(font);
 }
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+int putText( char* str, fxp_t x, fxp_t y, int size, sfColor colour, sfRenderWindow* renderWindow ){
+#else
 int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWindow* renderWindow ){
+#endif
     // sf::Font font;
     // if (!font.loadFromFile("Minecraft.ttf"))
     //     cout<<"Failed to load Minecraft.ttf\n";
@@ -42,7 +47,11 @@ int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWind
     sfText_setFont( text, font );
     sfText_setCharacterSize( text, size );
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    sfVector2f pos = { fixedToFloating(x), fixedToFloating(y) };
+#else
     sfVector2f pos = { x, y };
+#endif
     sfText_setPosition( text, pos );
 
     sfText_setColor( text, colour );
@@ -54,17 +63,29 @@ int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWind
     return 0;
 }
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+void drawLine( fxp_t x0, fxp_t y0, fxp_t x1, fxp_t y1, sfColor colour, sfRenderWindow* renderWindow ){
+#else
 void drawLine( float x0, float y0, float x1, float y1, sfColor colour, sfRenderWindow* renderWindow ){
+#endif
     sfVertexArray* vert_array;
     vert_array = sfVertexArray_create();
 
     sfVertexArray_setPrimitiveType( vert_array, sfLines );
 
     sfVertex v1, v2;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    v1.position.x = fixedToFloating(x0);
+    v1.position.y = fixedToFloating(y0);
+    v2.position.x = fixedToFloating(x1);
+    v2.position.y = fixedToFloating(y1);
+#else
     v1.position.x = x0;
     v1.position.y = y0;
     v2.position.x = x1;
     v2.position.y = y1;
+#endif
+
     v1.color = colour;
     v2.color = colour;
     sfVertexArray_append( vert_array, v1 );

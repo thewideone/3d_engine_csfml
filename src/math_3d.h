@@ -26,8 +26,8 @@
 #define bool int
 
 // Fixed point arithmetic:
-// Taken from javidx9 "Back To Basics!
-// Fixed Point Numbers in C++" video
+// Functions taken from javidx9's
+// "Back To Basics! Fixed Point Numbers in C++" video
 
 // Floating point number type
 #define flp_t float
@@ -38,6 +38,14 @@
 // Number of binary digits after the decimal place
 #define FP_DP 16
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+// Rational number type (fxp_t for fixed point representation)
+#define rtnl_t fxp_t
+#else
+// Rational number type (flp_t for floating point representation)
+#define rtnl_t flp_t
+#endif
+
 fxp_t floatingToFixed( flp_t num );
 flp_t fixedToFloating( fxp_t num );
 fxp_t fixedMul( fxp_t a, fxp_t b );
@@ -45,15 +53,15 @@ fxp_t fixedDiv( fxp_t a, fxp_t b );
 
 // Matrix 4x4:
 typedef struct {
-	float m[4][4];// = { 0 };	// rows, columns
+	rtnl_t m[4][4];// = { 0 };	// rows, columns
 } mat4x4_t;
 
 // Vector 3D structure:
 typedef struct {
-	float x;// = 0;
-    float y;// = 0;
-    float z;// = 0;
-    float w;// = 1;
+	rtnl_t x;// = 0;
+    rtnl_t y;// = 0;
+    rtnl_t z;// = 0;
+    rtnl_t w;// = 1;
 } vec3d_t;
 
 // Polygon holds only IDs of its vertices
@@ -68,6 +76,10 @@ typedef struct {
 
 void vec3d_print( vec3d_t* v, int new_line_flag );
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+void vec3d_printAsFixed( vec3d_t* v, int new_line_flag );
+#endif
+
 polygon_t polygonMakeEmpty( void );
 void polygon_print( polygon_t* poly );
 void polygon_free( polygon_t* poly );
@@ -77,23 +89,23 @@ void printMatrix( mat4x4_t* mat );
 
 // min() is built in for C++ I guess but to be sure I made it myself
 //#define min( a, b ) (a>b ? a : b)
-float minF( float a, float b );
-float maxF( float a, float b );
+rtnl_t minF( rtnl_t a, rtnl_t b );
+rtnl_t maxF( rtnl_t a, rtnl_t b );
 
 // Add:
 vec3d_t vectorAdd( vec3d_t* v1, vec3d_t* v2 );
 // Subtract:
 vec3d_t vectorSub( vec3d_t* v1, vec3d_t* v2 );
 // Multiply:
-vec3d_t vectorMul( vec3d_t* v, float k );
+vec3d_t vectorMul( vec3d_t* v, rtnl_t k );
 // Divide:
-vec3d_t vectorDiv( vec3d_t* v, float k );
+vec3d_t vectorDiv( vec3d_t* v, rtnl_t k );
 // Dot product:
-float vectorDotProduct( vec3d_t* v1, vec3d_t* v2 );
+rtnl_t vectorDotProduct( vec3d_t* v1, vec3d_t* v2 );
 // Cross product:
 vec3d_t vectorCrossProduct( vec3d_t* v1, vec3d_t* v2 );
 // Length:
-float vectorLength( vec3d_t* v );
+rtnl_t vectorLength( vec3d_t* v );
 // Normalise:
 vec3d_t vectorNormalise( vec3d_t* v );
 
@@ -105,17 +117,17 @@ mat4x4_t matrix_makeEmpty();
 
 mat4x4_t matrix_makeIdentity();
 
-mat4x4_t matrix_makeRotZ( float fAngleRad );
+mat4x4_t matrix_makeRotZ( rtnl_t fAngleRad );
 
-mat4x4_t matrix_makeRotX( float fAngleRad );
+mat4x4_t matrix_makeRotX( rtnl_t fAngleRad );
 
 #ifdef USE_CAMERA
-mat4x4_t matrix_makeRotY(float fAngleRad);
+mat4x4_t matrix_makeRotY(rtnl_t fAngleRad);
 #endif
 
-mat4x4_t matrix_makeTranslation( float x, float y, float z );
+mat4x4_t matrix_makeTranslation( rtnl_t x, rtnl_t y, rtnl_t z );
 
-mat4x4_t matrix_makeProjection( float fFovDegrees, float fAspectRatio, float fNear, float fFar );
+mat4x4_t matrix_makeProjection( rtnl_t fFovDegrees, rtnl_t fAspectRatio, rtnl_t fNear, rtnl_t fFar );
 
 mat4x4_t matrix_mulMatrix( mat4x4_t* m1, mat4x4_t* m2 );
 

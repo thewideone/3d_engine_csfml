@@ -15,23 +15,48 @@
 #include "graphics.h"
 
 void mathTest( void ){
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	vec3d_t v1 = { floatingToFixed(1.0), floatingToFixed(1.0), floatingToFixed(1.0), floatingToFixed(0) },
+			v2 = { floatingToFixed(2.5), floatingToFixed(3.5), floatingToFixed(4.5), floatingToFixed(0) };
+#else
 	vec3d_t v1 = { 1.0, 1.0, 1.0, 0 },
 			v2 = { 2.5, 3.5, 4.5, 0 };
+#endif
 
-	printf( "v1: %f, %f, %f, %f\n", v1.x, v1.y, v1.z, v1.w );
-	printf( "v2: %f, %f, %f, %f\n", v2.x, v2.y, v2.z, v2.w );
+	// printf( "v1: %f, %f, %f, %f\n", v1.x, v1.y, v1.z, v1.w );
+	// printf( "v2: %f, %f, %f, %f\n", v2.x, v2.y, v2.z, v2.w );
+	printf( "v1: " );
+	vec3d_print( &v1, true );
+	printf( "v2: " );
+	vec3d_print( &v2, true );
 
 	vec3d_t v3 = vectorAdd( &v1, &v2 );
-	printf( "vectorAdd(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+	// printf( "vectorAdd(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+	printf( "vectorAdd(): " );
+	vec3d_print( &v3, true );
 
 	v3 = vectorSub( &v1, &v2 );
-	printf( "vectorSub(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+	// printf( "vectorSub(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+	printf( "vectorSub(): " );
+	vec3d_print( &v3, true );
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	v3 = vectorMul( &v2, floatingToFixed(4.5) );
+#else
 	v3 = vectorMul( &v2, 4.5 );
-	printf( "vectorMul(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+#endif
+	// printf( "vectorMul(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+	printf( "vectorMul(): " );
+	vec3d_print( &v3, true );
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	v3 = vectorDiv( &v2, floatingToFixed(3.0) );
+#else
 	v3 = vectorDiv( &v2, 3.0 );
-	printf( "vectorDiv(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+#endif
+	// printf( "vectorDiv(): %f, %f, %f, %f\n", v3.x, v3.y, v3.z, v3.w );
+	printf( "vectorDiv(): " );
+	vec3d_print( &v3, true );
 
 	// printVec3D( &v3, "v3: " );
 
@@ -50,19 +75,35 @@ void dynamicArrayTest( void ){
 
 	printf( "Putting vertices.\n" );
 	vec3d_t loop1_vec;
+
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	loop1_vec.x = floatingToFixed(0);
+	loop1_vec.y = floatingToFixed(1);
+	loop1_vec.z = floatingToFixed(2);
+	loop1_vec.w = floatingToFixed(3);
+#else
 	loop1_vec.x = 0;
 	loop1_vec.y = 1;
 	loop1_vec.z = 2;
 	loop1_vec.w = 3;
+#endif
 	for( int i=0; i<4; i++ ){
 		
+#ifdef USE_FIXED_POINT_ARITHMETIC
+		loop1_vec.x += floatingToFixed(0.12);
+		loop1_vec.y += floatingToFixed(0.12);
+		loop1_vec.z += floatingToFixed(0.12);
+		loop1_vec.w += floatingToFixed(0.12);
+#else
 		loop1_vec.x += 0.12;
 		loop1_vec.y += 0.12;
 		loop1_vec.z += 0.12;
 		loop1_vec.w += 0.12;
-
+#endif
 		vec3d_t v_ret = arrput( vertices, loop1_vec );
-		printf( "v_ret: %f, %f, %f, %f\n", v_ret.x, v_ret.y, v_ret.z, v_ret.w );
+		// printf( "v_ret: %f, %f, %f, %f\n", v_ret.x, v_ret.y, v_ret.z, v_ret.w );
+		printf( "v_ret: " );
+		vec3d_print( &v_ret, true );
 	}
 
 	printf( "vertices: cap = %lld, len = %lld\n", arrcap(vertices), arrlen(vertices) );
@@ -70,7 +111,9 @@ void dynamicArrayTest( void ){
 	printf( "vertices:\n" );
 	for( int i=0; i<arrlen( vertices ); i++ ){
 		vec3d_t loop_vec = vertices[i];
-		printf( " -> v%d: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
+		// printf( " -> v%d: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
+		printf( " -> v%d: ", i );
+		vec3d_print( &loop_vec, true );
 	}
 
 	arrfree( vertices );
@@ -78,16 +121,28 @@ void dynamicArrayTest( void ){
 
 void binaryTreeMapTest( void ){
 	vec3d_t v1;
+
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	v1.x = floatingToFixed(0);
+	v1.y = floatingToFixed(1);
+	v1.z = floatingToFixed(2);
+	v1.w = floatingToFixed(3);
+#else
 	v1.x = 0;
 	v1.y = 1;
 	v1.z = 2;
 	v1.w = 3;
+#endif;
 	vec3d_t v2 = v1;
 	vec3d_t v3;
-	v3.x = 0.3;
-	v3.y = 1.3;
-	v3.z = 2.3;
-	v3.w = 3.3;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+
+#else
+	v3.x = floatingToFixed(0.3);
+	v3.y = floatingToFixed(1.3);
+	v3.z = floatingToFixed(2.3);
+	v3.w = floatingToFixed(3.3);
+#endif
 
 	vmap_t* map = NULL;
 
@@ -108,9 +163,13 @@ void binaryTreeMapTest( void ){
 		vmap_t* found_node = vmap_search( map, i );
 		if( found_node != NULL )
 #ifdef REMOVE_HIDDEN_LINES
-			printf( "Found node of key %d: %f, %f, %f, %f, %d\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w, found_node->visible );
+			// printf( "Found node of key %d: %f, %f, %f, %f, %d\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w, found_node->visible );
+			printf( "Found node of key %d and vis_flg %d: ", i, found_node->visible );
+			vec3d_print( &(found_node->v), true );
 #else
-			printf( "Found node of key %d: %f, %f, %f, %f\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w );
+			// printf( "Found node of key %d: %f, %f, %f, %f\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w );
+			printf( "Found node of key %d: ", i );
+			vec3d_print( &(found_node->v), true );
 #endif
 	}
 
@@ -128,7 +187,9 @@ void meshTest( void ){
 	printf( "mesh.vertices (%lld):\n", mesh.vertex_cnt );
 	for( size_t i=0; i < mesh.vertex_cnt; i++ ){
 		vec3d_t loop_vec = mesh.vertices[i];
-		printf( " -> v%lld: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
+		// printf( " -> v%lld: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
+		printf( " -> v%lld: ", i );
+		vec3d_print( &loop_vec, true );
 	}
 
 	printf( "mesh.faces (%lld):\n", mesh.face_cnt );
@@ -146,7 +207,7 @@ void graphicsTest( sfRenderWindow* renderWindow ){
 
 	char str[20];
 	sprintf( str, "Hello putText %d", 123 );
-	putText( str, 150, 150, 50, sfMagenta, renderWindow );
+	putText( str, floatingToFixed(150), floatingToFixed(150), 50, sfMagenta, renderWindow );
 }
 
 mesh_t mesh;
@@ -158,17 +219,27 @@ vec3d_t v_camera;  // only a placeholder now
 #endif
 #ifdef USE_CAMERA
 vec3d_t v_look_dir;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+fxp_t f_yaw;
+#else
 float f_yaw;
+#endif
 #endif
 
 void setup3D( void ){
 	mesh = mesh_makeEmpty();
 	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	mat_proj = matrix_makeProjection(
+		90.0, floatingToFixed( (float)SCREEN_HEIGHT / (float)SCREEN_WIDTH ),
+        floatingToFixed( 0.1f ), floatingToFixed( 1000.0f) );
+#else
 	mat_proj = matrix_makeProjection(
 		90.0,
 		(float)SCREEN_HEIGHT / (float)SCREEN_WIDTH,
         0.1f, 1000.0f );
+#endif
 }
 
 void free3D( void ){
@@ -181,6 +252,19 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f_theta ){
 #ifdef USE_CAMERA
     // Camera movement (WSAD hehe) and looking around (arrows)
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	if (sfKeyboard_isKeyPressed(sfKeyUp))
+        v_camera.y -= floatingToFixed( 2.0f * f_elapsed_time );
+    if (sfKeyboard_isKeyPressed(sfKeyDown))
+        v_camera.y += floatingToFixed( 2.0f * f_elapsed_time );
+    if (sfKeyboard_isKeyPressed(sfKeyRight))
+        f_yaw -= floatingToFixed( 2.0f * f_elapsed_time );
+    if (sfKeyboard_isKeyPressed(sfKeyLeft))
+        f_yaw += floatingToFixed( 2.0f * f_elapsed_time );
+    
+    // We've integrated time into this, so it's a velocity vector:
+    vec3d_t v_forward = vectorMul( &v_look_dir, floatingToFixed( 4.0f * f_elapsed_time ) );
+#else
     if (sfKeyboard_isKeyPressed(sfKeyUp))
         v_camera.y -= 2.0f * f_elapsed_time;
     if (sfKeyboard_isKeyPressed(sfKeyDown))
@@ -198,7 +282,7 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     
     // We've integrated time into this, so it's a velocity vector:
     vec3d_t v_forward = vectorMul( &v_look_dir, 4.0f * f_elapsed_time );
-
+#endif
     // My trial of implementing left and right strafing
     // I've changd some control bindings
     // pls at least change the name of this vector:
@@ -206,7 +290,11 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     // Calculate the right direction:
     vec3d_t v_right_raw = vectorCrossProduct( &temp_vUp, &v_forward );
     //					  v seems 2 big
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	vec3d_t v_right = vectorMul( &v_right_raw, floatingToFixed( 64.0f * f_elapsed_time ) );
+#else
     vec3d_t v_right = vectorMul( &v_right_raw, 64.0f * f_elapsed_time );
+#endif;
     
     if (sfKeyboard_isKeyPressed(sfKeyW))
         v_camera = vectorAdd( &v_camera, &v_forward );
@@ -240,9 +328,16 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     // Current angle:
     if( animate )
         *f_theta += 1.0 * f_elapsed_time;
+	
+	printf( "f_theta = %d (%ff),\f_elapsed_time = %d (%ff)\n", f_theta, f_elapsed_time );
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
+    vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
+#else
     vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
     vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
+#endif
 	
 #ifdef USE_CAMERA
     processMesh( &mesh, &pos1, &mat_view, *f_theta, (*f_theta)*0.5 );
@@ -255,11 +350,14 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
 }
 
 void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle_x, float rot_angle_z ){
-	// Apply rotation in Z axis:
+	// Apply rotation in Z and X axis:
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	mat4x4_t matRotZ = matrix_makeRotZ( floatingToFixed( rot_angle_z ) );
+    mat4x4_t matRotX = matrix_makeRotX( floatingToFixed( rot_angle_x ) );
+#else
     mat4x4_t matRotZ = matrix_makeRotZ( rot_angle_z );
-    // Apply rotation in X axis:
     mat4x4_t matRotX = matrix_makeRotX( rot_angle_x );
-
+#endif
     // Translation matrix
     // mat4x4 matTrans;
     // mesh.matTrans = matrixMakeTranslation( 0.0f, 0.0f, 2.0f );
@@ -347,7 +445,11 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
                                       &v_camera );
         // If the ray is aligned with normal, then face is visible:
         // Use '>' to render in inverse (like a view from inside):
+#ifdef USE_FIXED_POINT_ARITHMETIC
+		if( vectorDotProduct( &normal, &v_camera_ray ) < floatingToFixed(0.0f) ){
+#else
 		if( vectorDotProduct( &normal, &v_camera_ray ) < 0.0f ){
+#endif
             arrput( mesh->visFaceIDs, face_id );
 		}
 #else
@@ -407,9 +509,13 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
             // we have to scale it into view:
             vec3d_t vOffsetView = { 1, 1, 0, 0 };
             vertProjected = vectorAdd( &vertProjected, &vOffsetView );
+#ifdef USE_FIXED_POINT_ARITHMETIC
+			vertProjected.x = fixedMul( vertProjected.x, floatingToFixed( 0.5f * (float)SCREEN_WIDTH ) );
+            vertProjected.y = fixedMul( vertProjected.y, floatingToFixed( 0.5f * (float)SCREEN_HEIGHT ) );
+#else
             vertProjected.x *= 0.5f * (float)SCREEN_WIDTH;
             vertProjected.y *= 0.5f * (float)SCREEN_HEIGHT;
-	
+#endif
             // Add this vertex and its ID into the map
 #ifdef REMOVE_HIDDEN_LINES
 			vmap_insertNode( &mesh->vert2DSpaceMap,
@@ -610,6 +716,11 @@ int main()
 
 
 	printf( "Setup complete.\n" );
+
+	// mathTest();
+	// dynamicArrayTest();
+	// binaryTreeMapTest();
+	// meshTest();
 
 	while (sfRenderWindow_isOpen(window)){
 		/* Process events */

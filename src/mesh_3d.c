@@ -59,8 +59,18 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
         // Add a vertex to the local cache
         if( line_buf[0] == 'v' ){
             vec3d_t v;
+
+            #ifdef USE_FIXED_POINT_ARITHMETIC
+            flp_t x, y, z;
+            int values_read = sscanf( line_buf, "%c %f %f %f", &letter, &x, &y, &z );
+            v.x = floatingToFixed( x );
+            v.y = floatingToFixed( y );
+            v.z = floatingToFixed( z );
+            v.w = floatingToFixed( (flp_t)(1) );    // default value for 'w' member
+            #else
             int values_read = sscanf( line_buf, "%c %f %f %f", &letter, &v.x, &v.y, &v.z );
             v.w = 1;    // default value for 'w' member
+            #endif
 
             if( values_read != 4 ){
                 printf( "Error: in mesh_loadFromObjFile() could not read 4 values from line\n" );
