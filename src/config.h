@@ -11,6 +11,6 @@
 // #define VERTEX_ID_DEBUG
 // #define VERTEX_DOT_DEBUG
 
-#define USE_FIXED_POINT_ARITHMETIC
+// #define USE_FIXED_POINT_ARITHMETIC
 
 #endif /* _CONFIG_H_ */

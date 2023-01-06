@@ -212,7 +212,7 @@ void graphicsTest( sfRenderWindow* renderWindow ){
 
 mesh_t mesh;
 mat4x4_t mat_proj;
-int animate = 1;
+int animate = 0;
 
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 vec3d_t v_camera;  // only a placeholder now
@@ -232,7 +232,7 @@ void setup3D( void ){
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	mat_proj = matrix_makeProjection(
-		90.0, floatingToFixed( (float)SCREEN_HEIGHT / (float)SCREEN_WIDTH ),
+		floatingToFixed(90.0), floatingToFixed( (float)SCREEN_HEIGHT / (float)SCREEN_WIDTH ),
         floatingToFixed( 0.1f ), floatingToFixed( 1000.0f) );
 #else
 	mat_proj = matrix_makeProjection(
@@ -329,11 +329,16 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     if( animate )
         *f_theta += 1.0 * f_elapsed_time;
 	
-	printf( "f_theta = %d (%ff),\f_elapsed_time = %d (%ff)\n", f_theta, f_elapsed_time );
+	// printf( "f_theta = %f,\f_elapsed_time = %f\n", (*f_theta), f_elapsed_time );
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
-    vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
+    // vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
+
+	// printf( "Pos1: " );
+	// vec3d_print( &pos1, 1 );
+	// printf( "Pos2: " );
+	// vec3d_print( &pos2, 1 );
 #else
     vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
     vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
@@ -354,6 +359,10 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	mat4x4_t matRotZ = matrix_makeRotZ( floatingToFixed( rot_angle_z ) );
     mat4x4_t matRotX = matrix_makeRotX( floatingToFixed( rot_angle_x ) );
+	// printf( "rot_angle_x = %f\n", rot_angle_x );
+	// printf( "rot_angle_z = %f\n", rot_angle_z );
+	// printMatrix( &matRotX );
+	// printMatrix( &matRotZ );
 #else
     mat4x4_t matRotZ = matrix_makeRotZ( rot_angle_z );
     mat4x4_t matRotX = matrix_makeRotX( rot_angle_x );
@@ -377,6 +386,8 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 	// printMatrix( &matTrans );
 	// printf( "MatWorld:\n" );
 	// printMatrix( &matWorld );
+	// printf( "MatProj:\n" );
+	// printMatrix( &mat_proj );
 
 	arrfree( mesh->transformedVertices );
 	// mesh->transformedVertices = NULL;
@@ -385,10 +396,13 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 	// arrsetcap( mesh->transformedVertices, mesh->vertex_cnt );
 
 	// Transform every vertex of the mesh
+	// printf( "mesh->transformedVertices:\n" );
+
     for( size_t i=0; i < mesh->vertex_cnt; i++ ){
 		vec3d_t vertex = mesh->vertices[i];
         // Convert to world space
         vec3d_t v_transformed = matrix_mulVector( &matWorld, &vertex );
+		// vec3d_print( &v_transformed, 1 );
 		arrput( mesh->transformedVertices, v_transformed );
     }
 
@@ -498,20 +512,40 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
             vec3d_t vertViewed = matrix_mulVector( matView, &mesh->transformedVertices[curr_vert_id] );
             vec3d_t vertProjected = matrix_mulVector( &mat_proj, &vertViewed );
 #else   // NOT USING CAMERA
+			// printf( "vertex to use: " );
+			// vec3d_print( &mesh->transformedVertices[curr_vert_id], 1 );
+
             vec3d_t vertProjected = matrix_mulVector( &mat_proj, &mesh->transformedVertices[curr_vert_id] );
+
+			// printf( "vertProjected initially: " );
+			// vec3d_print( &vertProjected, 1 );
 #endif
             // Scale into view, we moved the normalising into cartesian space
             // out of the matrix.vector function from the previous versions, so
             // do this manually:
             vertProjected = vectorDiv( &vertProjected, vertProjected.w );
+
+			// printf( "vertProjected after div: " );
+			// vec3d_print( &vertProjected, 1 );
 	
             // But since the result is in range of -1 to 1,
             // we have to scale it into view:
-            vec3d_t vOffsetView = { 1, 1, 0, 0 };
+#ifdef USE_FIXED_POINT_ARITHMETIC
+            vec3d_t vOffsetView = { floatingToFixed(1), floatingToFixed(1), floatingToFixed(0), floatingToFixed(0) };
+#else
+			vec3d_t vOffsetView = { 1, 1, 0, 0 };
+#endif
+
             vertProjected = vectorAdd( &vertProjected, &vOffsetView );
+
+			// printf( "vertProjected after add: " );
+			// vec3d_print( &vertProjected, 1 );
+
 #ifdef USE_FIXED_POINT_ARITHMETIC
 			vertProjected.x = fixedMul( vertProjected.x, floatingToFixed( 0.5f * (float)SCREEN_WIDTH ) );
             vertProjected.y = fixedMul( vertProjected.y, floatingToFixed( 0.5f * (float)SCREEN_HEIGHT ) );
+			// printf( "vertProjected after mul: " );
+			// vec3d_print( &vertProjected, 1 );
 #else
             vertProjected.x *= 0.5f * (float)SCREEN_WIDTH;
             vertProjected.y *= 0.5f * (float)SCREEN_HEIGHT;

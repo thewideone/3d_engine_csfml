@@ -32,7 +32,7 @@ void printMatrix( mat4x4_t* mat ){
     for( int i=0; i<4; i++ ){
         for( int j=0; j<4; j++ )
 #ifdef USE_FIXED_POINT_ARITHMETIC
-            printf( "%d ", mat->m[i][j] );
+            printf( "%f ", fixedToFloating(mat->m[i][j]) );
 #else
 			printf( "%f ", mat->m[i][j] );
 #endif

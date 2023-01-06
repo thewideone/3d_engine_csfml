@@ -15,14 +15,14 @@
 typedef struct vmap_t {
     int key;    // used as vector's ID
     vec3d_t v;
-#ifdef REMOVE_HIDDEN_LINES
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
     bool visible;    // set if vector v is visible
 #endif
     struct vmap_t* left;
     struct vmap_t* right;
 } vmap_t;
 
-#ifdef REMOVE_HIDDEN_LINES
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
 vmap_t* vmap_createNode( int key, vec3d_t* v, bool vis_flag );
 vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v, bool vis_flag );
 #else

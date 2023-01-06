@@ -3,7 +3,7 @@
 #include <stdio.h>  // for printf
 #include <stdlib.h> // for malloc
 
-#ifdef REMOVE_HIDDEN_LINES
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
 vmap_t* vmap_createNode( int key, vec3d_t* v, bool vis_flag ){
 #else
 vmap_t* vmap_createNode( int key, vec3d_t* v ){
@@ -15,7 +15,7 @@ vmap_t* vmap_createNode( int key, vec3d_t* v ){
     new_node_ptr->v.y = v->y;
     new_node_ptr->v.z = v->z;
     new_node_ptr->v.w = v->w;
-#ifdef RENDER_VISIBLE_ONLY
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
     new_node_ptr->visible = vis_flag;
 #endif
     new_node_ptr->left = NULL;
@@ -60,7 +60,7 @@ vmap_t* vmap_search( vmap_t* root, int key ){
 // v        - pointer to vector to be added
 // vis_flag - visibility flag of the vector
 // 
-#ifdef REMOVE_HIDDEN_LINES
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
 vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v, bool vis_flag ){
 #else
 vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v ){
@@ -71,7 +71,7 @@ vmap_t* vmap_insertNode( vmap_t** root, int key, vec3d_t* v ){
         return NULL;
 
     // Create a new node
-#ifdef REMOVE_HIDDEN_LINES
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
     vmap_t* new_node_ptr = vmap_createNode( key, v, vis_flag );
 #else
     vmap_t* new_node_ptr = vmap_createNode( key, v );
