@@ -57,7 +57,11 @@ vec3d_t vectorAdd( vec3d_t* v1, vec3d_t* v2 ){
     // v.z = v1->z + v2->z;
     // v.w = 0;    // idk what to put in here
     // return v;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    return (vec3d_t){ v1->x + v2->x, v1->y + v2->y, v1->z + v2->z, floatingToFixed(1) };
+#else
     return (vec3d_t){ v1->x + v2->x, v1->y + v2->y, v1->z + v2->z, 1 };
+#endif
 }
 // Subtract:
 vec3d_t vectorSub( vec3d_t* v1, vec3d_t* v2 ){
@@ -67,7 +71,11 @@ vec3d_t vectorSub( vec3d_t* v1, vec3d_t* v2 ){
     // v.z = v1->z - v2->z;
     // v.w = 0;
     // return v;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    return (vec3d_t){ v1->x - v2->x, v1->y - v2->y, v1->z - v2->z, floatingToFixed(1) };
+#else
     return (vec3d_t){ v1->x - v2->x, v1->y - v2->y, v1->z - v2->z, 1 };
+#endif
 }
 // Multiply:
 vec3d_t vectorMul( vec3d_t* v, rtnl_t k ){
@@ -116,18 +124,19 @@ vec3d_t vectorCrossProduct( vec3d_t* v1, vec3d_t* v2 ){
     v.x = fixedMul( v1->y, v2->z ) - fixedMul( v1->z, v2->y );
 	v.y = fixedMul( v1->z, v2->x ) - fixedMul( v1->x, v2->z );
 	v.z = fixedMul( v1->x, v2->y ) - fixedMul( v1->y, v2->x );
+    v.w = floatingToFixed(1);
 #else
 	v.x = (v1->y) * (v2->z) - (v1->z) * (v2->y);
 	v.y = (v1->z) * (v2->x) - (v1->x) * (v2->z);
 	v.z = (v1->x) * (v2->y) - (v1->y) * (v2->x);
-#endif
     v.w = 1;
+#endif
 	return v;
 }
 // Length:
 rtnl_t vectorLength( vec3d_t* v ){
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    return sqrt( vectorDotProduct(v, v) );
+    return floatingToFixed( sqrt( fixedToFloating( vectorDotProduct(v, v) ) ) );
 #else
     return sqrtf( vectorDotProduct(v, v) );
 #endif
@@ -135,6 +144,11 @@ rtnl_t vectorLength( vec3d_t* v ){
 // Normalise:
 vec3d_t vectorNormalise( vec3d_t* v ){
     rtnl_t l = vectorLength( v );
+#ifdef USE_FIXED_POINT_ARITHMETIC 
+    printf( "vectorNormalise() l = %f\n", fixedToFloating(l) );
+#else
+    printf( "vectorNormalise() l = %f\n", l );
+#endif
     // vec3d_t v_ret;
     // v_ret.x = v->x / l;
     // v_ret.y = v->y / l;
@@ -155,7 +169,11 @@ mat4x4_t matrix_makeEmpty(){
     // for( int i=0; i<4; i++ )
     //     for( j=0; j<4; j++ )
     //         matrix.m[i][j] = 0;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    memset( matrix.m, floatingToFixed(0), sizeof( matrix.m ) );
+#else
     memset( matrix.m, 0, sizeof( matrix.m ) );
+#endif
 
     return matrix;
 }
@@ -316,29 +334,47 @@ mat4x4_t matrix_mulMatrix( mat4x4_t* m1, mat4x4_t* m2 ){
 mat4x4_t matrix_pointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
     // Calculate new forward direction:
     vec3d_t newForward = vectorSub( target, pos );
+    printf( "newForward init:\n" );
+	vec3d_print( &newForward, 1 );
     newForward = vectorNormalise( &newForward );
+    printf( "newForward after norm:\n" );
+	vec3d_print( &newForward, 1 );
 
     // Calculate new up direction:
     vec3d_t a = vectorMul( &newForward, vectorDotProduct( up, &newForward ) );
+    printf( "a:\n" );
+	vec3d_print( &a, 1 );
     vec3d_t newUp = vectorSub( up, &a );
+    printf( "newUp:\n" );
+	vec3d_print( &newUp, 1 );
     newUp = vectorNormalise( &newUp );
+    printf( "newUp after norm:\n" );
+	vec3d_print( &newUp, 1 );
 
     // Calculate new right direction:
     vec3d_t newRight = vectorCrossProduct( &newUp, &newForward );
+    printf( "newRight:\n" );
+	vec3d_print( &newRight, 1 );
 
     // Construct Dimensioning and Translation Matrix	
 	static mat4x4_t matrix;
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    matrix.m[0][0] = newRight.x;	    matrix.m[0][1] = newRight.y;	    matrix.m[0][2] = newRight.z;	    matrix.m[0][3] = floatingToFixed(0.0f);
+	matrix.m[1][0] = newUp.x;		    matrix.m[1][1] = newUp.y;		    matrix.m[1][2] = newUp.z;		    matrix.m[1][3] = floatingToFixed(0.0f);
+	matrix.m[2][0] = newForward.x;	    matrix.m[2][1] = newForward.y;	    matrix.m[2][2] = newForward.z;	    matrix.m[2][3] = floatingToFixed(0.0f);
+	matrix.m[3][0] = pos->x;			matrix.m[3][1] = pos->y;			matrix.m[3][2] = pos->z;			matrix.m[3][3] = floatingToFixed(1.0f);
+#else
 	matrix.m[0][0] = newRight.x;	    matrix.m[0][1] = newRight.y;	    matrix.m[0][2] = newRight.z;	    matrix.m[0][3] = 0.0f;
 	matrix.m[1][0] = newUp.x;		    matrix.m[1][1] = newUp.y;		    matrix.m[1][2] = newUp.z;		    matrix.m[1][3] = 0.0f;
 	matrix.m[2][0] = newForward.x;	    matrix.m[2][1] = newForward.y;	    matrix.m[2][2] = newForward.z;	    matrix.m[2][3] = 0.0f;
 	matrix.m[3][0] = pos->x;			matrix.m[3][1] = pos->y;			matrix.m[3][2] = pos->z;			matrix.m[3][3] = 1.0f;
-	
+#endif
     return matrix;
 }
 
 // Works only for Rotation/Translation Matrices
 mat4x4_t matrix_quickInverse(mat4x4_t* m){
-	static mat4x4_t matrix;
+	mat4x4_t matrix = matrix_makeEmpty();
 	matrix.m[0][0] = m->m[0][0]; matrix.m[0][1] = m->m[1][0]; matrix.m[0][2] = m->m[2][0]; matrix.m[0][3] = 0.0f;
 	matrix.m[1][0] = m->m[0][1]; matrix.m[1][1] = m->m[1][1]; matrix.m[1][2] = m->m[2][1]; matrix.m[1][3] = 0.0f;
 	matrix.m[2][0] = m->m[0][2]; matrix.m[2][1] = m->m[1][2]; matrix.m[2][2] = m->m[2][2]; matrix.m[2][3] = 0.0f;

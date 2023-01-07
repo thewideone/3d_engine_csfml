@@ -219,11 +219,7 @@ vec3d_t v_camera;  // only a placeholder now
 #endif
 #ifdef USE_CAMERA
 vec3d_t v_look_dir;
-#ifdef USE_FIXED_POINT_ARITHMETIC
-fxp_t f_yaw;
-#else
-float f_yaw;
-#endif
+rtnl_t f_yaw;
 #endif
 
 void setup3D( void ){
@@ -231,10 +227,36 @@ void setup3D( void ){
 	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
+	v_camera.x = floatingToFixed(0);
+	v_camera.y = floatingToFixed(0);
+	v_camera.z = floatingToFixed(0);
+	v_camera.w = floatingToFixed(1);
+#endif
+#ifdef USE_CAMERA
+	v_look_dir.x = floatingToFixed(0);
+	v_look_dir.y = floatingToFixed(0);
+	v_look_dir.z = floatingToFixed(0);
+	v_look_dir.w = floatingToFixed(1);
+	f_yaw = floatingToFixed(0);
+#endif
 	mat_proj = matrix_makeProjection(
 		floatingToFixed(90.0), floatingToFixed( (float)SCREEN_HEIGHT / (float)SCREEN_WIDTH ),
         floatingToFixed( 0.1f ), floatingToFixed( 1000.0f) );
 #else
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
+	v_camera.x = 0;
+	v_camera.y = 0;
+	v_camera.z = 0;
+	v_camera.w = 1;
+#endif
+#ifdef USE_CAMERA
+	v_look_dir.x = 0;
+	v_look_dir.y = 0;
+	v_look_dir.z = 0;
+	v_look_dir.w = 1;
+	f_yaw = 0;
+#endif
 	mat_proj = matrix_makeProjection(
 		90.0,
 		(float)SCREEN_HEIGHT / (float)SCREEN_WIDTH,
@@ -263,7 +285,12 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
         f_yaw += floatingToFixed( 2.0f * f_elapsed_time );
     
     // We've integrated time into this, so it's a velocity vector:
+	printf( "v_look_dir: " );
+	vec3d_print( &v_look_dir, 1 );
+
     vec3d_t v_forward = vectorMul( &v_look_dir, floatingToFixed( 4.0f * f_elapsed_time ) );
+
+	printf( "f_yaw: %f\n", fixedToFloating(f_yaw) );
 #else
     if (sfKeyboard_isKeyPressed(sfKeyUp))
         v_camera.y -= 2.0f * f_elapsed_time;
@@ -281,12 +308,28 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     }
     
     // We've integrated time into this, so it's a velocity vector:
+	printf( "v_look_dir: " );
+	vec3d_print( &v_look_dir, 1 );
+
     vec3d_t v_forward = vectorMul( &v_look_dir, 4.0f * f_elapsed_time );
+
+	printf( "f_yaw: %f\n", f_yaw );
 #endif
+
+	printf( "v_camera: " );
+	vec3d_print( &v_camera, 1 );
+	printf( "v_forward: " );
+	vec3d_print( &v_forward, 1 );
+
+
     // My trial of implementing left and right strafing
     // I've changd some control bindings
     // pls at least change the name of this vector:
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	vec3d_t temp_vUp = { floatingToFixed(0), floatingToFixed(1), floatingToFixed(0), floatingToFixed(1) };
+#else
     vec3d_t temp_vUp = { 0, 1, 0, 1 };
+#endif
     // Calculate the right direction:
     vec3d_t v_right_raw = vectorCrossProduct( &temp_vUp, &v_forward );
     //					  v seems 2 big
@@ -294,7 +337,14 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
 	vec3d_t v_right = vectorMul( &v_right_raw, floatingToFixed( 64.0f * f_elapsed_time ) );
 #else
     vec3d_t v_right = vectorMul( &v_right_raw, 64.0f * f_elapsed_time );
-#endif;
+#endif
+
+	printf( "temp_vUp: " );
+	vec3d_print( &temp_vUp, 1 );
+	printf( "v_right_raw: " );
+	vec3d_print( &v_right_raw, 1 );
+	printf( "v_right: " );
+	vec3d_print( &v_right, 1 );
     
     if (sfKeyboard_isKeyPressed(sfKeyW))
         v_camera = vectorAdd( &v_camera, &v_forward );
@@ -308,9 +358,22 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
         //f_yaw -= 2.0f * f_elapsed_time;
     
     //v_look_dir = { 0, 0, 1 };
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	vec3d_t v_up = { floatingToFixed(0), floatingToFixed(1), floatingToFixed(0), floatingToFixed(1) };
+	vec3d_t v_target = { floatingToFixed(0), floatingToFixed(0), floatingToFixed(1), floatingToFixed(1) };
+#else
     vec3d_t v_up = { 0, 1, 0, 1 };
     //vec3d_t v_target = vectorAdd( v_camera, v_look_dir );
     vec3d_t v_target = { 0, 0, 1, 1 };
+#endif
+
+	printf( "v_camera: " );
+	vec3d_print( &v_camera, 1 );
+	printf( "v_up: " );
+	vec3d_print( &v_up, 1 );
+	printf( "v_target: " );
+	vec3d_print( &v_target, 1 );
+	
     mat4x4_t mat_camera_rot = matrix_makeRotY( f_yaw );
     v_look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
     v_target = vectorAdd( &v_camera, &v_look_dir );
@@ -320,8 +383,18 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     // Make view matrix from camera:
     mat4x4_t mat_view = matrix_quickInverse( &mat_camera );
 
-	// printf( "MatView:\n" );
-	// printMatrix( &mat_view );	
+	
+	printf( "mat_camera_rot:\n" );
+	printMatrix( &mat_camera_rot );	
+	printf( "v_look_dir: " );
+	vec3d_print( &v_look_dir, 1 );
+	printf( "v_target: " );
+	vec3d_print( &v_target, 1 );
+
+	printf( "mat_camera:\n" );
+	printMatrix( &mat_camera );	
+	printf( "MatView:\n" );
+	printMatrix( &mat_view );	
 #endif
 
 	// mat4x4 matRotZ, matRotX;
@@ -459,11 +532,12 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
                                       &v_camera );
         // If the ray is aligned with normal, then face is visible:
         // Use '>' to render in inverse (like a view from inside):
-#ifdef USE_FIXED_POINT_ARITHMETIC
-		if( vectorDotProduct( &normal, &v_camera_ray ) < floatingToFixed(0.0f) ){
-#else
+// #ifdef USE_FIXED_POINT_ARITHMETIC
+		// vectorDotProduct() is of floating point type for now
+		// if( vectorDotProduct( &normal, &v_camera_ray ) < floatingToFixed(0.0f) ){
+// #else
 		if( vectorDotProduct( &normal, &v_camera_ray ) < 0.0f ){
-#endif
+// #endif
             arrput( mesh->visFaceIDs, face_id );
 		}
 #else
