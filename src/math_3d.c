@@ -144,11 +144,11 @@ rtnl_t vectorLength( vec3d_t* v ){
 // Normalise:
 vec3d_t vectorNormalise( vec3d_t* v ){
     rtnl_t l = vectorLength( v );
-#ifdef USE_FIXED_POINT_ARITHMETIC 
-    printf( "vectorNormalise() l = %f\n", fixedToFloating(l) );
-#else
-    printf( "vectorNormalise() l = %f\n", l );
-#endif
+// #ifdef USE_FIXED_POINT_ARITHMETIC 
+//     printf( "vectorNormalise() l = %f\n", fixedToFloating(l) );
+// #else
+//     printf( "vectorNormalise() l = %f\n", l );
+// #endif
     // vec3d_t v_ret;
     // v_ret.x = v->x / l;
     // v_ret.y = v->y / l;
@@ -180,11 +180,18 @@ mat4x4_t matrix_makeEmpty(){
 
 mat4x4_t matrix_makeIdentity(){
     mat4x4_t matrix = matrix_makeEmpty();
-    
+
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    matrix.m[0][0] = floatingToFixed(1.0f);
+    matrix.m[1][1] = floatingToFixed(1.0f);
+    matrix.m[2][2] = floatingToFixed(1.0f);
+    matrix.m[3][3] = floatingToFixed(1.0f);
+#else
     matrix.m[0][0] = 1.0f;
     matrix.m[1][1] = 1.0f;
     matrix.m[2][2] = 1.0f;
     matrix.m[3][3] = 1.0f;
+#endif
 
     return matrix;
 }
@@ -334,27 +341,27 @@ mat4x4_t matrix_mulMatrix( mat4x4_t* m1, mat4x4_t* m2 ){
 mat4x4_t matrix_pointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
     // Calculate new forward direction:
     vec3d_t newForward = vectorSub( target, pos );
-    printf( "newForward init:\n" );
-	vec3d_print( &newForward, 1 );
+    // printf( "newForward init:\n" );
+	// vec3d_print( &newForward, 1 );
     newForward = vectorNormalise( &newForward );
-    printf( "newForward after norm:\n" );
-	vec3d_print( &newForward, 1 );
+    // printf( "newForward after norm:\n" );
+	// vec3d_print( &newForward, 1 );
 
     // Calculate new up direction:
     vec3d_t a = vectorMul( &newForward, vectorDotProduct( up, &newForward ) );
-    printf( "a:\n" );
-	vec3d_print( &a, 1 );
+    // printf( "a:\n" );
+	// vec3d_print( &a, 1 );
     vec3d_t newUp = vectorSub( up, &a );
-    printf( "newUp:\n" );
-	vec3d_print( &newUp, 1 );
+    // printf( "newUp:\n" );
+	// vec3d_print( &newUp, 1 );
     newUp = vectorNormalise( &newUp );
-    printf( "newUp after norm:\n" );
-	vec3d_print( &newUp, 1 );
+    // printf( "newUp after norm:\n" );
+	// vec3d_print( &newUp, 1 );
 
     // Calculate new right direction:
     vec3d_t newRight = vectorCrossProduct( &newUp, &newForward );
-    printf( "newRight:\n" );
-	vec3d_print( &newRight, 1 );
+    // printf( "newRight:\n" );
+	// vec3d_print( &newRight, 1 );
 
     // Construct Dimensioning and Translation Matrix	
 	static mat4x4_t matrix;
@@ -375,15 +382,18 @@ mat4x4_t matrix_pointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
 // Works only for Rotation/Translation Matrices
 mat4x4_t matrix_quickInverse(mat4x4_t* m){
 	mat4x4_t matrix = matrix_makeEmpty();
-	matrix.m[0][0] = m->m[0][0]; matrix.m[0][1] = m->m[1][0]; matrix.m[0][2] = m->m[2][0]; matrix.m[0][3] = 0.0f;
-	matrix.m[1][0] = m->m[0][1]; matrix.m[1][1] = m->m[1][1]; matrix.m[1][2] = m->m[2][1]; matrix.m[1][3] = 0.0f;
-	matrix.m[2][0] = m->m[0][2]; matrix.m[2][1] = m->m[1][2]; matrix.m[2][2] = m->m[2][2]; matrix.m[2][3] = 0.0f;
 #ifdef USE_FIXED_POINT_ARITHMETIC
+	matrix.m[0][0] = m->m[0][0]; matrix.m[0][1] = m->m[1][0]; matrix.m[0][2] = m->m[2][0]; matrix.m[0][3] = floatingToFixed(0.0f);
+	matrix.m[1][0] = m->m[0][1]; matrix.m[1][1] = m->m[1][1]; matrix.m[1][2] = m->m[2][1]; matrix.m[1][3] = floatingToFixed(0.0f);
+	matrix.m[2][0] = m->m[0][2]; matrix.m[2][1] = m->m[1][2]; matrix.m[2][2] = m->m[2][2]; matrix.m[2][3] = floatingToFixed(0.0f);
     matrix.m[3][0] = -( fixedMul( m->m[3][0], matrix.m[0][0] ) + fixedMul( m->m[3][1], matrix.m[1][0] ) + fixedMul( m->m[3][2], matrix.m[2][0] ) );
-    matrix.m[3][0] = -( fixedMul( m->m[3][0], matrix.m[0][1] ) + fixedMul( m->m[3][1], matrix.m[1][1] ) + fixedMul( m->m[3][2], matrix.m[2][1] ) );
-    matrix.m[3][0] = -( fixedMul( m->m[3][0], matrix.m[0][2] ) + fixedMul( m->m[3][1], matrix.m[1][2] ) + fixedMul( m->m[3][2], matrix.m[2][2] ) );
+    matrix.m[3][1] = -( fixedMul( m->m[3][0], matrix.m[0][1] ) + fixedMul( m->m[3][1], matrix.m[1][1] ) + fixedMul( m->m[3][2], matrix.m[2][1] ) );
+    matrix.m[3][2] = -( fixedMul( m->m[3][0], matrix.m[0][2] ) + fixedMul( m->m[3][1], matrix.m[1][2] ) + fixedMul( m->m[3][2], matrix.m[2][2] ) );
     matrix.m[3][3] = floatingToFixed( 1.0f );
 #else
+    matrix.m[0][0] = m->m[0][0]; matrix.m[0][1] = m->m[1][0]; matrix.m[0][2] = m->m[2][0]; matrix.m[0][3] = 0.0f;
+	matrix.m[1][0] = m->m[0][1]; matrix.m[1][1] = m->m[1][1]; matrix.m[1][2] = m->m[2][1]; matrix.m[1][3] = 0.0f;
+	matrix.m[2][0] = m->m[0][2]; matrix.m[2][1] = m->m[1][2]; matrix.m[2][2] = m->m[2][2]; matrix.m[2][3] = 0.0f;
 	matrix.m[3][0] = -(m->m[3][0] * matrix.m[0][0] + m->m[3][1] * matrix.m[1][0] + m->m[3][2] * matrix.m[2][0]);
 	matrix.m[3][1] = -(m->m[3][0] * matrix.m[0][1] + m->m[3][1] * matrix.m[1][1] + m->m[3][2] * matrix.m[2][1]);
 	matrix.m[3][2] = -(m->m[3][0] * matrix.m[0][2] + m->m[3][1] * matrix.m[1][2] + m->m[3][2] * matrix.m[2][2]);

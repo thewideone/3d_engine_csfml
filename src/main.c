@@ -14,6 +14,13 @@
 
 #include "graphics.h"
 
+// 
+// TODO:
+// 	- left-right movement too slow
+// 	- add screen clipping and don't draw meshes behind camera
+// 	- coloured meshes (fill and edge colours separated)
+// 
+
 void mathTest( void ){
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	vec3d_t v1 = { floatingToFixed(1.0), floatingToFixed(1.0), floatingToFixed(1.0), floatingToFixed(0) },
@@ -285,12 +292,12 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
         f_yaw += floatingToFixed( 2.0f * f_elapsed_time );
     
     // We've integrated time into this, so it's a velocity vector:
-	printf( "v_look_dir: " );
-	vec3d_print( &v_look_dir, 1 );
+	// printf( "v_look_dir: " );
+	// vec3d_print( &v_look_dir, 1 );
 
     vec3d_t v_forward = vectorMul( &v_look_dir, floatingToFixed( 4.0f * f_elapsed_time ) );
 
-	printf( "f_yaw: %f\n", fixedToFloating(f_yaw) );
+	// printf( "f_yaw: %f\n", fixedToFloating(f_yaw) );
 #else
     if (sfKeyboard_isKeyPressed(sfKeyUp))
         v_camera.y -= 2.0f * f_elapsed_time;
@@ -308,19 +315,18 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     }
     
     // We've integrated time into this, so it's a velocity vector:
-	printf( "v_look_dir: " );
-	vec3d_print( &v_look_dir, 1 );
+	// printf( "v_look_dir: " );
+	// vec3d_print( &v_look_dir, 1 );
 
     vec3d_t v_forward = vectorMul( &v_look_dir, 4.0f * f_elapsed_time );
 
-	printf( "f_yaw: %f\n", f_yaw );
+	// printf( "f_yaw: %f\n", f_yaw );
 #endif
 
-	printf( "v_camera: " );
-	vec3d_print( &v_camera, 1 );
-	printf( "v_forward: " );
-	vec3d_print( &v_forward, 1 );
-
+	// printf( "v_camera: " );
+	// vec3d_print( &v_camera, 1 );
+	// printf( "v_forward: " );
+	// vec3d_print( &v_forward, 1 );
 
     // My trial of implementing left and right strafing
     // I've changd some control bindings
@@ -339,12 +345,12 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     vec3d_t v_right = vectorMul( &v_right_raw, 64.0f * f_elapsed_time );
 #endif
 
-	printf( "temp_vUp: " );
-	vec3d_print( &temp_vUp, 1 );
-	printf( "v_right_raw: " );
-	vec3d_print( &v_right_raw, 1 );
-	printf( "v_right: " );
-	vec3d_print( &v_right, 1 );
+	// printf( "temp_vUp: " );
+	// vec3d_print( &temp_vUp, 1 );
+	// printf( "v_right_raw: " );
+	// vec3d_print( &v_right_raw, 1 );
+	// printf( "v_right: " );
+	// vec3d_print( &v_right, 1 );
     
     if (sfKeyboard_isKeyPressed(sfKeyW))
         v_camera = vectorAdd( &v_camera, &v_forward );
@@ -367,12 +373,12 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     vec3d_t v_target = { 0, 0, 1, 1 };
 #endif
 
-	printf( "v_camera: " );
-	vec3d_print( &v_camera, 1 );
-	printf( "v_up: " );
-	vec3d_print( &v_up, 1 );
-	printf( "v_target: " );
-	vec3d_print( &v_target, 1 );
+	// printf( "v_camera: " );
+	// vec3d_print( &v_camera, 1 );
+	// printf( "v_up: " );
+	// vec3d_print( &v_up, 1 );
+	// printf( "v_target: " );
+	// vec3d_print( &v_target, 1 );
 	
     mat4x4_t mat_camera_rot = matrix_makeRotY( f_yaw );
     v_look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
@@ -384,17 +390,17 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
     mat4x4_t mat_view = matrix_quickInverse( &mat_camera );
 
 	
-	printf( "mat_camera_rot:\n" );
-	printMatrix( &mat_camera_rot );	
-	printf( "v_look_dir: " );
-	vec3d_print( &v_look_dir, 1 );
-	printf( "v_target: " );
-	vec3d_print( &v_target, 1 );
+	// printf( "mat_camera_rot:\n" );
+	// printMatrix( &mat_camera_rot );	
+	// printf( "v_look_dir: " );
+	// vec3d_print( &v_look_dir, 1 );
+	// printf( "v_target: " );
+	// vec3d_print( &v_target, 1 );
 
-	printf( "mat_camera:\n" );
-	printMatrix( &mat_camera );	
-	printf( "MatView:\n" );
-	printMatrix( &mat_view );	
+	// printf( "mat_camera:\n" );
+	// printMatrix( &mat_camera );	
+	// printf( "MatView:\n" );
+	// printMatrix( &mat_view );	
 #endif
 
 	// mat4x4 matRotZ, matRotX;
@@ -414,7 +420,7 @@ void update3DFrame( sfRenderWindow* renderWindow, float f_elapsed_time, float* f
 	// vec3d_print( &pos2, 1 );
 #else
     vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
-    vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
+    // vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
 #endif
 	
 #ifdef USE_CAMERA
@@ -779,7 +785,7 @@ int main()
 	// printf( "3.5 = %d = %f\n", a, fixedToFloating( a ) );
 
 	// Create a window:
-	sfVideoMode videoMode = {800, 600, 24};
+	sfVideoMode videoMode = {390, 390, 24};
     sfRenderWindow* window;
 	sfFont* font;
 	sfText* text;
