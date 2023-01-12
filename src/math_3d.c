@@ -7,6 +7,7 @@
 #include "math_3d.h"
 #include "graphics.h"
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
 fxp_t floatingToFixed( flp_t num ){
     return (fxp_t)( num * (flp_t)( 1 << FP_DP ) + ( num >= 0 ? 0.5 : -0.5 ) );
 }
@@ -19,6 +20,7 @@ fxp_t fixedMul( fxp_t a, fxp_t b ){
 fxp_t fixedDiv( fxp_t a, fxp_t b ){
     return ( (fxp2_t)(a) << FP_DP ) / (fxp2_t)(b);
 }
+#endif
 
 // void printVec3D( vec3d_t* v, char* name ){
 //     char vec_val[30];
@@ -55,7 +57,7 @@ vec3d_t vectorAdd( vec3d_t* v1, vec3d_t* v2 ){
     // v.x = v1->x + v2->x;
     // v.y = v1->y + v2->y;
     // v.z = v1->z + v2->z;
-    // v.w = 0;    // idk what to put in here
+    // v.w = 0;    // idk what to put in here <- 1! put 1!
     // return v;
 #ifdef USE_FIXED_POINT_ARITHMETIC
     return (vec3d_t){ v1->x + v2->x, v1->y + v2->y, v1->z + v2->z, floatingToFixed(1) };
@@ -144,11 +146,13 @@ rtnl_t vectorLength( vec3d_t* v ){
 // Normalise:
 vec3d_t vectorNormalise( vec3d_t* v ){
     rtnl_t l = vectorLength( v );
-// #ifdef USE_FIXED_POINT_ARITHMETIC 
-//     printf( "vectorNormalise() l = %f\n", fixedToFloating(l) );
+#ifdef USE_FIXED_POINT_ARITHMETIC 
+    if( l == floatingToFixed( 0.0 ) )
+        l = floatingToFixed( 0.0001 );
+    // printf( "vectorNormalise() l = %f\n", fixedToFloating(l) );
 // #else
 //     printf( "vectorNormalise() l = %f\n", l );
-// #endif
+#endif
     // vec3d_t v_ret;
     // v_ret.x = v->x / l;
     // v_ret.y = v->y / l;

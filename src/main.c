@@ -16,13 +16,24 @@
 
 // 
 // TODO:
-// 	- left-right movement too slow
+// 	- left-right movement too slow but only sometimes??
+// 	- move global variables and mesh processing functions to a separate file
+// 	- move all source files to proper subfolders
 // 	- add screen clipping and don't draw meshes behind camera
 // 	- coloured meshes (fill and edge colours separated)
+// 	- inverted line colour when in front of filled object?
+// 	- add a mesh queue
 // 
 
 void mathTest( void ){
 #ifdef USE_FIXED_POINT_ARITHMETIC
+	fxp_t a = floatingToFixed( 5.6 );
+	fxp_t b = floatingToFixed( 2.7 );
+	fxp_t c = fixedMul( a, b );
+	fxp_t d = fixedDiv( a, b );
+	printf( "a=%f, b=%f, c=%f, d=%f\n", fixedToFloating(a), fixedToFloating(b), fixedToFloating(c), fixedToFloating(d) );
+	printf( "3.5 = %d = %f\n", a, fixedToFloating( a ) );
+
 	vec3d_t v1 = { floatingToFixed(1.0), floatingToFixed(1.0), floatingToFixed(1.0), floatingToFixed(0) },
 			v2 = { floatingToFixed(2.5), floatingToFixed(3.5), floatingToFixed(4.5), floatingToFixed(0) };
 #else
@@ -143,17 +154,20 @@ void binaryTreeMapTest( void ){
 	vec3d_t v2 = v1;
 	vec3d_t v3;
 #ifdef USE_FIXED_POINT_ARITHMETIC
-
-#else
 	v3.x = floatingToFixed(0.3);
 	v3.y = floatingToFixed(1.3);
 	v3.z = floatingToFixed(2.3);
 	v3.w = floatingToFixed(3.3);
+#else
+	v3.x = 0.3;
+	v3.y = 1.3;
+	v3.z = 2.3;
+	v3.w = 3.3;
 #endif
 
 	vmap_t* map = NULL;
 
-#ifdef REMOVE_HIDDEN_LINES
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
 	vmap_insertNode( &map, 0, &v1, 0 );
 	vmap_insertNode( &map, 1, &v2, 1 );
 	vmap_insertNode( &map, 2, &v3, 0 );
@@ -169,7 +183,7 @@ void binaryTreeMapTest( void ){
 	for( int i=0; i<3; i++ ){
 		vmap_t* found_node = vmap_search( map, i );
 		if( found_node != NULL )
-#ifdef REMOVE_HIDDEN_LINES
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
 			// printf( "Found node of key %d: %f, %f, %f, %f, %d\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w, found_node->visible );
 			printf( "Found node of key %d and vis_flg %d: ", i, found_node->visible );
 			vec3d_print( &(found_node->v), true );
@@ -214,7 +228,11 @@ void graphicsTest( sfRenderWindow* renderWindow ){
 
 	char str[20];
 	sprintf( str, "Hello putText %d", 123 );
+#ifdef USE_FIXED_POINT_ARITHMETIC
 	putText( str, floatingToFixed(150), floatingToFixed(150), 50, sfMagenta, renderWindow );
+#else
+	putText( str, 150, 150, 50, sfMagenta, renderWindow );
+#endif
 }
 
 mesh_t mesh;
@@ -231,7 +249,10 @@ rtnl_t f_yaw;
 
 void setup3D( void ){
 	mesh = mesh_makeEmpty();
-	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
+	bool ret = mesh_loadFromObjFile( &mesh, "obj_models/tie_fighter_ngon.obj" );
+	if( !ret ){
+		printf( "Error: in setup3D() loading mesh from file failed\n" );
+	}
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
@@ -249,7 +270,7 @@ void setup3D( void ){
 #endif
 	mat_proj = matrix_makeProjection(
 		floatingToFixed(90.0), floatingToFixed( (float)SCREEN_HEIGHT / (float)SCREEN_WIDTH ),
-        floatingToFixed( 0.1f ), floatingToFixed( 1000.0f) );
+        floatingToFixed( 0.1f ), floatingToFixed( 1000.0f ) );
 #else
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 	v_camera.x = 0;
@@ -485,8 +506,12 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
 		arrput( mesh->transformedVertices, v_transformed );
     }
 
+	// printf( "Transformed vertices.\n" );
+
 	// Vector storing only IDs of visible faces
 	arrfree( mesh->visFaceIDs );
+
+	// printf( "Freed mesh->visFaceIDs.\n" );
 	// mesh->visFaceIDs = NULL;
 	// arrsetcap( mesh->visFaceIDs, mesh->face_cnt );	// is it needed?
 
@@ -521,6 +546,8 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
     int face_id = 0;
     for( size_t i=0; i < mesh->face_cnt; i++ ){ 
 		polygon_t face = mesh->faces[i];	// idk how but it works
+		// printf( "Processing face %d: ", i );
+		// polygon_print( &face );
 #ifdef RENDER_VISIBLE_ONLY
         // Use cross-product to get surface normal:
         vec3d_t normal, edge1, edge2;
@@ -528,22 +555,35 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
                            &mesh->transformedVertices[face.p[1]] );
         edge2 = vectorSub( &mesh->transformedVertices[face.p[0]],
                            &mesh->transformedVertices[face.p[1]] );
+		// printf( "Face %d edge1: ", i );
+		// vec3d_print( &edge1, true );
+		// printf( "Face %d edge2: ", i );
+		// vec3d_print( &edge2, true );
 		// The normal vector is a cross product of two edges of the face:
         normal = vectorCrossProduct( &edge1, &edge2 );
+		// printf( "Face %d normal: ", i );
+		// vec3d_print( &normal, true );
         // Normalise the normal (normalised length = 1.0 unit):
         normal = vectorNormalise( &normal );
+
+		// printf( "Face %d normal normalised: ", i );
+		// vec3d_print( &normal, true );
 
         // Get ray from the face to the camera:
         vec3d_t v_camera_ray = vectorSub( &mesh->transformedVertices[face.p[0]],
                                       &v_camera );
+		// printf( "Face %d v_camera_ray: ", i );
+		// vec3d_print( &v_camera_ray, true );
+
         // If the ray is aligned with normal, then face is visible:
         // Use '>' to render in inverse (like a view from inside):
-// #ifdef USE_FIXED_POINT_ARITHMETIC
+#ifdef USE_FIXED_POINT_ARITHMETIC
 		// vectorDotProduct() is of floating point type for now
-		// if( vectorDotProduct( &normal, &v_camera_ray ) < floatingToFixed(0.0f) ){
-// #else
+		// printf( "Face %d dot product: %f\n", i, fixedToFloating(vectorDotProduct( &normal, &v_camera_ray ) ) );
+		if( vectorDotProduct( &normal, &v_camera_ray ) < floatingToFixed(0.0f) ){
+#else
 		if( vectorDotProduct( &normal, &v_camera_ray ) < 0.0f ){
-// #endif
+#endif
             arrput( mesh->visFaceIDs, face_id );
 		}
 #else
@@ -631,7 +671,7 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
             vertProjected.y *= 0.5f * (float)SCREEN_HEIGHT;
 #endif
             // Add this vertex and its ID into the map
-#ifdef REMOVE_HIDDEN_LINES
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
 			vmap_insertNode( &mesh->vert2DSpaceMap,
 							 curr_vert_id,
 							 &vertProjected, 1 );
@@ -696,8 +736,6 @@ void processMesh( mesh_t* mesh, vec3d_t* pos, mat4x4_t* matView, float rot_angle
             }
         }
     }
-
-	// mesh_printVisEdgeVec( mesh );
 }
 
 void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
@@ -754,7 +792,7 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
             dot.setPosition( vertProjected1.x, vertProjected1.y );
             render_window.draw(dot);
         }
-#endif /* VERTEX_DOT_DEBUG */
+#endif // VERTEX_DOT_DEBUG
 
 #ifdef VERTEX_ID_DEBUG
         stringstream s1;
@@ -766,7 +804,7 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
 
         // cout<<"\nEdge "<<i/4<<": "<<mesh.vis_edge_vec[i]<<" "<<mesh.vis_edge_vec[i+1];//<<" "<<mesh.vis_edge_vec[i+2]<<" "<<mesh.vis_edge_vec[i+3];
         // cout<<": ("<<vertProjected1.x<<", "<<vertProjected1.y<<")-("<<vertProjected2.x<<", "<<vertProjected2.y<<")";
-#endif /* VERTEX_ID_DEBUG */
+#endif // VERTEX_ID_DEBUG
 
         drawLine( vertProjected1.x, vertProjected1.y,
                   vertProjected2.x, vertProjected2.y,
@@ -774,18 +812,10 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
     }
 }
 
-int main()
-{
-
-	// fxp_t a = floatingToFixed( 5.6 );
-	// fxp_t b = floatingToFixed( 2.7 );
-	// fxp_t c = fixedMul( a, b );
-	// fxp_t d = fixedDiv( a, b );
-	// printf( "a=%f, b=%f, c=%f, d=%f\n", fixedToFloating(a), fixedToFloating(b), fixedToFloating(c), fixedToFloating(d) );
-	// printf( "3.5 = %d = %f\n", a, fixedToFloating( a ) );
+int main(){
 
 	// Create a window:
-	sfVideoMode videoMode = {390, 390, 24};
+	sfVideoMode videoMode = {SCREEN_WIDTH, SCREEN_HEIGHT, COLOUR_DEPTH};
     sfRenderWindow* window;
 	sfFont* font;
 	sfText* text;
@@ -847,7 +877,7 @@ int main()
                 if (event.mouseButton.button == sfMouseRight){
                     if( animate ){
                         animate = 0;
-                        mesh_printVisEdgeVec( &mesh );
+                        // mesh_printVisEdgeVec( &mesh );
                     }
                     else
                         animate = 1;
