@@ -74,6 +74,8 @@ typedef struct {
 	int p_count;
 } polygon_t;
 
+void vec3d_makeEmpty( vec3d_t* v );
+
 void vec3d_print( vec3d_t* v, int new_line_flag );
 
 #ifdef USE_FIXED_POINT_ARITHMETIC

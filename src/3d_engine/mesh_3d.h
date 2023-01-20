@@ -19,6 +19,7 @@
 // types of vertex_cnt and face_cnt variables
 // Same for polygon struct
 typedef struct {
+    vec3d_t pos;
     // vector<polygon> faces;    // std::vector<...>, contains IDs of vertices
     polygon_t* faces;
     // vector<vec3d> vertices;
@@ -57,7 +58,7 @@ typedef struct {
 
 // Idk if it makes sense because a mesh should be loaded
 // with info just after its declaration
-mesh_t mesh_makeEmpty();
+void mesh_makeEmpty( mesh_t* mesh );
 void mesh_free( mesh_t* mesh );
 bool mesh_loadFromObjFile( mesh_t* mesh, char* filename );
 void mesh_printVisFaceIDs( mesh_t* mesh );

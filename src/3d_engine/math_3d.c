@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "pc_routines.h" // for reading lines of files
+#include "../pc_routines.h" // for reading lines of files
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
@@ -29,6 +29,20 @@ fxp_t fixedDiv( fxp_t a, fxp_t b ){
 //     strcat( name, "\n" );
 //     printf( name );
 // }
+
+void vec3d_makeEmpty( vec3d_t* v ){
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    v->x = floatingToFixed( 0.0f );
+    v->y = floatingToFixed( 0.0f );
+    v->z = floatingToFixed( 0.0f );
+    v->w = floatingToFixed( 1.0f );
+#else
+    v->x = 0.0f;
+    v->y = 0.0f;
+    v->z = 0.0f;
+    v->w = 1.0f;
+#endif
+}
 
 void printMatrix( mat4x4_t* mat ){
     for( int i=0; i<4; i++ ){

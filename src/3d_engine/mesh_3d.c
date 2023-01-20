@@ -5,19 +5,17 @@
 #include <stdlib.h>      // for reading files
 #include <stdio.h>
 
-mesh_t mesh_makeEmpty(){
-    static mesh_t mesh;
-    mesh.face_cnt = 0;
-    mesh.faces = NULL;
-    // mesh.matRotX = matrixMakeRotX();
-    mesh.transformedVertices = NULL;
-    mesh.vert2DSpaceMap = NULL;
-    mesh.vertex_cnt = 0;
-    mesh.vertices = NULL;
-    mesh.vis_edge_vec = NULL;
-    mesh.visFaceIDs = NULL;
-
-    return mesh;
+void mesh_makeEmpty( mesh_t* mesh ){
+    vec3d_makeEmpty( &mesh->pos );
+    mesh->face_cnt = 0;
+    mesh->faces = NULL;
+    // mesh->matRotX = matrixMakeRotX();
+    mesh->transformedVertices = NULL;
+    mesh->vert2DSpaceMap = NULL;
+    mesh->vertex_cnt = 0;
+    mesh->vertices = NULL;
+    mesh->vis_edge_vec = NULL;
+    mesh->visFaceIDs = NULL;
 }
 
 void mesh_free( mesh_t* mesh ){
