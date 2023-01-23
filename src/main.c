@@ -9,6 +9,7 @@
 #include "3d_engine/math_3d.h"
 #include "3d_engine/vmap/vmap.h"
 #include "3d_engine/mesh_3d.h"
+#include "3d_engine/mesh_3d_queue.h"
 
 #include "3d_engine/stb_ds.h"
 
@@ -201,7 +202,8 @@ void binaryTreeMapTest( void ){
 }
 
 void meshTest( void ){
-	mesh_t mesh = mesh_makeEmpty();
+	mesh_t mesh;
+	mesh_makeEmpty( &mesh );
 	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
 
 	printf( "mesh.vertices: cap = %lld, len = %lld\n", arrcap(mesh.vertices), arrlen(mesh.vertices) );
@@ -222,6 +224,50 @@ void meshTest( void ){
 	}
 
 	mesh_free( &mesh );
+}
+
+void meshQueueTest( void ){
+	mesh_queue_t mq;
+	meshQueue_makeEmpty( &mq );
+
+	mesh_t mesh1, mesh2, mesh3;
+	mesh_makeEmpty( &mesh1 );
+	mesh_makeEmpty( &mesh2 );
+	mesh_makeEmpty( &mesh3 );
+	mesh_loadFromObjFile( &mesh1, "obj_models/cube.obj" );
+	mesh_loadFromObjFile( &mesh1, "obj_models/dodecahedron.obj" );
+	mesh_loadFromObjFile( &mesh1, "obj_models/sphere.obj" );
+
+	meshQueue_push( &mq, &mesh1 );
+	meshQueue_push( &mq, &mesh2 );
+	meshQueue_push( &mq, &mesh3 );
+
+	for( size_t mi=0; mi < MESH_QUEUE_CAPACITY; mi++ ){
+		if( mq.array[mi] == NULL ){
+			printf( "null\n" );
+			continue;
+		}
+		printf( "%d\n", mq.array[mi] );
+		// printf( "mesh%d.vertices: cap = %lld, len = %lld\n", mi+1, arrcap( mq.array[mi]->vertices ), arrlen( mq.array[mi]->vertices ) );
+
+		// printf( "mesh%d.vertices (%lld):\n", mi+1, mq.array[mi]->vertex_cnt );
+		// for( size_t i=0; i < mq.array[mi]->vertex_cnt; i++ ){
+		// 	vec3d_t loop_vec = mq.array[mi]->vertices[i];
+		// 	// printf( " -> v%lld: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
+		// 	printf( " -> v%lld: ", i );
+		// 	vec3d_print( &loop_vec, true );
+		// }
+
+		// printf( "mesh%d.faces (%lld):\n", mi+1, mq.array[mi]->face_cnt );
+		// for( size_t i=0; i < mq.array[mi]->face_cnt; i++ ){
+		// 	polygon_t poly = mq.array[mi]->faces[i];
+		// 	printf( "Face %lld: ", i );
+		// 	polygon_print( &poly );
+		// }
+	}
+
+	meshQueue_freeMeshes( &mq );
+
 }
 
 void graphicsTest( sfRenderWindow* renderWindow ){
@@ -288,6 +334,7 @@ int main(){
 	// dynamicArrayTest();
 	// binaryTreeMapTest();
 	// meshTest();
+	meshQueueTest();
 
 	while (sfRenderWindow_isOpen(window)){
 		/* Process events */
@@ -327,7 +374,7 @@ int main(){
 		flp_t elapsed_time = (flp_t)(t2-t1) / CLOCKS_PER_SEC;
 		t1 = t2;
 
-		update3DFrame( window, elapsed_time, &f_theta );
+		// update3DFrame( window, elapsed_time, &f_theta );
 
 		/* Update the window */
         sfRenderWindow_display(window);

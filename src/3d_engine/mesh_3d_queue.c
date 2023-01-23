@@ -77,15 +77,45 @@ bool meshQueue_push( mesh_queue_t* mq, mesh_t* mesh ){
 }
 
 bool meshQueue_remove( mesh_queue_t* mq, mesh_t* mesh ){
-
+    if( mq->size == 0 )
+        return false;
+    
+    for( size_t i=0; i<MESH_QUEUE_CAPACITY; i++ )
+        if( mq->array[i] == mesh ){
+            mq->array[i] = NULL;
+            // Add shifting of remaining elements here if needed
+            return true;
+        }
+    // Mesh not found
+    return false;
 }
 bool meshQueue_removeAt( mesh_queue_t* mq, size_t idx ){
-
+    if( idx > MESH_QUEUE_CAPACITY )
+        return false;
+    mq->array[idx] = NULL;
+    return true;
 }
 
 bool meshQueue_freeMesh( mesh_queue_t* mq, mesh_t* mesh ){
-
+    if( mq->size == 0 )
+        return false;
+    
+    for( size_t i=0; i<MESH_QUEUE_CAPACITY; i++ )
+        if( mq->array[i] == mesh ){
+            mesh_free( mq->array[i] );
+            mq->array[i] = NULL;
+            // Add shifting of remaining elements here if needed
+            return true;
+        }
+    // Mesh not found
+    return false;
 }
 bool meshQueue_freeMeshAt( mesh_queue_t* mq, size_t idx ){
+    if( idx > MESH_QUEUE_CAPACITY || mq->array[idx] == NULL )
+        return false;
 
+    mesh_free( mq->array[idx] );
+    mq->array[idx] = NULL;
+
+    return true;
 }

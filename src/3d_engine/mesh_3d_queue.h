@@ -1,16 +1,16 @@
 #ifndef _MESH_3D_QUEUE_H_
 #define _MESH_3D_QUEUE_H_
 
+#include "config.h"
+
 #include "mesh_3d.h"
 #include "math_3d.h"    // for bool type
 
 // 
 // For now, the queue is implemented as
 // FIFO array containing pointers to meshes.
+// Config in "config.h".
 // 
-
-#define MESH_QUEUE_FIXED_SIZE
-#define MESH_QUEUE_CAPACITY 10
 
 typedef struct {
     // Array of pointers to meshes
