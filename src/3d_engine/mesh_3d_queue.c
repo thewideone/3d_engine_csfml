@@ -1,5 +1,7 @@
 #include "mesh_3d_queue.h"
 
+#include <stdio.h>  // for debug printf
+
 void meshQueue_makeEmpty( mesh_queue_t* mq ){
     for( size_t i = 0; i < MESH_QUEUE_CAPACITY; i++ )
         mq->array[i] = NULL;
@@ -20,9 +22,16 @@ void meshQueue_freeMeshes( mesh_queue_t* mq ){
     for( size_t i = 0; i < MESH_QUEUE_CAPACITY; i++ ){
         if( mq->array[i] == NULL )
             continue;
+            
         mesh_free( mq->array[i] );
+        mq->array[i] = NULL;
+        mq->size--;
     }
-    meshQueue_makeEmpty( mq );
+
+    if( mq->size != 0 )
+        printf( "Error: after meshQueue_freeMeshes() size not zero!\n" );
+    // mq->size = 0;
+    mq->cursor = 0;
 }
 
 bool meshQueue_isEmpty( mesh_queue_t* mq ){
@@ -33,6 +42,8 @@ bool meshQueue_isFull( mesh_queue_t* mq ){
 }
 
 mesh_t* meshQueue_getCurrent( mesh_queue_t* mq ){
+    if( mq->size == 0 )
+        return NULL;
     return mq->array[ mq->cursor ];
 }
 
@@ -52,19 +63,22 @@ void meshQueue_goToNext( mesh_queue_t* mq ){
 }
 
 bool meshQueue_push( mesh_queue_t* mq, mesh_t* mesh ){
-    // If the queue is empty
-    if( mq->size == 0 ){
-        mq->array[0] = mesh;
-        mq->size++;
-        return true;
-    }
 
     // If the queue is full
-    if( mq->size == MESH_QUEUE_CAPACITY )
+    if( mq->size == MESH_QUEUE_CAPACITY ){
+        printf( "Error: in meshQueue_push(): queue at its capacity.\n" );
         return false;
+    }
 
+    // Check for duplicates
+    for( size_t i=0; i < MESH_QUEUE_CAPACITY; i++ )
+        if( mq->array[i] == mesh )
+            return false;
+
+    // There is at least one free place
     size_t temp_cursor = 0;
-    while( mq->array[ temp_cursor ] == NULL ){
+
+    while( mq->array[ temp_cursor ] != NULL ){
         temp_cursor++;
         // Wrap(?) the cursor
         if( temp_cursor == MESH_QUEUE_CAPACITY )
@@ -73,6 +87,7 @@ bool meshQueue_push( mesh_queue_t* mq, mesh_t* mesh ){
 
     mq->array[temp_cursor] = mesh;
     mq->size++;
+
     return true;
 }
 
@@ -83,6 +98,11 @@ bool meshQueue_remove( mesh_queue_t* mq, mesh_t* mesh ){
     for( size_t i=0; i<MESH_QUEUE_CAPACITY; i++ )
         if( mq->array[i] == mesh ){
             mq->array[i] = NULL;
+            mq->size--;
+
+            if( mq->size )
+                while( mq->array[mq->cursor] == NULL )
+                    mq->cursor++;
             // Add shifting of remaining elements here if needed
             return true;
         }
@@ -90,9 +110,15 @@ bool meshQueue_remove( mesh_queue_t* mq, mesh_t* mesh ){
     return false;
 }
 bool meshQueue_removeAt( mesh_queue_t* mq, size_t idx ){
-    if( idx > MESH_QUEUE_CAPACITY )
+    if( idx > MESH_QUEUE_CAPACITY || idx < 0 )
         return false;
     mq->array[idx] = NULL;
+    mq->size--;
+
+    if( mq->size )
+        while( mq->array[mq->cursor] == NULL )
+            mq->cursor++;
+    
     return true;
 }
 
@@ -104,6 +130,11 @@ bool meshQueue_freeMesh( mesh_queue_t* mq, mesh_t* mesh ){
         if( mq->array[i] == mesh ){
             mesh_free( mq->array[i] );
             mq->array[i] = NULL;
+            mq->size--;
+
+            if( mq->size )
+                while( mq->array[mq->cursor] == NULL )
+                    mq->cursor++;
             // Add shifting of remaining elements here if needed
             return true;
         }
@@ -111,11 +142,16 @@ bool meshQueue_freeMesh( mesh_queue_t* mq, mesh_t* mesh ){
     return false;
 }
 bool meshQueue_freeMeshAt( mesh_queue_t* mq, size_t idx ){
-    if( idx > MESH_QUEUE_CAPACITY || mq->array[idx] == NULL )
+    if( idx > MESH_QUEUE_CAPACITY || idx < 0 || mq->array[idx] == NULL )
         return false;
 
     mesh_free( mq->array[idx] );
     mq->array[idx] = NULL;
+    mq->size--;
+
+    if( mq->size )
+        while( mq->array[mq->cursor] == NULL )
+            mq->cursor++;
 
     return true;
 }

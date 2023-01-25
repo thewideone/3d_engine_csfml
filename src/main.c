@@ -235,39 +235,71 @@ void meshQueueTest( void ){
 	mesh_makeEmpty( &mesh2 );
 	mesh_makeEmpty( &mesh3 );
 	mesh_loadFromObjFile( &mesh1, "obj_models/cube.obj" );
-	mesh_loadFromObjFile( &mesh1, "obj_models/dodecahedron.obj" );
-	mesh_loadFromObjFile( &mesh1, "obj_models/sphere.obj" );
+	mesh_loadFromObjFile( &mesh2, "obj_models/dodecahedron.obj" );
+	mesh_loadFromObjFile( &mesh3, "obj_models/sphere.obj" );
 
-	meshQueue_push( &mq, &mesh1 );
-	meshQueue_push( &mq, &mesh2 );
-	meshQueue_push( &mq, &mesh3 );
+	bool ret = meshQueue_push( &mq, &mesh1 );
+	if( !ret )
+		printf( "Error: in meshQueueTest(): failed to push mesh1 into mq.\n" );
+	ret = meshQueue_push( &mq, &mesh2 );
+	if( !ret )
+		printf( "Error: in meshQueueTest(): failed to push mesh1 into mq.\n" );
+	ret = meshQueue_push( &mq, &mesh3 );
+	if( !ret )
+		printf( "Error: in meshQueueTest(): failed to push mesh1 into mq.\n" );
 
-	for( size_t mi=0; mi < MESH_QUEUE_CAPACITY; mi++ ){
-		if( mq.array[mi] == NULL ){
+	for( size_t mi=0; mi < mq.size; mi++ ){
+		mesh_t* mptr = meshQueue_getCurrent( &mq );
+
+		if( mptr == NULL ){
 			printf( "null\n" );
 			continue;
 		}
-		printf( "%d\n", mq.array[mi] );
-		// printf( "mesh%d.vertices: cap = %lld, len = %lld\n", mi+1, arrcap( mq.array[mi]->vertices ), arrlen( mq.array[mi]->vertices ) );
 
-		// printf( "mesh%d.vertices (%lld):\n", mi+1, mq.array[mi]->vertex_cnt );
-		// for( size_t i=0; i < mq.array[mi]->vertex_cnt; i++ ){
-		// 	vec3d_t loop_vec = mq.array[mi]->vertices[i];
-		// 	// printf( " -> v%lld: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
-		// 	printf( " -> v%lld: ", i );
-		// 	vec3d_print( &loop_vec, true );
-		// }
+		printf( "mesh%d.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
 
-		// printf( "mesh%d.faces (%lld):\n", mi+1, mq.array[mi]->face_cnt );
-		// for( size_t i=0; i < mq.array[mi]->face_cnt; i++ ){
-		// 	polygon_t poly = mq.array[mi]->faces[i];
-		// 	printf( "Face %lld: ", i );
-		// 	polygon_print( &poly );
-		// }
+		printf( "mesh%d.faces (%lld):\n", mi+1, mptr->face_cnt );
+
+		meshQueue_goToNext( &mq );
+	}
+
+	meshQueue_removeAt( &mq, 1 );
+
+	printf( "Removed 2ns mesh, size = %d.\n", mq.size );
+
+	for( size_t mi=0; mi < mq.size; mi++ ){
+		mesh_t* mptr = meshQueue_getCurrent( &mq );
+
+		if( mptr == NULL ){
+			printf( "null\n" );
+			continue;
+		}
+
+		printf( "mesh%d.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
+
+		printf( "mesh%d.faces (%lld):\n", mi+1, mptr->face_cnt );
+
+		meshQueue_goToNext( &mq );
+	}
+
+	meshQueue_push( &mq, &mesh2 );
+
+	for( size_t mi=0; mi < mq.size; mi++ ){
+		mesh_t* mptr = meshQueue_getCurrent( &mq );
+
+		if( mptr == NULL ){
+			printf( "null\n" );
+			continue;
+		}
+
+		printf( "mesh%d.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
+
+		printf( "mesh%d.faces (%lld):\n", mi+1, mptr->face_cnt );
+
+		meshQueue_goToNext( &mq );
 	}
 
 	meshQueue_freeMeshes( &mq );
-
 }
 
 void graphicsTest( sfRenderWindow* renderWindow ){

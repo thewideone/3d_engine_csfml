@@ -9,6 +9,10 @@
 // 
 // For now, the queue is implemented as
 // FIFO array containing pointers to meshes.
+// Use meshQueue_makeEmpty() to init a queue,
+// meshQueue_getCurrent() to get a pointer to a mesh
+// and meshQueue_goToNext() to move internal cursor
+// to the next mesh.
 // Config in "config.h".
 // 
 
@@ -42,7 +46,8 @@ bool meshQueue_isFull( mesh_queue_t* mq );
 
 // 
 // Get a pointer to the first not yet processed mesh.
-// Return a pointer to a mesh pointed by the cursor.
+// Return a pointer to a mesh pointed by the cursor
+// or void if queue empty.
 // 
 mesh_t* meshQueue_getCurrent( mesh_queue_t* mq );
 
