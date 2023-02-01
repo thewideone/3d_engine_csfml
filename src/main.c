@@ -19,7 +19,9 @@
 
 // 
 // TODO:
-// 	- add a mesh queue
+// 	- X add a mesh queue
+// 	- loading meshes from program memory
+// 	- dynamic meshes
 // 	- left-right movement too slow but only sometimes??
 // 	- move global variables and mesh processing functions to a separate file
 // 	- add screen clipping and don't draw meshes behind camera
@@ -227,6 +229,18 @@ void meshTest( void ){
 }
 
 void meshQueueTest( void ){
+
+	const float vertices[] = {
+		-0.500000, -0.500000, 0.500000,
+		-0.500000, 0.500000, 0.500000,
+		-0.500000, -0.500000, -0.500000,
+		-0.500000, 0.500000, -0.500000,
+		0.500000, -0.500000, 0.500000,
+		0.500000, 0.500000, 0.500000,
+		0.500000, -0.500000, -0.500000,
+		0.500000, 0.500000, -0.500000,
+	};
+
 	mesh_queue_t mq;
 	meshQueue_makeEmpty( &mq );
 
