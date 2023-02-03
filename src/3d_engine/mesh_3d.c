@@ -141,6 +141,76 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
     return true;
 }
 
+// 
+// Load mesh from program memory.
+// mesh                 - pointer to a mesh object
+// vert_array       - array of vertex values
+// face_array       - array of vertex IDs for each face
+// vert_cnt         - number of vertices
+// faxe_cnt         - number of faces
+// fixed_face_size  - number of vertices if each face of the mesh
+//                    has got the same
+// 
+bool mesh_loadFromProgmem( mesh_t* mesh, const rtnl_t vert_array[], const size_t face_array[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size ){
+    // Load vertices
+    // printf( "Loading vertices..." );
+    for( size_t i=0; i<vert_cnt; i++ ){
+        vec3d_t v;
+        v.x = vert_array[ i%3 ];
+        v.y = vert_array[ i%3+1 ];
+        v.z = vert_array[ i%3+2 ];
+        #ifdef USE_FIXED_POINT_ARITHMETIC
+        v.w = floatingToFixed( (flp_t)(1) );
+        #else
+        v.w = 1;    // default value for 'w' member
+        #endif
+        arrput( mesh->vertices, v );
+        // mesh->vertex_cnt++;
+    }
+    mesh->vertex_cnt = vert_cnt;
+
+    // printf( "done. mesh->vertex_cnt = %d\n\n", mesh->vertex_cnt );
+
+    // Load faces
+    // printf( "\nLoading faces...\n" );
+    if( fixed_face_size ){
+        for( size_t f_itr=0; f_itr < face_cnt; f_itr++ ){
+            polygon_t face = polygonMakeEmpty();
+
+            for( size_t v_itr=0; v_itr < fixed_face_size; v_itr++ )
+                arrput( face.p, face_array[ f_itr % fixed_face_size + v_itr ] );
+        }
+    }
+    else {
+        size_t v_itr=0;
+
+        for( size_t f_itr=0; f_itr < face_cnt; f_itr++ ){
+            // printf( "Face %d:\n", f_itr );
+
+            polygon_t face = polygonMakeEmpty();
+            
+            // printf( "\tPushing vertices: " );
+            while( face_array[ v_itr ] != F_VID_SEP ){
+                // printf( "%d (v%d), ", v_itr, face_array[ v_itr ] );
+
+                arrput( face.p, face_array[ v_itr ] );
+                face.p_count++;
+                
+                v_itr++;
+            }
+            // printf( "\n" );
+            
+            arrput( mesh->faces, face );
+            v_itr++;
+        }
+    }
+    mesh->face_cnt = face_cnt;
+
+    // printf( "Loading faces done. mesh->face_cnt = %d\n", mesh->face_cnt );
+
+    return true;
+}
+
 void mesh_printVisFaceIDs( mesh_t* mesh ){
     // cout << "IDs of visible faces (" << visFaceIDs.size() << " in total):" << endl;
     // for( int i=0; i < visFaceIDs.size(); i++ )

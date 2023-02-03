@@ -17,6 +17,8 @@
 
 #include "3d_engine/3d_main.hpp"
 
+#include "meshes/cube.h"
+
 // 
 // TODO:
 // 	- X add a mesh queue
@@ -213,7 +215,6 @@ void meshTest( void ){
 	printf( "mesh.vertices (%lld):\n", mesh.vertex_cnt );
 	for( size_t i=0; i < mesh.vertex_cnt; i++ ){
 		vec3d_t loop_vec = mesh.vertices[i];
-		// printf( " -> v%lld: %f, %f, %f, %f\n", i, loop_vec.x, loop_vec.y, loop_vec.z, loop_vec.w );
 		printf( " -> v%lld: ", i );
 		vec3d_print( &loop_vec, true );
 	}
@@ -226,20 +227,28 @@ void meshTest( void ){
 	}
 
 	mesh_free( &mesh );
+
+	mesh_t mesh_prgm;
+	mesh_makeEmpty( &mesh_prgm );
+	mesh_loadFromProgmem( &mesh_prgm, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
+
+	printf( "mesh_prgm.vertices (%lld):\n", mesh_prgm.vertex_cnt );
+	for( size_t i=0; i < mesh_prgm.vertex_cnt; i++ ){
+		vec3d_t loop_vec = mesh_prgm.vertices[i];
+		printf( " -> v%lld: ", i );
+		vec3d_print( &loop_vec, true );
+	}	
+	printf( "mesh_prgm.faces (%lld):\n", mesh_prgm.face_cnt );
+	for( size_t i=0; i < mesh_prgm.face_cnt; i++ ){
+		polygon_t poly = mesh_prgm.faces[i];
+		printf( "Face %lld: ", i );
+		polygon_print( &poly );
+	}
+
+	mesh_free( &mesh_prgm );
 }
 
 void meshQueueTest( void ){
-
-	const float vertices[] = {
-		-0.500000, -0.500000, 0.500000,
-		-0.500000, 0.500000, 0.500000,
-		-0.500000, -0.500000, -0.500000,
-		-0.500000, 0.500000, -0.500000,
-		0.500000, -0.500000, 0.500000,
-		0.500000, 0.500000, 0.500000,
-		0.500000, -0.500000, -0.500000,
-		0.500000, 0.500000, -0.500000,
-	};
 
 	mesh_queue_t mq;
 	meshQueue_makeEmpty( &mq );
@@ -257,10 +266,10 @@ void meshQueueTest( void ){
 		printf( "Error: in meshQueueTest(): failed to push mesh1 into mq.\n" );
 	ret = meshQueue_push( &mq, &mesh2 );
 	if( !ret )
-		printf( "Error: in meshQueueTest(): failed to push mesh1 into mq.\n" );
+		printf( "Error: in meshQueueTest(): failed to push mesh2 into mq.\n" );
 	ret = meshQueue_push( &mq, &mesh3 );
 	if( !ret )
-		printf( "Error: in meshQueueTest(): failed to push mesh1 into mq.\n" );
+		printf( "Error: in meshQueueTest(): failed to push mesh3 into mq.\n" );
 
 	for( size_t mi=0; mi < mq.size; mi++ ){
 		mesh_t* mptr = meshQueue_getCurrent( &mq );
@@ -279,7 +288,7 @@ void meshQueueTest( void ){
 
 	meshQueue_removeAt( &mq, 1 );
 
-	printf( "Removed 2ns mesh, size = %d.\n", mq.size );
+	printf( "Removed 2nd mesh, size = %d.\n", mq.size );
 
 	for( size_t mi=0; mi < mq.size; mi++ ){
 		mesh_t* mptr = meshQueue_getCurrent( &mq );
@@ -379,8 +388,8 @@ int main(){
 	// mathTest();
 	// dynamicArrayTest();
 	// binaryTreeMapTest();
-	// meshTest();
-	meshQueueTest();
+	meshTest();
+	// meshQueueTest();
 
 	while (sfRenderWindow_isOpen(window)){
 		/* Process events */

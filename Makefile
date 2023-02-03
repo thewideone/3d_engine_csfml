@@ -22,7 +22,7 @@ endif
 OUTPUT	:= output
 
 # define source directory
-SRC		:= src src/vmap
+SRC		:= src src/3d_engine src/3d_engine/vmap src/meshes
 
 # define include directory
 INCLUDE	:= include

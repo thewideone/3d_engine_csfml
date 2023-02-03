@@ -78,12 +78,6 @@ if user_in == "fx":
     use_fixed_point = 1
     vert_arr_type = fixed_point_type_name
 
-    print( "Number of binary digits after the decimal place (16 default): ", end = '' )
-    user_in = input()
-
-    if user_in:
-        fp_dp = user_in
-
     print( "Fixed point type (int8, int16, int32 (default), int64): ", end = '' )
     user_in = input()
 
@@ -92,6 +86,12 @@ if user_in == "fx":
             print( "Wrong intput! Continuing with the default value" )
         else:
             fixed_point_type = user_in
+
+    print( "Number of binary digits after the decimal place (16 default): ", end = '' )
+    user_in = input()
+
+    if user_in:
+        fp_dp = user_in
 
 # Specify vertex ID separator in face array
 print( "Vertex ID separator in face array (default F_VID_SEP): ", end = '' )
@@ -126,24 +126,36 @@ for line in in_lines:
 last_vert_line = vert_lines[-1]
 last_face_line = face_lines[-1]
 
+vertex_count = len(vert_lines)
+face_count = len(face_lines)
+
 # Assign type based on the greatest vertex ID (number of vertices)
-if len(vert_lines) <= 255:
+if vertex_count <= 255:
     face_arr_type = "uint8_t"
-elif len(vert_lines) <= 65535:
+elif vertex_count <= 65535:
     face_arr_type = "uint16_t"
-elif len(vert_lines) <= 4294967295:
+elif vertex_count <= 4294967295:
     face_arr_type = "uint32_t"
 # Please don't XD
-elif len(vert_lines) <= 18446744073709551615:
+elif vertex_count <= 18446744073709551615:
     face_arr_type = "uint64_t"
 
 
 
+# Print definitions
+if print_to_file:
+    out_file.write( "#define " + mesh_name.upper() + "_MESH_V_CNT " + str(vertex_count) + '\n' )
+    out_file.write( "#define " + mesh_name.upper() + "_MESH_F_CNT " + str(face_count) + "\n\n" )
+if print_to_std_out:
+    print( "#define " + mesh_name.upper() + "_MESH_V_CNT " + str(vertex_count) )
+    print( "#define " + mesh_name.upper() + "_MESH_F_CNT " + str(face_count) )
+    print( "" )
+
 # Print header of vertex array
 if print_to_file:
-    out_file.write( "const "+vert_arr_type+" "+mesh_name+"_verts[] = {\n" )
+    out_file.write( "const "+vert_arr_type+" "+mesh_name+"_mesh_verts[] = {\n" )
 if print_to_std_out:
-    print( "const "+vert_arr_type+" "+mesh_name+"_verts[] = {" )
+    print( "const "+vert_arr_type+" "+mesh_name+"_mesh_verts[] = {" )
 
 # Print vertices
 for line in vert_lines:
@@ -200,9 +212,9 @@ if print_to_std_out:
 
 # Print header of face array
 if print_to_file:
-    out_file.write( "const "+face_arr_type+" "+mesh_name+"_faces[] = {\n" )
+    out_file.write( "const "+face_arr_type+" "+mesh_name+"_mesh_faces[] = {\n" )
 if print_to_std_out:
-    print( "const "+face_arr_type+" "+mesh_name+"_faces[] = {" )
+    print( "const "+face_arr_type+" "+mesh_name+"_mesh_faces[] = {" )
 
 # Print faces
 for line in face_lines:
@@ -244,7 +256,7 @@ if print_to_file:
     out_file.close()
     
 
-if platform.startswith('linux'):
-    os.system("read")
-else:
-    os.system("pause")
+#if platform.startswith('linux'):
+#    os.system("read")
+#else:
+#    os.system("pause")

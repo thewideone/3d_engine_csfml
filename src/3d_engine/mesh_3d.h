@@ -14,6 +14,9 @@
 //    update it with new values
 //  - add loading from program memory
 
+// Vertex ID separator in face array in program memory
+#define F_VID_SEP 255
+
 // Mesh:
 // Vertex and face count limits are the limits of
 // types of vertex_cnt and face_cnt variables
@@ -61,6 +64,7 @@ typedef struct {
 void mesh_makeEmpty( mesh_t* mesh );
 void mesh_free( mesh_t* mesh );
 bool mesh_loadFromObjFile( mesh_t* mesh, char* filename );
+bool mesh_loadFromProgmem( mesh_t* mesh, const rtnl_t vert_array[], const size_t face_array[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size );
 void mesh_printVisFaceIDs( mesh_t* mesh );
 void mesh_printVisEdgeVec( mesh_t* mesh );
 
