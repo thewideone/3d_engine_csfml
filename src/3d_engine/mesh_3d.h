@@ -63,8 +63,10 @@ typedef struct {
 // with info just after its declaration
 void mesh_makeEmpty( mesh_t* mesh );
 void mesh_free( mesh_t* mesh );
+#ifdef USE_LOADING_FROM_OBJ
 bool mesh_loadFromObjFile( mesh_t* mesh, char* filename );
-bool mesh_loadFromProgmem( mesh_t* mesh, const rtnl_t vert_array[], const size_t face_array[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size );
+#endif
+bool mesh_loadFromProgmem( mesh_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size );
 void mesh_printVisFaceIDs( mesh_t* mesh );
 void mesh_printVisEdgeVec( mesh_t* mesh );
 

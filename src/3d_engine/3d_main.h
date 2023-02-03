@@ -15,6 +15,10 @@
 
 #include "graphics.h"
 
+#include "../meshes/cube.h"
+#include "../meshes/sphere.h"
+#include "../meshes/dodecahedron.h"
+
 bool getAnimateFlag( void );
 void setAnimateFlag( bool value );
 

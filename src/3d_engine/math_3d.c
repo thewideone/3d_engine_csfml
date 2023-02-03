@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../pc_routines.h" // for reading lines of files
+// #include "../pc_routines.h" // for reading lines of files
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
@@ -433,7 +433,7 @@ void vec3d_print( vec3d_t* v, int new_line_flag ){
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 void vec3d_printAsFixed( vec3d_t* v, int new_line_flag ){
-    printf( "\t%f %f %f %f", v->x, v->y, v->z, v->w );
+    printf( "\t%d %d %d %d", v->x, v->y, v->z, v->w );
     if( new_line_flag )
         printf( "\n" );
 }

@@ -14,6 +14,7 @@
 #define USE_CAMERA
 #define RENDER_VISIBLE_ONLY     // render only visible edges / faces
 // #define REMOVE_HIDDEN_LINES
+// #define USE_LOADING_FROM_OBJ
 
 // 
 // Debug:

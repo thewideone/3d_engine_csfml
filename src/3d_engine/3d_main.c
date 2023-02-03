@@ -1,4 +1,4 @@
-#include "3d_main.hpp"
+#include "3d_main.h"
 
 mesh_t mesh;
 mat4x4_t mat_proj;
@@ -21,7 +21,13 @@ void setAnimateFlag( bool value ){
 
 void setup3D( void ){
 	mesh_makeEmpty( &mesh );
-	bool ret = mesh_loadFromObjFile( &mesh, "obj_models/tie_fighter_ngon.obj" );
+#ifdef USE_LOADING_FROM_OBJ
+	bool ret = mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
+#else
+	// bool ret = mesh_loadFromProgmem( &mesh, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
+	// bool ret = mesh_loadFromProgmem( &mesh, sphere_mesh_verts, sphere_mesh_faces, SPHERE_MESH_V_CNT, SPHERE_MESH_F_CNT, false );
+	bool ret = mesh_loadFromProgmem( &mesh, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
+#endif
 	if( !ret ){
 		printf( "Error: in setup3D() loading mesh from file failed\n" );
 	}

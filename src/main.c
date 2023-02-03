@@ -15,17 +15,19 @@
 
 #include "3d_engine/graphics.h"
 
-#include "3d_engine/3d_main.hpp"
+#include "3d_engine/3d_main.h"
 
 #include "meshes/cube.h"
+#include "meshes/sphere.h"
+#include "meshes/dodecahedron.h"
 
 // 
 // TODO:
 // 	- X add a mesh queue
-// 	- loading meshes from program memory
+// 	- X loading meshes from program memory
 // 	- dynamic meshes
 // 	- left-right movement too slow but only sometimes??
-// 	- move global variables and mesh processing functions to a separate file
+// 	- X move global variables and mesh processing functions to a separate file
 // 	- add screen clipping and don't draw meshes behind camera
 // 	- coloured meshes (fill and edge colours separated)
 // 	- inverted line colour when in front of filled object?
@@ -206,6 +208,7 @@ void binaryTreeMapTest( void ){
 }
 
 void meshTest( void ){
+#ifdef USE_LOADING_FROM_OBJ
 	mesh_t mesh;
 	mesh_makeEmpty( &mesh );
 	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
@@ -227,6 +230,7 @@ void meshTest( void ){
 	}
 
 	mesh_free( &mesh );
+#endif
 
 	mesh_t mesh_prgm;
 	mesh_makeEmpty( &mesh_prgm );
@@ -257,9 +261,16 @@ void meshQueueTest( void ){
 	mesh_makeEmpty( &mesh1 );
 	mesh_makeEmpty( &mesh2 );
 	mesh_makeEmpty( &mesh3 );
+#ifdef USE_LOADING_FROM_OBJ
 	mesh_loadFromObjFile( &mesh1, "obj_models/cube.obj" );
 	mesh_loadFromObjFile( &mesh2, "obj_models/dodecahedron.obj" );
 	mesh_loadFromObjFile( &mesh3, "obj_models/sphere.obj" );
+#else
+	mesh_loadFromProgmem( &mesh1, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
+	mesh_loadFromProgmem( &mesh2, sphere_mesh_verts, sphere_mesh_faces, SPHERE_MESH_V_CNT, SPHERE_MESH_F_CNT, false );
+	mesh_loadFromProgmem( &mesh3, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
+
+#endif
 
 	bool ret = meshQueue_push( &mq, &mesh1 );
 	if( !ret )
@@ -388,7 +399,7 @@ int main(){
 	// mathTest();
 	// dynamicArrayTest();
 	// binaryTreeMapTest();
-	meshTest();
+	// meshTest();
 	// meshQueueTest();
 
 	while (sfRenderWindow_isOpen(window)){
@@ -429,7 +440,7 @@ int main(){
 		flp_t elapsed_time = (flp_t)(t2-t1) / CLOCKS_PER_SEC;
 		t1 = t2;
 
-		// update3DFrame( window, elapsed_time, &f_theta );
+		update3DFrame( window, elapsed_time, &f_theta );
 
 		/* Update the window */
         sfRenderWindow_display(window);
