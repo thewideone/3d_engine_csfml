@@ -95,32 +95,30 @@ vec3d_t vectorNormalise( vec3d_t* v );
 // Multiply matrix by vector ( m - input matrix, i - input vector ):
 vec3d_t matrix_mulVector( mat4x4_t* m, vec3d_t* i );
 
-mat4x4_t matrix_makeEmpty();
+void matrix_makeEmpty( mat4x4_t* matrix );
+void matrix_makeIdentity( mat4x4_t* matrix );
 
-mat4x4_t matrix_makeIdentity();
-
-mat4x4_t matrix_makeRotZ( rtnl_t fAngleRad );
-
-mat4x4_t matrix_makeRotX( rtnl_t fAngleRad );
+void matrix_makeRotZ( mat4x4_t* matrix, rtnl_t fAngleRad );
+void matrix_makeRotX( mat4x4_t* matrix, rtnl_t fAngleRad );
 
 #ifdef USE_CAMERA
-mat4x4_t matrix_makeRotY(rtnl_t fAngleRad);
+void matrix_makeRotY( mat4x4_t* matrix, rtnl_t fAngleRad);
 #endif
 
-mat4x4_t matrix_makeTranslation( rtnl_t x, rtnl_t y, rtnl_t z );
+void matrix_makeTranslation( mat4x4_t* matrix, rtnl_t x, rtnl_t y, rtnl_t z );
 
-mat4x4_t matrix_makeProjection( rtnl_t fFovDegrees, rtnl_t fAspectRatio, rtnl_t fNear, rtnl_t fFar );
+void matrix_makeProjection( mat4x4_t* matrix, rtnl_t fFovDegrees, rtnl_t fAspectRatio, rtnl_t fNear, rtnl_t fFar );
 
-mat4x4_t matrix_mulMatrix( mat4x4_t* m1, mat4x4_t* m2 );
+void matrix_mulMatrix( mat4x4_t* out_m, mat4x4_t* m1, mat4x4_t* m2 );
 
 #ifdef USE_CAMERA
 //  pos - where the object should be
 //  target - "forward" vector for that object
 //  up - "up" vector
-mat4x4_t matrix_pointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up );
+void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up );
 
 // Works only for Rotation/Translation Matrices
-mat4x4_t matrix_quickInverse(mat4x4_t* m);
+void matrix_quickInverse( mat4x4_t* out_mat, mat4x4_t* m );
 #endif
 
 // Move these to a some other file, like hidden line related one:

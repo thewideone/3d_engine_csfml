@@ -86,7 +86,8 @@ void mathTest( void ){
 
 	// printVec3D( &v3, "v3: " );
 
-	mat4x4_t mat = matrix_makeIdentity();
+	mat4x4_t mat;
+	matrix_makeIdentity( &mat );
 	printMatrix( &mat );
 	// for( int i=0; i<16; i+=4 ){
 	// 	printf( "%f %f %f %f\n", mat.m[i%4][i/4], mat.m[i%4][i/4+1], mat.m[i/4%4][i/4+2], mat.m[i%4][i/4+3] );

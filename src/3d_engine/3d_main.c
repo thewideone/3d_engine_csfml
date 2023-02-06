@@ -46,7 +46,7 @@ void setup3D( void ){
 	v_look_dir.w = floatingToFixed(1);
 	f_yaw = floatingToFixed(0);
 #endif
-	mat_proj = matrix_makeProjection(
+	matrix_makeProjection( &mat_proj,
 		floatingToFixed(90.0), floatingToFixed( (flp_t)SCREEN_HEIGHT / (flp_t)SCREEN_WIDTH ),
         floatingToFixed( 0.1f ), floatingToFixed( 1000.0f ) );
 #else
@@ -63,7 +63,7 @@ void setup3D( void ){
 	v_look_dir.w = 1;
 	f_yaw = 0;
 #endif
-	mat_proj = matrix_makeProjection(
+	matrix_makeProjection( &mat_proj,
 		90.0,
 		(flp_t)SCREEN_HEIGHT / (flp_t)SCREEN_WIDTH,
         0.1f, 1000.0f );
@@ -74,8 +74,8 @@ void free3D( void ){
 	mesh_free( &mesh );
 }
 
-void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f_theta ){
 #ifdef USE_CAMERA
+void computeViewMatrix( mat4x4_t* mat_view, flp_t f_elapsed_time ){
     // Camera movement (WSAD hehe) and looking around (arrows)
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	if (sfKeyboard_isKeyPressed(sfKeyUp))
@@ -176,14 +176,16 @@ void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f
 	// printf( "v_target: " );
 	// vec3d_print( &v_target, 1 );
 	
-    mat4x4_t mat_camera_rot = matrix_makeRotY( f_yaw );
+    mat4x4_t mat_camera_rot;
+	matrix_makeRotY( &mat_camera_rot, f_yaw );
     v_look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
     v_target = vectorAdd( &v_camera, &v_look_dir );
 
-    mat4x4_t mat_camera = matrix_pointAt( &v_camera, &v_target, &v_up );
+    mat4x4_t mat_camera;
+	matrix_pointAt( &mat_camera, &v_camera, &v_target, &v_up );
 
     // Make view matrix from camera:
-    mat4x4_t mat_view = matrix_quickInverse( &mat_camera );
+    matrix_quickInverse( mat_view, &mat_camera );
 
 	
 	// printf( "mat_camera_rot:\n" );
@@ -195,10 +197,12 @@ void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f
 
 	// printf( "mat_camera:\n" );
 	// printMatrix( &mat_camera );	
-	// printf( "MatView:\n" );
+	// printf( "mat_view:\n" );
 	// printMatrix( &mat_view );	
+}
 #endif
 
+void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f_theta ){
 	// mat4x4 matRotZ, matRotX;
     // Current angle:
     if( animate )
@@ -208,19 +212,17 @@ void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
-    mesh.pos = pos1;
     // vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
-
-	// printf( "Pos1: " );
-	// vec3d_print( &pos1, 1 );
-	// printf( "Pos2: " );
-	// vec3d_print( &pos2, 1 );
 #else
     vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
     // vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
 #endif
+
+	mesh.pos = pos1;
 	
 #ifdef USE_CAMERA
+	mat4x4_t mat_view;
+	computeViewMatrix( &mat_view, f_elapsed_time );
     processMesh( &mesh, &mat_view, *f_theta, (*f_theta)*0.5 );
 #else
 	processMesh( &mesh, *f_theta, (*f_theta)*0.5 );
@@ -228,33 +230,50 @@ void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f
 	draw_mesh( &mesh, renderWindow );
 
 }
+
+// 
+// Project a 3D mesh on 2D surface,
+// save transformed vertices in the mesh structure
+// and fill mesh's visible edge array
+// with visible vertx IDs.
+// mesh 		- pointer to a mesh to be processed
+// mat_view		- pointer to a "view matrix"
+// rot_angle_x	- angle of rotation of the mesh (in degrees) in X axis
+// rot_angle_z	- angle of rotation of the mesh (in degrees) in Z axis
+// 
 #ifdef USE_CAMERA
-void processMesh( mesh_t* mesh, mat4x4_t* matView, flp_t rot_angle_x, flp_t rot_angle_z ){
+void processMesh( mesh_t* mesh, mat4x4_t* mat_view, flp_t rot_angle_x, flp_t rot_angle_z ){
 #else
 void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 #endif
 	// Apply rotation in Z and X axis:
 #ifdef USE_FIXED_POINT_ARITHMETIC
-	mat4x4_t matRotZ = matrix_makeRotZ( floatingToFixed( rot_angle_z ) );
-    mat4x4_t matRotX = matrix_makeRotX( floatingToFixed( rot_angle_x ) );
+	mat4x4_t matRotZ, matRotX;
+	matrix_makeRotZ( &matRotZ, floatingToFixed( rot_angle_z ) );
+    matrix_makeRotX( &matRotX, floatingToFixed( rot_angle_x ) );
 	// printf( "rot_angle_x = %f\n", rot_angle_x );
 	// printf( "rot_angle_z = %f\n", rot_angle_z );
 	// printMatrix( &matRotX );
 	// printMatrix( &matRotZ );
 #else
-    mat4x4_t matRotZ = matrix_makeRotZ( rot_angle_z );
-    mat4x4_t matRotX = matrix_makeRotX( rot_angle_x );
+    mat4x4_t matRotZ, matRotX;
+	matrix_makeRotZ( &matRotZ, rot_angle_z );
+    matrix_makeRotX( &matRotX, rot_angle_x );
 #endif
     // Translation matrix
     // mat4x4 matTrans;
     // mesh.matTrans = matrixMakeTranslation( 0.0f, 0.0f, 2.0f );
-    mat4x4_t matTrans = matrix_makeTranslation( mesh->pos.x, mesh->pos.y, mesh->pos.z );
+    mat4x4_t matTrans;
+	matrix_makeEmpty( &matTrans );
+	matrix_makeTranslation( &matTrans, mesh->pos.x, mesh->pos.y, mesh->pos.z );
 
     // World matrix:
     // mat4x4 matWorld;
-    mat4x4_t matWorld = matrix_makeIdentity();
-    matWorld = matrix_mulMatrix( &matRotZ, &matRotX );     // order important
-    matWorld = matrix_mulMatrix( &matWorld, &matTrans );   // second
+    mat4x4_t matWorld, mat_temp;
+	matrix_makeIdentity( &matWorld );
+	matrix_makeIdentity( &mat_temp );
+    matrix_mulMatrix( &mat_temp, &matRotZ, &matRotX );     // order important
+    matrix_mulMatrix( &matWorld, &mat_temp, &matTrans );   // second
 
 	// printf( "matRotZ:\n" );
 	// printMatrix( &matRotZ );
@@ -407,7 +426,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
             // Transform current vertex
 #ifdef USE_CAMERA
             // Convert world space to view space
-            vec3d_t vertViewed = matrix_mulVector( matView, &mesh->transformedVertices[curr_vert_id] );
+            vec3d_t vertViewed = matrix_mulVector( mat_view, &mesh->transformedVertices[curr_vert_id] );
             vec3d_t vertProjected = matrix_mulVector( &mat_proj, &vertViewed );
 #else   // NOT USING CAMERA
 			// printf( "vertex to use: " );
@@ -516,6 +535,11 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
     }
 }
 
+// 
+// Draw mesh on given render window.
+// Replace drawLine() function at the end with any function
+// drawing a straight line on your output device
+// 
 void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
     // Draw every visible edge
     // Debug (commented): print the visible edge array

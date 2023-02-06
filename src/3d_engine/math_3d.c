@@ -180,99 +180,102 @@ vec3d_t vectorNormalise( vec3d_t* v ){
 #endif
 }
 
-mat4x4_t matrix_makeEmpty(){
-    static mat4x4_t matrix;
+void matrix_makeEmpty( mat4x4_t* matrix ){
+    // static mat4x4_t matrix;
 
     // int j=0;
     // for( int i=0; i<4; i++ )
     //     for( j=0; j<4; j++ )
-    //         matrix.m[i][j] = 0;
+    //         matrix.m[i][j] = 0
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    memset( matrix.m, floatingToFixed(0), sizeof( matrix.m ) );
+    memset( matrix->m, floatingToFixed(0), sizeof( matrix->m ) );
 #else
-    memset( matrix.m, 0, sizeof( matrix.m ) );
+    memset( matrix->m, 0, sizeof( matrix->m ) );
 #endif
 
-    return matrix;
+    // return matrix;
 }
 
-mat4x4_t matrix_makeIdentity(){
-    mat4x4_t matrix = matrix_makeEmpty();
+void matrix_makeIdentity( mat4x4_t* matrix ){
+    matrix_makeEmpty( matrix );
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    matrix.m[0][0] = floatingToFixed(1.0f);
-    matrix.m[1][1] = floatingToFixed(1.0f);
-    matrix.m[2][2] = floatingToFixed(1.0f);
-    matrix.m[3][3] = floatingToFixed(1.0f);
+    matrix->m[0][0] = floatingToFixed(1.0f);
+    matrix->m[1][1] = floatingToFixed(1.0f);
+    matrix->m[2][2] = floatingToFixed(1.0f);
+    matrix->m[3][3] = floatingToFixed(1.0f);
 #else
-    matrix.m[0][0] = 1.0f;
-    matrix.m[1][1] = 1.0f;
-    matrix.m[2][2] = 1.0f;
-    matrix.m[3][3] = 1.0f;
+    matrix->m[0][0] = 1.0f;
+    matrix->m[1][1] = 1.0f;
+    matrix->m[2][2] = 1.0f;
+    matrix->m[3][3] = 1.0f;
 #endif
 
-    return matrix;
+    // return matrix;
 }
 
-mat4x4_t matrix_makeRotZ( rtnl_t fAngleRad ){
-    static mat4x4_t matrix;
+void matrix_makeRotZ( mat4x4_t* matrix, rtnl_t fAngleRad ){
+    // static mat4x4_t matrix;
+    matrix_makeEmpty( matrix );
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    matrix.m[0][0] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
-    matrix.m[0][1] = floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
-    matrix.m[1][0] = -floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
-    matrix.m[1][1] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
-    matrix.m[2][2] = floatingToFixed( 1.0f );
-    matrix.m[3][3] = floatingToFixed( 1.0f );
+    matrix->m[0][0] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+    matrix->m[0][1] = floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+    matrix->m[1][0] = -floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+    matrix->m[1][1] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+    matrix->m[2][2] = floatingToFixed( 1.0f );
+    matrix->m[3][3] = floatingToFixed( 1.0f );
 #else
-    matrix.m[0][0] = cosf( fAngleRad );
-    matrix.m[0][1] = sinf( fAngleRad );
-    matrix.m[1][0] = -sinf( fAngleRad );
-    matrix.m[1][1] = cosf( fAngleRad );
-    matrix.m[2][2] = 1.0f;
-    matrix.m[3][3] = 1.0f;
+    matrix->m[0][0] = cosf( fAngleRad );
+    matrix->m[0][1] = sinf( fAngleRad );
+    matrix->m[1][0] = -sinf( fAngleRad );
+    matrix->m[1][1] = cosf( fAngleRad );
+    matrix->m[2][2] = 1.0f;
+    matrix->m[3][3] = 1.0f;
 #endif
-    return matrix;
+    // return matrix;
 }
 
-mat4x4_t matrix_makeRotX( rtnl_t fAngleRad ){
-    static mat4x4_t matrix;
+void matrix_makeRotX( mat4x4_t* matrix, rtnl_t fAngleRad ){
+    // static mat4x4_t matrix;
+    matrix_makeEmpty( matrix );
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    matrix.m[0][0] = floatingToFixed( 1.0f );
-    matrix.m[1][1] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
-    matrix.m[1][2] = floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
-    matrix.m[2][1] = -floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
-    matrix.m[2][2] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
-    matrix.m[3][3] = floatingToFixed( 1.0f );
+    matrix->m[0][0] = floatingToFixed( 1.0f );
+    matrix->m[1][1] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+    matrix->m[1][2] = floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+    matrix->m[2][1] = -floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+    matrix->m[2][2] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+    matrix->m[3][3] = floatingToFixed( 1.0f );
 #else
-    matrix.m[0][0] = 1.0f;
-    matrix.m[1][1] = cosf( fAngleRad );
-    matrix.m[1][2] = sinf( fAngleRad );
-    matrix.m[2][1] = -sinf( fAngleRad );
-    matrix.m[2][2] = cosf( fAngleRad );
-    matrix.m[3][3] = 1.0f;
+    matrix->m[0][0] = 1.0f;
+    matrix->m[1][1] = cosf( fAngleRad );
+    matrix->m[1][2] = sinf( fAngleRad );
+    matrix->m[2][1] = -sinf( fAngleRad );
+    matrix->m[2][2] = cosf( fAngleRad );
+    matrix->m[3][3] = 1.0f;
 #endif
-    return matrix;
+    // return matrix;
 }
 
 #ifdef USE_CAMERA
-mat4x4_t matrix_makeRotY(rtnl_t fAngleRad){
-	static mat4x4_t matrix;
+void matrix_makeRotY( mat4x4_t* matrix, rtnl_t fAngleRad ){
+	// static mat4x4_t matrix;
+    matrix_makeEmpty( matrix );
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    matrix.m[0][0] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
-	matrix.m[0][2] = floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
-	matrix.m[2][0] = -floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
-	matrix.m[1][1] = floatingToFixed( 1.0f );
-	matrix.m[2][2] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
-	matrix.m[3][3] = floatingToFixed( 1.0f );
+    matrix->m[0][0] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+	matrix->m[0][2] = floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+	matrix->m[2][0] = -floatingToFixed( sinf( fixedToFloating( fAngleRad ) ) );
+	matrix->m[1][1] = floatingToFixed( 1.0f );
+	matrix->m[2][2] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
+	matrix->m[3][3] = floatingToFixed( 1.0f );
 #else
-	matrix.m[0][0] = cosf(fAngleRad);
-	matrix.m[0][2] = sinf(fAngleRad);
-	matrix.m[2][0] = -sinf(fAngleRad);
-	matrix.m[1][1] = 1.0f;
-	matrix.m[2][2] = cosf(fAngleRad);
-	matrix.m[3][3] = 1.0f;
+	matrix->m[0][0] = cosf(fAngleRad);
+	matrix->m[0][2] = sinf(fAngleRad);
+	matrix->m[2][0] = -sinf(fAngleRad);
+	matrix->m[1][1] = 1.0f;
+	matrix->m[2][2] = cosf(fAngleRad);
+	matrix->m[3][3] = 1.0f;
 #endif
-	return matrix;
+	// return matrix;
 }
 #endif
 
@@ -294,69 +297,69 @@ vec3d_t matrix_mulVector( mat4x4_t* m, vec3d_t* i ){
 	return v;
 }
 
-mat4x4_t matrix_makeTranslation( rtnl_t x, rtnl_t y, rtnl_t z ){
-    static mat4x4_t matrix;
+void matrix_makeTranslation( mat4x4_t* matrix, rtnl_t x, rtnl_t y, rtnl_t z ){
+    // static mat4x4_t matrix;
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    matrix.m[0][0] = floatingToFixed( 1.0f );
-    matrix.m[1][1] = floatingToFixed( 1.0f );
-    matrix.m[2][2] = floatingToFixed( 1.0f );
-    matrix.m[3][3] = floatingToFixed( 1.0f );
+    matrix->m[0][0] = floatingToFixed( 1.0f );
+    matrix->m[1][1] = floatingToFixed( 1.0f );
+    matrix->m[2][2] = floatingToFixed( 1.0f );
+    matrix->m[3][3] = floatingToFixed( 1.0f );
 #else
-    matrix.m[0][0] = 1.0f;
-    matrix.m[1][1] = 1.0f;
-    matrix.m[2][2] = 1.0f;
-    matrix.m[3][3] = 1.0f;
+    matrix->m[0][0] = 1.0f;
+    matrix->m[1][1] = 1.0f;
+    matrix->m[2][2] = 1.0f;
+    matrix->m[3][3] = 1.0f;
 #endif
-    matrix.m[3][0] = x;
-    matrix.m[3][1] = y;
-    matrix.m[3][2] = z;
-    return matrix;
+    matrix->m[3][0] = x;
+    matrix->m[3][1] = y;
+    matrix->m[3][2] = z;
+    // return matrix;
 }
 
-mat4x4_t matrix_makeProjection( rtnl_t fFovDegrees, rtnl_t fAspectRatio, rtnl_t fNear, rtnl_t fFar ){
-    static mat4x4_t matrix;
+void matrix_makeProjection( mat4x4_t* matrix, rtnl_t fFovDegrees, rtnl_t fAspectRatio, rtnl_t fNear, rtnl_t fFar ){
+    // static mat4x4_t matrix;
     
 #ifdef USE_FIXED_POINT_ARITHMETIC
     // Fov coefficient in radians
     rtnl_t fFovRad = fixedDiv( floatingToFixed( 1.0f ), floatingToFixed( tanf( fixedToFloating( fFovDegrees ) * 0.5f / 180.0f * 3.14159f ) ) );
     
-    matrix.m[0][0] = fixedMul( fAspectRatio, fFovRad );
-    matrix.m[1][1] = fFovRad;
-    matrix.m[2][2] = fixedDiv( fFar, ( fFar - fNear ) );
-    matrix.m[3][2] = fixedDiv( fixedMul( -fFar, fNear ), ( fFar - fNear ) );
-    matrix.m[2][3] = floatingToFixed( 1.0f );
-    matrix.m[3][3] = floatingToFixed( 0.0f );
+    matrix->m[0][0] = fixedMul( fAspectRatio, fFovRad );
+    matrix->m[1][1] = fFovRad;
+    matrix->m[2][2] = fixedDiv( fFar, ( fFar - fNear ) );
+    matrix->m[3][2] = fixedDiv( fixedMul( -fFar, fNear ), ( fFar - fNear ) );
+    matrix->m[2][3] = floatingToFixed( 1.0f );
+    matrix->m[3][3] = floatingToFixed( 0.0f );
 #else
     // Fov coefficient in radians
     rtnl_t fFovRad = 1.0f / tanf( fFovDegrees * 0.5f / 180.0f * 3.14159f );
     
-    matrix.m[0][0] = fAspectRatio * fFovRad;
-    matrix.m[1][1] = fFovRad;
-    matrix.m[2][2] = fFar / ( fFar - fNear );
-    matrix.m[3][2] = ( -fFar * fNear ) / ( fFar - fNear );
-    matrix.m[2][3] = 1.0f;
-    matrix.m[3][3] = 0.0f;
+    matrix->m[0][0] = fAspectRatio * fFovRad;
+    matrix->m[1][1] = fFovRad;
+    matrix->m[2][2] = fFar / ( fFar - fNear );
+    matrix->m[3][2] = ( -fFar * fNear ) / ( fFar - fNear );
+    matrix->m[2][3] = 1.0f;
+    matrix->m[3][3] = 0.0f;
 #endif
-    return matrix;
+    // return matrix;
 }
 
-mat4x4_t matrix_mulMatrix( mat4x4_t* m1, mat4x4_t* m2 ){
-    static mat4x4_t matrix;
+void matrix_mulMatrix( mat4x4_t* out_m, mat4x4_t* m1, mat4x4_t* m2 ){
+    // static mat4x4_t matrix;
 	for (int c = 0; c < 4; c++)
 		for (int r = 0; r < 4; r++)
 #ifdef USE_FIXED_POINT_ARITHMETIC
-            matrix.m[r][c] = fixedMul( m1->m[r][0], m2->m[0][c] ) + fixedMul( m1->m[r][1], m2->m[1][c] ) + fixedMul( m1->m[r][2], m2->m[2][c] ) + fixedMul( m1->m[r][3], m2->m[3][c] );
+            out_m->m[r][c] = fixedMul( m1->m[r][0], m2->m[0][c] ) + fixedMul( m1->m[r][1], m2->m[1][c] ) + fixedMul( m1->m[r][2], m2->m[2][c] ) + fixedMul( m1->m[r][3], m2->m[3][c] );
 #else
-			matrix.m[r][c] = m1->m[r][0] * m2->m[0][c] + m1->m[r][1] * m2->m[1][c] + m1->m[r][2] * m2->m[2][c] + m1->m[r][3] * m2->m[3][c];
+			out_m->m[r][c] = m1->m[r][0] * m2->m[0][c] + m1->m[r][1] * m2->m[1][c] + m1->m[r][2] * m2->m[2][c] + m1->m[r][3] * m2->m[3][c];
 #endif
-	return matrix;
+	// return matrix;
 }
 
 #ifdef USE_CAMERA
 //  pos - where the object should be
 //  target - "forward" vector for that object
 //  up - "up" vector
-mat4x4_t matrix_pointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
+void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
     // Calculate new forward direction:
     vec3d_t newForward = vectorSub( target, pos );
     // printf( "newForward init:\n" );
@@ -384,40 +387,40 @@ mat4x4_t matrix_pointAt( vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
     // Construct Dimensioning and Translation Matrix	
 	static mat4x4_t matrix;
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    matrix.m[0][0] = newRight.x;	    matrix.m[0][1] = newRight.y;	    matrix.m[0][2] = newRight.z;	    matrix.m[0][3] = floatingToFixed(0.0f);
-	matrix.m[1][0] = newUp.x;		    matrix.m[1][1] = newUp.y;		    matrix.m[1][2] = newUp.z;		    matrix.m[1][3] = floatingToFixed(0.0f);
-	matrix.m[2][0] = newForward.x;	    matrix.m[2][1] = newForward.y;	    matrix.m[2][2] = newForward.z;	    matrix.m[2][3] = floatingToFixed(0.0f);
-	matrix.m[3][0] = pos->x;			matrix.m[3][1] = pos->y;			matrix.m[3][2] = pos->z;			matrix.m[3][3] = floatingToFixed(1.0f);
+    out_m->m[0][0] = newRight.x;	    out_m->m[0][1] = newRight.y;	    out_m->m[0][2] = newRight.z;	    out_m->m[0][3] = floatingToFixed(0.0f);
+	out_m->m[1][0] = newUp.x;		    out_m->m[1][1] = newUp.y;		    out_m->m[1][2] = newUp.z;		    out_m->m[1][3] = floatingToFixed(0.0f);
+	out_m->m[2][0] = newForward.x;	    out_m->m[2][1] = newForward.y;	    out_m->m[2][2] = newForward.z;	    out_m->m[2][3] = floatingToFixed(0.0f);
+	out_m->m[3][0] = pos->x;			out_m->m[3][1] = pos->y;			out_m->m[3][2] = pos->z;			out_m->m[3][3] = floatingToFixed(1.0f);
 #else
-	matrix.m[0][0] = newRight.x;	    matrix.m[0][1] = newRight.y;	    matrix.m[0][2] = newRight.z;	    matrix.m[0][3] = 0.0f;
-	matrix.m[1][0] = newUp.x;		    matrix.m[1][1] = newUp.y;		    matrix.m[1][2] = newUp.z;		    matrix.m[1][3] = 0.0f;
-	matrix.m[2][0] = newForward.x;	    matrix.m[2][1] = newForward.y;	    matrix.m[2][2] = newForward.z;	    matrix.m[2][3] = 0.0f;
-	matrix.m[3][0] = pos->x;			matrix.m[3][1] = pos->y;			matrix.m[3][2] = pos->z;			matrix.m[3][3] = 1.0f;
+	out_m->m[0][0] = newRight.x;	    out_m->m[0][1] = newRight.y;	    out_m->m[0][2] = newRight.z;	    out_m->m[0][3] = 0.0f;
+	out_m->m[1][0] = newUp.x;		    out_m->m[1][1] = newUp.y;		    out_m->m[1][2] = newUp.z;		    out_m->m[1][3] = 0.0f;
+	out_m->m[2][0] = newForward.x;	    out_m->m[2][1] = newForward.y;	    out_m->m[2][2] = newForward.z;	    out_m->m[2][3] = 0.0f;
+	out_m->m[3][0] = pos->x;			out_m->m[3][1] = pos->y;			out_m->m[3][2] = pos->z;			out_m->m[3][3] = 1.0f;
 #endif
-    return matrix;
+    // return matrix;
 }
 
 // Works only for Rotation/Translation Matrices
-mat4x4_t matrix_quickInverse(mat4x4_t* m){
-	mat4x4_t matrix = matrix_makeEmpty();
+void matrix_quickInverse( mat4x4_t* out_mat, mat4x4_t* m ){
+	matrix_makeEmpty( out_mat );
 #ifdef USE_FIXED_POINT_ARITHMETIC
-	matrix.m[0][0] = m->m[0][0]; matrix.m[0][1] = m->m[1][0]; matrix.m[0][2] = m->m[2][0]; matrix.m[0][3] = floatingToFixed(0.0f);
-	matrix.m[1][0] = m->m[0][1]; matrix.m[1][1] = m->m[1][1]; matrix.m[1][2] = m->m[2][1]; matrix.m[1][3] = floatingToFixed(0.0f);
-	matrix.m[2][0] = m->m[0][2]; matrix.m[2][1] = m->m[1][2]; matrix.m[2][2] = m->m[2][2]; matrix.m[2][3] = floatingToFixed(0.0f);
-    matrix.m[3][0] = -( fixedMul( m->m[3][0], matrix.m[0][0] ) + fixedMul( m->m[3][1], matrix.m[1][0] ) + fixedMul( m->m[3][2], matrix.m[2][0] ) );
-    matrix.m[3][1] = -( fixedMul( m->m[3][0], matrix.m[0][1] ) + fixedMul( m->m[3][1], matrix.m[1][1] ) + fixedMul( m->m[3][2], matrix.m[2][1] ) );
-    matrix.m[3][2] = -( fixedMul( m->m[3][0], matrix.m[0][2] ) + fixedMul( m->m[3][1], matrix.m[1][2] ) + fixedMul( m->m[3][2], matrix.m[2][2] ) );
-    matrix.m[3][3] = floatingToFixed( 1.0f );
+	out_mat->m[0][0] = m->m[0][0]; out_mat->m[0][1] = m->m[1][0]; out_mat->m[0][2] = m->m[2][0]; out_mat->m[0][3] = floatingToFixed(0.0f);
+	out_mat->m[1][0] = m->m[0][1]; out_mat->m[1][1] = m->m[1][1]; out_mat->m[1][2] = m->m[2][1]; out_mat->m[1][3] = floatingToFixed(0.0f);
+	out_mat->m[2][0] = m->m[0][2]; out_mat->m[2][1] = m->m[1][2]; out_mat->m[2][2] = m->m[2][2]; out_mat->m[2][3] = floatingToFixed(0.0f);
+    out_mat->m[3][0] = -( fixedMul( m->m[3][0], out_mat->m[0][0] ) + fixedMul( m->m[3][1], out_mat->m[1][0] ) + fixedMul( m->m[3][2], out_mat->m[2][0] ) );
+    out_mat->m[3][1] = -( fixedMul( m->m[3][0], out_mat->m[0][1] ) + fixedMul( m->m[3][1], out_mat->m[1][1] ) + fixedMul( m->m[3][2], out_mat->m[2][1] ) );
+    out_mat->m[3][2] = -( fixedMul( m->m[3][0], out_mat->m[0][2] ) + fixedMul( m->m[3][1], out_mat->m[1][2] ) + fixedMul( m->m[3][2], out_mat->m[2][2] ) );
+    out_mat->m[3][3] = floatingToFixed( 1.0f );
 #else
-    matrix.m[0][0] = m->m[0][0]; matrix.m[0][1] = m->m[1][0]; matrix.m[0][2] = m->m[2][0]; matrix.m[0][3] = 0.0f;
-	matrix.m[1][0] = m->m[0][1]; matrix.m[1][1] = m->m[1][1]; matrix.m[1][2] = m->m[2][1]; matrix.m[1][3] = 0.0f;
-	matrix.m[2][0] = m->m[0][2]; matrix.m[2][1] = m->m[1][2]; matrix.m[2][2] = m->m[2][2]; matrix.m[2][3] = 0.0f;
-	matrix.m[3][0] = -(m->m[3][0] * matrix.m[0][0] + m->m[3][1] * matrix.m[1][0] + m->m[3][2] * matrix.m[2][0]);
-	matrix.m[3][1] = -(m->m[3][0] * matrix.m[0][1] + m->m[3][1] * matrix.m[1][1] + m->m[3][2] * matrix.m[2][1]);
-	matrix.m[3][2] = -(m->m[3][0] * matrix.m[0][2] + m->m[3][1] * matrix.m[1][2] + m->m[3][2] * matrix.m[2][2]);
-	matrix.m[3][3] = 1.0f;
+    out_mat->m[0][0] = m->m[0][0]; out_mat->m[0][1] = m->m[1][0]; out_mat->m[0][2] = m->m[2][0]; out_mat->m[0][3] = 0.0f;
+	out_mat->m[1][0] = m->m[0][1]; out_mat->m[1][1] = m->m[1][1]; out_mat->m[1][2] = m->m[2][1]; out_mat->m[1][3] = 0.0f;
+	out_mat->m[2][0] = m->m[0][2]; out_mat->m[2][1] = m->m[1][2]; out_mat->m[2][2] = m->m[2][2]; out_mat->m[2][3] = 0.0f;
+	out_mat->m[3][0] = -(m->m[3][0] * out_mat->m[0][0] + m->m[3][1] * out_mat->m[1][0] + m->m[3][2] * out_mat->m[2][0]);
+	out_mat->m[3][1] = -(m->m[3][0] * out_mat->m[0][1] + m->m[3][1] * out_mat->m[1][1] + m->m[3][2] * out_mat->m[2][1]);
+	out_mat->m[3][2] = -(m->m[3][0] * out_mat->m[0][2] + m->m[3][1] * out_mat->m[1][2] + m->m[3][2] * out_mat->m[2][2]);
+	out_mat->m[3][3] = 1.0f;
 #endif
-    return matrix;
+    // return matrix;
 }
 #endif
 
