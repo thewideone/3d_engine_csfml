@@ -250,6 +250,26 @@ void meshTest( void ){
 	}
 
 	mesh_free( &mesh_prgm );
+
+	// Dynamic mesh
+	mesh_t* mesh_prgm_dyn = (mesh_t*)malloc( sizeof(mesh_t) );
+	mesh_makeEmpty( mesh_prgm_dyn );
+	mesh_loadFromProgmem( mesh_prgm_dyn, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
+
+	printf( "mesh_prgm_dyn->vertices (%lld):\n", mesh_prgm_dyn->vertex_cnt );
+	for( size_t i=0; i < mesh_prgm_dyn->vertex_cnt; i++ ){
+		vec3d_t loop_vec = mesh_prgm_dyn->vertices[i];
+		printf( " -> v%lld: ", i );
+		vec3d_print( &loop_vec, true );
+	}	
+	printf( "mesh_prgm_dyn->faces (%lld):\n", mesh_prgm_dyn->face_cnt );
+	for( size_t i=0; i < mesh_prgm_dyn->face_cnt; i++ ){
+		polygon_t poly = mesh_prgm_dyn->faces[i];
+		printf( "Face %lld: ", i );
+		polygon_print( &poly );
+	}
+
+	mesh_free( mesh_prgm_dyn );
 }
 
 void meshQueueTest( void ){
