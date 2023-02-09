@@ -2,25 +2,59 @@
 #define _CONFIG_H_
 
 // 
+// Debug:
+// 
+// #define VERTEX_ID_DEBUG
+// #define VERTEX_DOT_DEBUG
+// Draw only outlines of meshes
+// #define DRAW_CONTOUR_ONLY
+
+// 
 // Display:
 // 
 #define SCREEN_WIDTH 390//256
 #define SCREEN_HEIGHT 390//240
-#define COLOUR_DEPTH 24 // in bits
+// #define COLOUR_MONOCHROME
+
+#ifndef COLOUR_MONOCHROME
+    // Number of bits per R/G/B channel
+    #define COLOUR_DEPTH 1
+    #if COLOUR_DEPTH <= 2
+        #define COLOUR_SINGLE_BYTE
+        #define COLOUR_WHITE   0xff
+        #define COLOUR_BLACK   0x00
+        #if COLOUR_DEPTH == 1
+            //  _______________
+            // |0|R|0|G|0|B|-|-|
+            // 
+            #define COLOUR_RED     0b01000000
+            #define COLOUR_GREEN   0b00010000
+            #define COLOUR_BLUE    0b00000100
+        #else
+            //  _______________
+            // |R|R|G|G|B|B|-|-|
+            // 
+            #define COLOUR_RED     0b11000000
+            #define COLOUR_GREEN   0b00110000
+            #define COLOUR_BLUE    0b00001100
+        #endif
+
+        #define COLOUR_CYAN    (COLOUR_GREEN | COLOUR_BLUE)
+        #define COLOUR_MAGENTA (COLOUR_RED   | COLOUR_BLUE)
+        #define COLOUR_YELLOW  (COLOUR_RED   | COLOUR_GREEN)
+    #endif
+
+#endif  // COLOUR_MONOCHROME
 
 // 
 // Engine features:
 // 
 #define USE_CAMERA
-#define RENDER_VISIBLE_ONLY     // render only visible edges / faces
-// #define REMOVE_HIDDEN_LINES
+#define USE_FILLED_MESHES
 // #define USE_LOADING_FROM_OBJ
-
-// 
-// Debug:
-// 
-// #define VERTEX_ID_DEBUG
-// #define VERTEX_DOT_DEBUG
+// Render only visible edges / faces
+#define RENDER_VISIBLE_ONLY
+// #define REMOVE_HIDDEN_LINES
 
 // 
 // Math:

@@ -181,8 +181,6 @@ vec3d_t vectorNormalise( vec3d_t* v ){
 }
 
 void matrix_makeEmpty( mat4x4_t* matrix ){
-    // static mat4x4_t matrix;
-
     // int j=0;
     // for( int i=0; i<4; i++ )
     //     for( j=0; j<4; j++ )
@@ -192,8 +190,6 @@ void matrix_makeEmpty( mat4x4_t* matrix ){
 #else
     memset( matrix->m, 0, sizeof( matrix->m ) );
 #endif
-
-    // return matrix;
 }
 
 void matrix_makeIdentity( mat4x4_t* matrix ){
@@ -210,12 +206,9 @@ void matrix_makeIdentity( mat4x4_t* matrix ){
     matrix->m[2][2] = 1.0f;
     matrix->m[3][3] = 1.0f;
 #endif
-
-    // return matrix;
 }
 
 void matrix_makeRotZ( mat4x4_t* matrix, rtnl_t fAngleRad ){
-    // static mat4x4_t matrix;
     matrix_makeEmpty( matrix );
 #ifdef USE_FIXED_POINT_ARITHMETIC
     matrix->m[0][0] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
@@ -232,11 +225,9 @@ void matrix_makeRotZ( mat4x4_t* matrix, rtnl_t fAngleRad ){
     matrix->m[2][2] = 1.0f;
     matrix->m[3][3] = 1.0f;
 #endif
-    // return matrix;
 }
 
 void matrix_makeRotX( mat4x4_t* matrix, rtnl_t fAngleRad ){
-    // static mat4x4_t matrix;
     matrix_makeEmpty( matrix );
 #ifdef USE_FIXED_POINT_ARITHMETIC
     matrix->m[0][0] = floatingToFixed( 1.0f );
@@ -253,12 +244,10 @@ void matrix_makeRotX( mat4x4_t* matrix, rtnl_t fAngleRad ){
     matrix->m[2][2] = cosf( fAngleRad );
     matrix->m[3][3] = 1.0f;
 #endif
-    // return matrix;
 }
 
 #ifdef USE_CAMERA
 void matrix_makeRotY( mat4x4_t* matrix, rtnl_t fAngleRad ){
-	// static mat4x4_t matrix;
     matrix_makeEmpty( matrix );
 #ifdef USE_FIXED_POINT_ARITHMETIC
     matrix->m[0][0] = floatingToFixed( cosf( fixedToFloating( fAngleRad ) ) );
@@ -275,7 +264,6 @@ void matrix_makeRotY( mat4x4_t* matrix, rtnl_t fAngleRad ){
 	matrix->m[2][2] = cosf(fAngleRad);
 	matrix->m[3][3] = 1.0f;
 #endif
-	// return matrix;
 }
 #endif
 
@@ -298,7 +286,7 @@ vec3d_t matrix_mulVector( mat4x4_t* m, vec3d_t* i ){
 }
 
 void matrix_makeTranslation( mat4x4_t* matrix, rtnl_t x, rtnl_t y, rtnl_t z ){
-    // static mat4x4_t matrix;
+    matrix_makeEmpty( matrix );
 #ifdef USE_FIXED_POINT_ARITHMETIC
     matrix->m[0][0] = floatingToFixed( 1.0f );
     matrix->m[1][1] = floatingToFixed( 1.0f );
@@ -313,12 +301,10 @@ void matrix_makeTranslation( mat4x4_t* matrix, rtnl_t x, rtnl_t y, rtnl_t z ){
     matrix->m[3][0] = x;
     matrix->m[3][1] = y;
     matrix->m[3][2] = z;
-    // return matrix;
 }
 
 void matrix_makeProjection( mat4x4_t* matrix, rtnl_t fFovDegrees, rtnl_t fAspectRatio, rtnl_t fNear, rtnl_t fFar ){
-    // static mat4x4_t matrix;
-    
+    matrix_makeEmpty( matrix );
 #ifdef USE_FIXED_POINT_ARITHMETIC
     // Fov coefficient in radians
     rtnl_t fFovRad = fixedDiv( floatingToFixed( 1.0f ), floatingToFixed( tanf( fixedToFloating( fFovDegrees ) * 0.5f / 180.0f * 3.14159f ) ) );
@@ -340,11 +326,9 @@ void matrix_makeProjection( mat4x4_t* matrix, rtnl_t fFovDegrees, rtnl_t fAspect
     matrix->m[2][3] = 1.0f;
     matrix->m[3][3] = 0.0f;
 #endif
-    // return matrix;
 }
 
 void matrix_mulMatrix( mat4x4_t* out_m, mat4x4_t* m1, mat4x4_t* m2 ){
-    // static mat4x4_t matrix;
 	for (int c = 0; c < 4; c++)
 		for (int r = 0; r < 4; r++)
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -352,7 +336,6 @@ void matrix_mulMatrix( mat4x4_t* out_m, mat4x4_t* m1, mat4x4_t* m2 ){
 #else
 			out_m->m[r][c] = m1->m[r][0] * m2->m[0][c] + m1->m[r][1] * m2->m[1][c] + m1->m[r][2] * m2->m[2][c] + m1->m[r][3] * m2->m[3][c];
 #endif
-	// return matrix;
 }
 
 #ifdef USE_CAMERA
@@ -385,7 +368,6 @@ void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up
 	// vec3d_print( &newRight, 1 );
 
     // Construct Dimensioning and Translation Matrix	
-	static mat4x4_t matrix;
 #ifdef USE_FIXED_POINT_ARITHMETIC
     out_m->m[0][0] = newRight.x;	    out_m->m[0][1] = newRight.y;	    out_m->m[0][2] = newRight.z;	    out_m->m[0][3] = floatingToFixed(0.0f);
 	out_m->m[1][0] = newUp.x;		    out_m->m[1][1] = newUp.y;		    out_m->m[1][2] = newUp.z;		    out_m->m[1][3] = floatingToFixed(0.0f);
@@ -397,7 +379,6 @@ void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up
 	out_m->m[2][0] = newForward.x;	    out_m->m[2][1] = newForward.y;	    out_m->m[2][2] = newForward.z;	    out_m->m[2][3] = 0.0f;
 	out_m->m[3][0] = pos->x;			out_m->m[3][1] = pos->y;			out_m->m[3][2] = pos->z;			out_m->m[3][3] = 1.0f;
 #endif
-    // return matrix;
 }
 
 // Works only for Rotation/Translation Matrices

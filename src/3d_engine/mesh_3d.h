@@ -22,6 +22,12 @@
 // types of vertex_cnt and face_cnt variables
 // Same for polygon struct
 typedef struct {
+#ifndef COLOUR_MONOCHROME
+    colour_t edge_colour;
+#ifdef USE_FILLED_MESHES
+    colour_t fill_colour;
+#endif
+#endif
     vec3d_t pos;
     // vector<polygon> faces;    // std::vector<...>, contains IDs of vertices
     polygon_t* faces;
@@ -69,6 +75,24 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename );
 bool mesh_loadFromProgmem( mesh_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size );
 void mesh_printVisFaceIDs( mesh_t* mesh );
 void mesh_printVisEdgeVec( mesh_t* mesh );
+
+#ifndef COLOUR_MONOCHROME
+    void mesh_setEdgeColour( mesh_t* mesh, colour_t colour );
+    #ifdef USE_FILLED_MESHES
+        void mesh_setFillColour( mesh_t* mesh, colour_t colour );
+    #endif
+    #ifdef COLOUR_SINGLE_BYTE
+        void mesh_setEdgeColourByValue( mesh_t* mesh, uint8_t colour );
+        #ifdef USE_FILLED_MESHES
+            void mesh_setFillColourByValue( mesh_t* mesh, uint8_t colour );
+        #endif
+    #else
+        void mesh_setEdgeColourByValue( mesh_t* mesh, uint8_t r, uint8_t g, uint8_t b );
+        #ifdef USE_FILLED_MESHES
+            void mesh_setFillColourByValue( mesh_t* mesh, uint8_t r, uint8_t g, uint8_t b );
+        #endif
+    #endif
+#endif
 
 void calcFaceBoundaries( mesh_t* mesh, int face_id, int* min_x, int* max_x, int* min_y, int* max_y );
 

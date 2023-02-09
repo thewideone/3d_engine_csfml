@@ -25,11 +25,15 @@
 // TODO:
 // 	- X add a mesh queue
 // 	- X loading meshes from program memory
-// 	- dynamic meshes
+// 	- X dynamic meshes
+// 	- X add "destructors" to free for example meshes' dynamic arrays
 // 	- left-right movement too slow but only sometimes??
 // 	- X move global variables and mesh processing functions to a separate file
-// 	- add screen clipping and don't draw meshes behind camera
-// 	- coloured meshes (fill and edge colours separated)
+// 	- don't draw meshes behind camera
+// 	- add screen clipping
+// 	- X coloured meshes:
+// 	- X (fill and edge colours separated)
+// 	- filling meshes
 // 	- inverted line colour when in front of filled object?
 // 
 
@@ -278,10 +282,12 @@ void meshQueueTest( void ){
 	mesh_queue_t mq;
 	meshQueue_makeEmpty( &mq );
 
-	mesh_t mesh1, mesh2, mesh3;
+	mesh_t mesh1, mesh2;
+	mesh_t* mesh3 = (mesh_t*)malloc( sizeof(mesh_t) );
+
 	mesh_makeEmpty( &mesh1 );
 	mesh_makeEmpty( &mesh2 );
-	mesh_makeEmpty( &mesh3 );
+	mesh_makeEmpty( mesh3 );
 #ifdef USE_LOADING_FROM_OBJ
 	mesh_loadFromObjFile( &mesh1, "obj_models/cube.obj" );
 	mesh_loadFromObjFile( &mesh2, "obj_models/dodecahedron.obj" );
@@ -289,7 +295,7 @@ void meshQueueTest( void ){
 #else
 	mesh_loadFromProgmem( &mesh1, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
 	mesh_loadFromProgmem( &mesh2, sphere_mesh_verts, sphere_mesh_faces, SPHERE_MESH_V_CNT, SPHERE_MESH_F_CNT, false );
-	mesh_loadFromProgmem( &mesh3, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
+	mesh_loadFromProgmem( mesh3, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
 
 #endif
 
@@ -299,7 +305,7 @@ void meshQueueTest( void ){
 	ret = meshQueue_push( &mq, &mesh2 );
 	if( !ret )
 		printf( "Error: in meshQueueTest(): failed to push mesh2 into mq.\n" );
-	ret = meshQueue_push( &mq, &mesh3 );
+	ret = meshQueue_push( &mq, mesh3 );
 	if( !ret )
 		printf( "Error: in meshQueueTest(): failed to push mesh3 into mq.\n" );
 
@@ -354,7 +360,7 @@ void meshQueueTest( void ){
 		meshQueue_goToNext( &mq );
 	}
 
-	meshQueue_freeMeshes( &mq );
+	meshQueue_freeAllMeshes( &mq );
 }
 
 void graphicsTest( sfRenderWindow* renderWindow ){
@@ -372,7 +378,12 @@ void graphicsTest( sfRenderWindow* renderWindow ){
 int main(){
 
 	// Create a window:
+#ifdef COLOUR_MONOCHROME
+	// Just for SFML window, the engine will work in monochrome mode
+	sfVideoMode videoMode = { SCREEN_WIDTH, SCREEN_HEIGHT, 24 };
+#else
 	sfVideoMode videoMode = { SCREEN_WIDTH, SCREEN_HEIGHT, COLOUR_DEPTH };
+#endif
     sfRenderWindow* window;
 	sfFont* font;
 	sfText* text;
@@ -401,8 +412,6 @@ int main(){
 	// window.setFramerateLimit( 144 );
 
 	// sf::CircleShape circle(2.0);
-
-	// TODO: see math_3d.h
 
 	// mathTest();
 	// meshTest();

@@ -18,7 +18,7 @@ void meshQueue_freeQueue( mesh_queue_t* mq ){
 }
 #endif
 
-void meshQueue_freeMeshes( mesh_queue_t* mq ){
+void meshQueue_freeAllMeshes( mesh_queue_t* mq ){
     for( size_t i = 0; i < MESH_QUEUE_CAPACITY; i++ ){
         if( mq->array[i] == NULL )
             continue;

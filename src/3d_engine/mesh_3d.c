@@ -11,10 +11,27 @@ ssize_t getline(char **linep, size_t *n, FILE *fp);
 #endif
 
 void mesh_makeEmpty( mesh_t* mesh ){
+#ifndef COLOUR_MONOCHROME
+    // Default full white
+#ifdef COLOUR_SINGLE_BYTE
+    mesh->edge_colour.rgb = COLOUR_WHITE;
+#ifdef USE_FILLED_MESHES
+    mesh->fill_colour.rgb = COLOUR_WHITE;
+#endif
+#else
+    mesh->edge_colour.r = 0xff;
+    mesh->edge_colour.g = 0xff;
+    mesh->edge_colour.b = 0xff;
+#ifdef USE_FILLED_MESHES
+    mesh->fill_colour.r = 0xff;
+    mesh->fill_colour.g = 0xff;
+    mesh->fill_colour.b = 0xff;
+#endif
+#endif
+#endif
     vec3d_makeEmpty( &mesh->pos );
     mesh->face_cnt = 0;
     mesh->faces = NULL;
-    // mesh->matRotX = matrixMakeRotX();
     mesh->transformedVertices = NULL;
     mesh->vert2DSpaceMap = NULL;
     mesh->vertex_cnt = 0;
@@ -35,6 +52,11 @@ void mesh_free( mesh_t* mesh ){
 }
 
 #ifdef USE_LOADING_FROM_OBJ
+// 
+// Load mesh from .obj file.
+// mesh     - mesh structure to be loaded into
+// filename - name of the .obj file
+// 
 bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
     
     FILE* file_ptr;
@@ -249,6 +271,40 @@ void mesh_printVisEdgeVec( mesh_t* mesh ){
     for( int i=0; i<arrlen(mesh->vis_edge_vec); i+=4 )
         printf( "%d, %d, %d, %d\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1], mesh->vis_edge_vec[2], mesh->vis_edge_vec[i+3] );
 }
+
+#ifndef COLOUR_MONOCHROME
+void mesh_setEdgeColour( mesh_t* mesh, colour_t colour ){
+    mesh->edge_colour = colour;
+}
+#ifdef USE_FILLED_MESHES
+void mesh_setFillColour( mesh_t* mesh, colour_t colour ){
+    mesh->fill_colour = colour;
+}
+#endif
+#ifdef COLOUR_SINGLE_BYTE
+void mesh_setEdgeColourByValue( mesh_t* mesh, uint8_t colour ){
+    mesh->edge_colour.rgb = colour;
+}
+#ifdef USE_FILLED_MESHES
+void mesh_setFillColourByValue( mesh_t* mesh, uint8_t colour ){
+    mesh->fill_colour.rgb = colour;
+}
+#endif
+#else
+void mesh_setEdgeColourByValue( mesh_t* mesh, uint8_t r, uint8_t g, uint8_t b ){
+    mesh->edge_colour.r = r;
+    mesh->edge_colour.g = g;
+    mesh->edge_colour.b = b;
+}
+#ifdef USE_FILLED_MESHES
+void mesh_setFillColourByValue( mesh_t* mesh, uint8_t r, uint8_t g, uint8_t b ){
+    mesh->fill_colour.r = r;
+    mesh->fill_colour.g = g;
+    mesh->fill_colour.b = b;
+}
+#endif
+#endif
+#endif
 
 #ifdef USE_LOADING_FROM_OBJ
 // Used only by getline() below

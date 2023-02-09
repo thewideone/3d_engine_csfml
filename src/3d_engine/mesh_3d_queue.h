@@ -39,7 +39,7 @@ void meshQueue_freeQueue( mesh_queue_t* mq );
 // 
 // Free all meshes within the queue.
 // 
-void meshQueue_freeMeshes( mesh_queue_t* mq );
+void meshQueue_freeAllMeshes( mesh_queue_t* mq );
 
 bool meshQueue_isEmpty( mesh_queue_t* mq );
 bool meshQueue_isFull( mesh_queue_t* mq );

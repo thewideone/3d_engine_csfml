@@ -21,6 +21,7 @@ void setAnimateFlag( bool value ){
 
 void setup3D( void ){
 	mesh_makeEmpty( &mesh );
+	// mesh_setEdgeColourByValue( &mesh, COLOUR_GREEN );
 #ifdef USE_LOADING_FROM_OBJ
 	bool ret = mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
 #else
@@ -75,6 +76,18 @@ void free3D( void ){
 }
 
 #ifdef USE_CAMERA
+// 
+// Compute camera and view matrices,
+// the latter of which is used for mesh transformation,
+// if using camera
+// mat_view			- view matrix
+// f_elapsed_time	- elapsed time since the last frame,
+// 					  don't ask me about unit XD
+// Input parameters not listed in the function declaration:
+// v_camera
+// f_yaw
+// v_look_dir
+// 
 void computeViewMatrix( mat4x4_t* mat_view, flp_t f_elapsed_time ){
     // Camera movement (WSAD hehe) and looking around (arrows)
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -227,8 +240,8 @@ void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f
 #else
 	processMesh( &mesh, *f_theta, (*f_theta)*0.5 );
 #endif
-	draw_mesh( &mesh, renderWindow );
 
+	draw_mesh( &mesh, renderWindow );
 }
 
 // 
@@ -264,7 +277,6 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
     // mat4x4 matTrans;
     // mesh.matTrans = matrixMakeTranslation( 0.0f, 0.0f, 2.0f );
     mat4x4_t matTrans;
-	matrix_makeEmpty( &matTrans );
 	matrix_makeTranslation( &matTrans, mesh->pos.x, mesh->pos.y, mesh->pos.z );
 
     // World matrix:
@@ -544,10 +556,10 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
     // Draw every visible edge
     // Debug (commented): print the visible edge array
     for( int i=0; i<arrlen(mesh->vis_edge_vec); i+=4 ){
-        // Draw only outline of the mesh
-		// Useful for debugging, TRY IT!!!
-        // if( mesh->vis_edge_vec[ i + 2 ] > 1 )
-        //     continue;
+#ifdef DRAW_CONTOUR_ONLY
+        if( mesh->vis_edge_vec[ i + 2 ] > 1 )
+            continue;
+#endif
 
 		// printf( "Looking for verts %d and %d...\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1] );
         
@@ -608,8 +620,49 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
         // cout<<": ("<<vertProjected1.x<<", "<<vertProjected1.y<<")-("<<vertProjected2.x<<", "<<vertProjected2.y<<")";
 #endif // VERTEX_ID_DEBUG
 
-        drawLine( vertProjected1.x, vertProjected1.y,
+#ifdef COLOUR_MONOCHROME
+		drawLine( vertProjected1.x, vertProjected1.y,
                   vertProjected2.x, vertProjected2.y,
                   sfWhite, render_window );
+#else
+#ifdef COLOUR_SINGLE_BYTE
+
+#if COLOUR_DEPTH == 1
+		uint8_t r = ((mesh->edge_colour.rgb) >> 6) & 0b0000001;
+		uint8_t g = ((mesh->edge_colour.rgb) >> 4) & 0b0000001;
+		uint8_t b = ((mesh->edge_colour.rgb) >> 2) & 0b0000001;
+		drawLine( vertProjected1.x, vertProjected1.y,
+                  vertProjected2.x, vertProjected2.y,
+                  sfColor_fromRGB( r*255, g*255, b*255 ), render_window );
+#ifdef USE_FILLED_MESHES
+		r = ((mesh->fill_colour.rgb) >> 6) & 0b0000001;
+		g = ((mesh->fill_colour.rgb) >> 4) & 0b0000001;
+		b = ((mesh->fill_colour.rgb) >> 2) & 0b0000001;
+		// Fill the mesh
+#endif
+#else
+		uint8_t r = ((mesh->edge_colour.rgb) >> 6) & 0b0000011;
+		uint8_t g = ((mesh->edge_colour.rgb) >> 4) & 0b0000011;
+		uint8_t b = ((mesh->edge_colour.rgb) >> 2) & 0b0000011;
+		drawLine( vertProjected1.x, vertProjected1.y,
+                  vertProjected2.x, vertProjected2.y,
+                  sfColor_fromRGB( r*(255/3), g*(255/3), b*(255/3) ), render_window );
+#ifdef USE_FILLED_MESHES
+		r = ((mesh->fill_colour.rgb) >> 6) & 0b0000011;
+		g = ((mesh->fill_colour.rgb) >> 4) & 0b0000011;
+		b = ((mesh->fill_colour.rgb) >> 2) & 0b0000011;
+
+		// Fill the mesh
+#endif
+#endif
+#else
+        drawLine( vertProjected1.x, vertProjected1.y,
+                  vertProjected2.x, vertProjected2.y,
+                  sfColor_fromRGB( mesh->edge_colour.r, mesh->edge_colour.g, mesh->edge_colour.b ), render_window );
+#ifdef USE_FILLED_MESHE
+		// Fill the mesh
+#endif
+#endif
+#endif
     }
 }

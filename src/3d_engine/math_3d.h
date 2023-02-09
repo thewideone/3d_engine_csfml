@@ -17,12 +17,19 @@
 // Config in "config.h".
 // 
 
-/*
- TODO:
-    - add "destructors" to free for example meshes' dynamic arrays
-    - tests of everything XD
+#ifndef COLOUR_MONOCHROME
+// Colour structure:
+typedef struct {
 
- */
+#ifdef COLOUR_SINGLE_BYTE
+    uint8_t rgb;
+#else
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+#endif
+} colour_t;
+#endif
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 fxp_t floatingToFixed( flp_t num );
@@ -44,7 +51,7 @@ typedef struct {
     rtnl_t w;// = 1;
 } vec3d_t;
 
-// Polygon holds only IDs of its vertices
+// Polygon structure (holds only IDs of its vertices):
 typedef struct {
     // Vector of vertex IDs
     // vector<int> p;
