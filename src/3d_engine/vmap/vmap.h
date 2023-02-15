@@ -13,11 +13,13 @@
 // 
 
 typedef struct vmap_t {
-    int key;    // used as vector's ID
+    int key;                // used as vector's ID
     vec3d_t v;
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
-    bool visible;    // set if vector v is visible
+    bool visible;           // set if vector v is visible
 #endif
+    int8_t bf;              // balance factor
+    struct vmap_t* parent;  // for remove I guess
     struct vmap_t* left;
     struct vmap_t* right;
 } vmap_t;

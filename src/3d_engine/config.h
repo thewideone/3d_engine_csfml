@@ -25,7 +25,7 @@
         #define COLOUR_BLACK   0x00
         #if COLOUR_DEPTH == 1
             //  _______________
-            // |0|R|0|G|0|B|-|-|
+            // |-|R|-|G|-|B|-|-|
             // 
             #define COLOUR_RED     0b01000000
             #define COLOUR_GREEN   0b00010000

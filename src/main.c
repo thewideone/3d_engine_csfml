@@ -23,6 +23,8 @@
 
 // 
 // TODO:
+// 	- upgrade vmap to AVL
+// 	- make the engine available to use as a submodule in AVR project
 // 	- X add a mesh queue
 // 	- X loading meshes from program memory
 // 	- X dynamic meshes

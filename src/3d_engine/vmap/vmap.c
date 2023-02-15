@@ -18,6 +18,8 @@ vmap_t* vmap_createNode( int key, vec3d_t* v ){
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
     new_node_ptr->visible = vis_flag;
 #endif
+    new_node_ptr->bf = 0;
+    new_node_ptr->parent = NULL;
     new_node_ptr->left = NULL;
     new_node_ptr->right = NULL;
 
