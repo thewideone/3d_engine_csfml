@@ -183,13 +183,13 @@ void binaryTreeMapTest( void ){
 	vmap_t* map = NULL;
 
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
-	vmap_insertNode( &map, 0, &v1, 0 );
-	vmap_insertNode( &map, 1, &v2, 1 );
-	vmap_insertNode( &map, 2, &v3, 0 );
+	vmap_insert( &map, 0, &v1, 0 );
+	vmap_insert( &map, 1, &v2, 1 );
+	vmap_insert( &map, 2, &v3, 0 );
 #else
-	vmap_insertNode( &map, 0, &v1 );
-	vmap_insertNode( &map, 1, &v2 );
-	vmap_insertNode( &map, 2, &v3 );
+	vmap_insert( &map, 0, &v1 );
+	vmap_insert( &map, 1, &v2 );
+	vmap_insert( &map, 2, &v3 );
 #endif
 
 	if( map == NULL )
