@@ -481,11 +481,11 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 #endif
             // Add this vertex and its ID into the map
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
-			vmap_insertNode( &mesh->vert2DSpaceMap,
+			vmap_insert( &mesh->vert2DSpaceMap,
 							 curr_vert_id,
 							 &vertProjected, 1 );
 #else
-			vmap_insertNode( &mesh->vert2DSpaceMap,
+			vmap_insert( &mesh->vert2DSpaceMap,
 							 curr_vert_id,
 							 &vertProjected );
 #endif
@@ -563,27 +563,30 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
 
 		// printf( "Looking for verts %d and %d...\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1] );
         
-		vmap_t* v_proj_el = NULL;
-		v_proj_el = vmap_search( mesh->vert2DSpaceMap, mesh->vis_edge_vec[i] );
+		vmap_node_t* v_proj_el = NULL;
+		// v_proj_el = vmap_search( mesh->vert2DSpaceMap, mesh->vis_edge_vec[i] );
+		printf( "In draw_mesh(): implement vmap_search()! Aborting.\n" );
+		return;
+
 		if( v_proj_el == NULL ){
 			printf( "Error: in mesh->vert2DSpaceMap could not find vertex of ID=%d\n",
 					mesh->vis_edge_vec[i] );
 			return;
 		}
 		vec3d_t vertProjected1 = v_proj_el->v;
-		int vert1_ID = v_proj_el->key;
+		int vert1_ID = mesh->vis_edge_vec[i];//v_proj_el->key;
 
 		// vec3d_print( &v_proj_el->v, 0 );
 
 		v_proj_el = NULL;
-		v_proj_el = vmap_search( mesh->vert2DSpaceMap, mesh->vis_edge_vec[i+1] );
+		// v_proj_el = vmap_search( mesh->vert2DSpaceMap, mesh->vis_edge_vec[i+1] );
 		if( v_proj_el == NULL ){
 			printf( "Error: in mesh->vert2DSpaceMap could not find vertex of ID=%d\n",
 					mesh->vis_edge_vec[i+1] );
 			return;
 		}
 		vec3d_t vertProjected2 = v_proj_el->v;
-		int vert2_ID = v_proj_el->key;
+		int vert2_ID = mesh->vis_edge_vec[i+1];//v_proj_el->key;
 
 		// vec3d_print( &v_proj_el->v, 1 );
 

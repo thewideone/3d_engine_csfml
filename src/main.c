@@ -152,7 +152,7 @@ void dynamicArrayTest( void ){
 	arrfree( vertices );
 }
 
-void binaryTreeMapTest( void ){
+void binarySearchTreeMapTest( void ){
 	vec3d_t v1;
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -180,11 +180,17 @@ void binaryTreeMapTest( void ){
 	v3.w = 3.3;
 #endif
 
-	vmap_t* map = NULL;
+	vmap_t map;
+
+	printf( "Making empty map...\n" );
+	vmap_makeEmpty( &map );
 
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+	printf( "Inserting 1st element...\n" );
 	vmap_insert( &map, 0, &v1, 0 );
+	printf( "Inserting 2nd element...\n" );
 	vmap_insert( &map, 1, &v2, 1 );
+	printf( "Inserting 3rd element...\n" );
 	vmap_insert( &map, 2, &v3, 0 );
 #else
 	vmap_insert( &map, 0, &v1 );
@@ -192,26 +198,48 @@ void binaryTreeMapTest( void ){
 	vmap_insert( &map, 2, &v3 );
 #endif
 
-	if( map == NULL )
-		printf( "map == NULL!\n" );
+	if( vmap_isEmpty( &map ) )
+		printf( "Map empty\n" );
 
 	for( int i=0; i<3; i++ ){
-		vmap_t* found_node = vmap_search( map, i );
-		if( found_node != NULL )
+		vec3d_t found_vert;
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+		bool found_vis_flag;
+		bool ret = vmap_find( &map, i, &found_vert, &found_vis_flag );
+#else
+		bool ret = vmap_find( &map, i, &found_vert );
+#endif
+		if( ret )
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
 			// printf( "Found node of key %d: %f, %f, %f, %f, %d\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w, found_node->visible );
-			printf( "Found node of key %d and vis_flg %d: ", i, found_node->visible );
-			vec3d_print( &(found_node->v), true );
+			printf( "Found node of key %d and vis_flg %d: ", i, found_vis_flag );
+			vec3d_print( &found_vert, true );
 #else
 			// printf( "Found node of key %d: %f, %f, %f, %f\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w );
 			printf( "Found node of key %d: ", i );
-			vec3d_print( &(found_node->v), true );
+			vec3d_print( &found_vert, true );
 #endif
 	}
 
-	vmap_print( map );
-	vmap_free( map );
-	map = NULL;	// keep this in mind
+	printf( "Plotting graph...\n" );
+	vmap_graph( &map );
+	printf( "Printing...\n" );
+	vmap_printInorder( &map );
+
+	bool ret = vmap_updateNode( &map, 0, &v3, 1 );
+
+	if( ret )
+		printf( "Successufully updated v0.\n" );
+	else
+		printf( "Failed to update v0.\n" );
+
+	printf( "Printing again...\n" );
+	vmap_printInorder( &map );
+
+	printf( "Freeing...\n" );
+	vmap_free( &map );
+	printf( "Done.\n" );
+	// map = NULL;	// keep this in mind
 }
 
 void meshTest( void ){
@@ -415,12 +443,7 @@ int main(){
 
 	// sf::CircleShape circle(2.0);
 
-	// mathTest();
-	// meshTest();
-
-	// binaryTreeMapTest();
-
-	setup3D();
+	// setup3D();
 
 	flp_t f_theta = 0;
 	clock_t t1 = clock();
@@ -430,7 +453,7 @@ int main(){
 
 	// mathTest();
 	// dynamicArrayTest();
-	// binaryTreeMapTest();
+	binarySearchTreeMapTest();
 	// meshTest();
 	// meshQueueTest();
 
@@ -472,7 +495,7 @@ int main(){
 		flp_t elapsed_time = (flp_t)(t2-t1) / CLOCKS_PER_SEC;
 		t1 = t2;
 
-		update3DFrame( window, elapsed_time, &f_theta );
+		// update3DFrame( window, elapsed_time, &f_theta );
 
 		/* Update the window */
         sfRenderWindow_display(window);
@@ -482,7 +505,7 @@ int main(){
 	sfText_destroy(text);
     sfFont_destroy(font);
 
-	free3D();
+	// free3D();
 	freeGraphics();
 
 	return (0);

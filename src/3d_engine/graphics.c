@@ -94,6 +94,7 @@ void drawLine( float x0, float y0, float x1, float y1, sfColor colour, sfRenderW
     sfRenderWindow_drawVertexArray( renderWindow, vert_array, NULL );
 }
 
+/*
 vec3d_t findCentre( mesh_t* mesh, int face_ID ){
     // mesh.printVisFaceIDs();
     // mesh.printVisEdgeVec();
@@ -149,6 +150,7 @@ vec3d_t findCentre( mesh_t* mesh, int face_ID ){
 
     return vec_avg;
 }
+*/
 
 int getOutlineEdgeCount( mesh_t* mesh ){
     // In vis_edge_vec:

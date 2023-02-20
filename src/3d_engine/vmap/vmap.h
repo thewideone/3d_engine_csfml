@@ -19,13 +19,13 @@
 // 
 
 typedef struct vmap_node_t {
-    vmap_key_t key;                // used as vector's ID
+    vmap_key_t key;                 // used as vector's ID
     vec3d_t v;
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
-    bool visible;           // set if vector v is visible
+    bool visible;                   // set if vector v is visible
 #endif
-    int8_t bf;              // balance factor
-    struct vmap_node_t* parent;  // for remove I guess
+    int8_t bf;                      // balance factor
+    struct vmap_node_t* parent;     // for remove I guess
     struct vmap_node_t* left;
     struct vmap_node_t* right;
 } vmap_node_t;
@@ -49,24 +49,34 @@ vmap_node_t* vmap_insertAux( vmap_node_t** root, vmap_key_t key, vec3d_t* v
 #endif
 );
 
-vmap_node_t* vmap_search( vmap_node_t* root, vmap_key_t key );
+vmap_node_t* vmap_findAux( vmap_node_t* root, vmap_key_t key );
 
 void vmap_printInorderAux( vmap_node_t* subroot );
-void vmap_graphAux( vmap_node_t* root );
+void vmap_graphAux( vmap_node_t* root, uint8_t indent );
 void vmap_freeAux( vmap_node_t* root );
 
 // 
 // Public functions
 // 
-void vmap_insert( vmap_t* vmap, vmap_key_t key, vec3d_t* v
+void vmap_makeEmpty( vmap_t* vmap );
+
+bool vmap_isEmpty( vmap_t* vmap );
+
+bool vmap_find( vmap_t* vmap, vmap_key_t key, vec3d_t* v 
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+                , bool* vis_flag 
+#endif
+);
+
+bool vmap_updateNode( vmap_t* vmap, vmap_key_t key, vec3d_t* v 
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
                 , bool vis_flag 
 #endif
 );
 
-bool vmap_find( vmap_t* vmap, vmap_key_t key, vec3d_t* v
+void vmap_insert( vmap_t* vmap, vmap_key_t key, vec3d_t* v
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
-                , bool* vis_flag 
+                , bool vis_flag 
 #endif
 );
 

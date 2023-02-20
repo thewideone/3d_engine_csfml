@@ -8,6 +8,112 @@
 // 
 
 // 
+// Get height of a subtree.
+// subroot - subtree to compute height of
+// Return height of a subtree,
+// 0 if subroot is NULL.
+// 
+size_t vmap_getHeight( vmap_node_t* subroot ){
+    if( subroot == NULL )
+        return 0;
+    
+    size_t height_left = vmap_getHeight( subroot->left );
+    size_t height_right = vmap_getHeight( subroot->right );
+
+    if( height_left > height_right )
+        return ( height_left + 1 );
+    return ( height_right + 1);
+}
+
+// 
+// Get balance factor of a subtree.
+// subroot - subtree to compute b.f. of
+// Return b.f. of a subtree
+// (height of right subtree - height of
+// the left one).
+// 
+int8_t vmap_getBalanceFactor( vmap_node_t* subroot ){
+    return ( vmap_getHeight( subroot->right ) - vmap_getHeight( subroot->left ) );
+}
+
+// 
+// Rotate subtree to the left or right.
+// subroot - node of balance factor +-2
+//           (root of subtree to be rotated)
+// This methods change the subroot pointer.
+// 
+void vmap_rotateLeft( vmap_node_t** subroot ){
+    vmap_node_t* temp = (*subroot)->right;
+
+    // vmap_node_t* T1 = *subroot->left;
+    // Subtree no. 2:
+    vmap_node_t* T2 = temp->left;
+    // vmap_node_t* T3 = temp->right;
+
+    (*subroot)->right = T2;
+    temp->left = *subroot;
+
+    // Update parents
+    if( T2 != NULL )
+        T2->parent = *subroot;
+
+    vmap_node_t* tmp_parent = (*subroot)->parent;
+    (*subroot)->parent = temp;
+    temp->parent = tmp_parent;
+
+    // Update balance factors
+    (*subroot)->bf = vmap_getBalanceFactor( *subroot );
+    *subroot = temp;
+    (*subroot)->bf = vmap_getBalanceFactor( *subroot );
+
+    // std::cout << "-----Rot_left-----" << std::endl;
+    // graph();
+}
+void vmap_rotateRight( vmap_node_t** subroot ){
+    vmap_node_t* temp = (*subroot)->left;
+
+    // vmap_node_t* T1 = temp->left;
+    // Subtree no. 2:
+    vmap_node_t* T2 = temp->right;
+    // vmap_node_t* T3 = *subroot->right;
+
+    (*subroot)->left = T2;
+    temp->right = *subroot;
+
+    // Update parents
+    if( T2 != NULL )
+        T2->parent = *subroot;
+
+    vmap_node_t* tmp_parent = (*subroot)->parent;
+    (*subroot)->parent = temp;
+    temp->parent = tmp_parent;
+
+    // Update balance factors
+    (*subroot)->bf = vmap_getBalanceFactor( *subroot );
+    *subroot = temp;
+    (*subroot)->bf = vmap_getBalanceFactor( *subroot );
+
+    // std::cout << "-----Rot_right-----" << std::endl;
+    // graph();
+}
+
+// 
+// Rotate subtree first to the left and then
+// to the right or vice-versa.
+// subroot - node of balance factor +-2
+//           (root of subtree to be rotated)
+// This methods change the subroot pointer.
+// 
+void vmap_rotateLeftRight( vmap_node_t** subroot ){
+    vmap_rotateLeft( &((*subroot)->left) );
+    vmap_rotateRight( subroot );
+}
+void vmap_rotateRightLeft( vmap_node_t** subroot ){
+    vmap_rotateRight( &((*subroot)->right) );
+    vmap_rotateLeft( subroot );
+}
+
+// 
 // Create a new node.
 // key          - key of the node
 // v            - vec3d_t data of the node
@@ -38,12 +144,12 @@ vmap_node_t* vmap_createNode( vmap_key_t key, vec3d_t* v ){
 }
 
 // 
-// Search the map.
+// Auxillary find function.
 // subroot - tree to be searched
 // key  - key of the node of interest
 // Return pointer to the found node, or NULL if not found.
 // 
-vmap_node_t* vmap_search( vmap_node_t* subroot, vmap_key_t key ){
+vmap_node_t* vmap_findAux( vmap_node_t* subroot, vmap_key_t key ){
 
     if( subroot == NULL )
         return NULL;
@@ -77,56 +183,69 @@ vmap_node_t* vmap_insertAux( vmap_node_t** subroot, vmap_key_t key, vec3d_t* v, 
 #else
 vmap_node_t* vmap_insertAux( vmap_node_t** subroot, vmap_key_t key, vec3d_t* v ){
 #endif
-
-    // If key already exists, return
-    if( vmap_search( *subroot, key ) != NULL )
-        return NULL;
-
-    // Create a new node
+    // printf( "In vmap_insertAux(): " );
+    // printf( "subroot = %d\n", (*subroot) );
+    if( (*subroot) == NULL ){
+        // Create a new node
+        // printf( "Creating a new node... " );
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
-    vmap_node_t* new_node_ptr = vmap_createNode( key, v, vis_flag );
+        vmap_node_t* new_node_ptr = vmap_createNode( key, v, vis_flag );
 #else
-    vmap_node_t* new_node_ptr = vmap_createNode( key, v );
+        vmap_node_t* new_node_ptr = vmap_createNode( key, v );
 #endif
-
-    vmap_node_t* search_head_ptr = *subroot;
-    vmap_node_t* parent_ptr = NULL;
-
-    while( search_head_ptr != NULL ){
-        parent_ptr = search_head_ptr;
-        if( key < search_head_ptr->key )
-            search_head_ptr = search_head_ptr->left;
-        else if( key > search_head_ptr->key )
-            search_head_ptr = search_head_ptr->right;
-        else {
-            // Given key has been found,
-            // we don't want duplicates
-            free(new_node_ptr);
+        if( new_node_ptr == NULL ){
+            printf( "Error: in vmap_insertAux(): memory allocation failed.\n" );
             return NULL;
         }
+
+        // printf( "done.\n" );
+
+        return new_node_ptr;
     }
 
-    if( *subroot == NULL )
-        *subroot = new_node_ptr;
-    // If the subroot is NULL (the tree is empty)
-    // The new node is the subroot node
-    if( parent_ptr == NULL ){
-        parent_ptr = new_node_ptr;
-        // *subroot = new_node_ptr;
+    // Insert the new node
+    if( key < (*subroot)->key ){
+        // printf( "Inserting to the left...\n" );
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+        (*subroot)->left = vmap_insertAux( &((*subroot)->left), key, v, vis_flag );
+#else
+        (*subroot)->left = vmap_insertAux( &((*subroot)->left), key, v );
+#endif
+        (*subroot)->left->parent = *subroot;
+    }
+    else if( key > (*subroot)->key ){
+        // printf( "Inserting to the right...\n" );
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+        (*subroot)->right = vmap_insertAux( &((*subroot)->right), key, v, vis_flag );
+#else
+        (*subroot)->right = vmap_insertAux( &((*subroot)->right), key, v );
+#endif
+        (*subroot)->right->parent = *subroot;
+    }
+    else {
+        // Key is already existing (duplicate found)
+        // printf( "Key duplicate.\n" );
+        return *subroot;
     }
 
-    // If the new key is less than the leaf node key
-    // Assign the new node to be its left child
-    else if( key < parent_ptr->key )
-        parent_ptr->left = new_node_ptr;
-    
-    // Else, assign the new node to be its right child
-    else
-        parent_ptr->right = new_node_ptr;
-    
-    // Return a pointer to where the new node is
-    // inserted
-    return parent_ptr;
+    // printf("Computing bf...\n ");
+    (*subroot)->bf = vmap_getBalanceFactor( *subroot );
+
+    // Balance tree
+    if( (*subroot)->bf > 1 ){
+        if( (*subroot)->right->bf > 0 )
+            vmap_rotateLeft( subroot );
+        else
+            vmap_rotateRightLeft( subroot );
+    }
+    else if( (*subroot)->bf < -1 ){
+        if( (*subroot)->left->bf > 0 )
+            vmap_rotateLeftRight( subroot );
+        else
+            vmap_rotateRight( subroot );
+    }
+
+    return *subroot;
 }
 
 // 
@@ -137,17 +256,19 @@ void vmap_printInorderAux( vmap_node_t* subroot ){
     if (subroot == NULL)
         return;
     else {
-        vmap_print(subroot->left);
+        vmap_printInorderAux(subroot->left);
         printf( "Key: %d, v: ", subroot->key );
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
         vec3d_print( &(subroot->v), 0 );
+
+        printf( ", " );
         if( !(subroot->visible) )
             printf( "not " );
         printf( "visible\n" );
 #else  
         vec3d_print( &(subroot->v), 1 );
 #endif
-        vmap_print(subroot->right);
+        vmap_printInorderAux(subroot->right);
     }
 }
 
@@ -184,7 +305,8 @@ void vmap_graphAux( vmap_node_t* subroot, uint8_t indent ){
 
 #ifdef VMAP_SHOW_PARENT_KEY
         // Print parent's key
-        printf( " ]%d", subroot->parent->key );
+        if( subroot->parent != NULL )
+            printf( " ] %d", subroot->parent->key );
 #endif
 
         printf( "}\n" );
@@ -201,8 +323,8 @@ void vmap_freeAux( vmap_node_t* subroot ){
     if (subroot == NULL)
         return;
     else{
-        vmap_free(subroot->left);
-        vmap_free(subroot->right);
+        vmap_freeAux(subroot->left);
+        vmap_freeAux(subroot->right);
         // printf("Freeing node of key %d\n", subroot->key );
         free( subroot );
         subroot = NULL;
@@ -213,20 +335,90 @@ void vmap_freeAux( vmap_node_t* subroot ){
 // Public functions
 // 
 
+void vmap_makeEmpty( vmap_t* vmap ){
+    vmap->root = NULL;
+    // vmap->root->left = NULL;
+    // vmap->root->right = NULL;
+    // vmap->root->parent = NULL;
+    vmap->size = 0;
+}
+
+bool vmap_isEmpty( vmap_t* vmap ){
+    return ( vmap->root == NULL ) || ( vmap->size == 0 );
+}
+
+// 
+// Find a node in a map.
+// vmap     - tree to be searched
+// key      - key of the node of interest
+// v        - if found, copied values of vertex of interest
+// vis_flag - if found, copied visibility flag of the vertex
+// Return true if found, false otherwise.
+// 
+bool vmap_find( vmap_t* vmap, vmap_key_t key, vec3d_t* v 
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+                , bool* vis_flag 
+#endif
+){
+    if( vmap->root == NULL )
+        return false;
+    
+    vmap_node_t* node_ptr = vmap_findAux( vmap->root, key );
+
+    if( node_ptr == NULL )
+        return false;
+    
+    *v = node_ptr->v;
+    *vis_flag = node_ptr->visible;
+
+    return true;
+}
+
+// 
+// Update a single map node with given values.
+// vmap     - tree to be searched
+// key      - key of the node of interest
+// v        - new value for vertex of node of interest
+// vis_flag - new value for visibility flag of this vertex
+// Return true if found and update succeeded, false otherwise.
+// 
+bool vmap_updateNode( vmap_t* vmap, vmap_key_t key, vec3d_t* v 
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+                , bool vis_flag 
+#endif
+){
+    if( vmap->root == NULL )
+        return false;
+    
+    vmap_node_t* node_ptr = vmap_findAux( vmap->root, key );
+
+    if( node_ptr == NULL )
+        return false;
+    
+    node_ptr->v = *v;
+    node_ptr->visible = vis_flag;
+
+    return true;
+}
+
 void vmap_insert( vmap_t* vmap, vmap_key_t key, vec3d_t* v
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
                 , bool vis_flag 
 #endif
 ){
 
-}
-
-bool vmap_find( vmap_t* vmap, vmap_key_t key, vec3d_t* v
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
-                , bool* vis_flag 
+    vmap->root = vmap_insertAux( &(vmap->root), key, v, vis_flag );
+#else
+    vmap->root = vmap_insertAux( &(vmap->root), key, v );
 #endif
-){
 
+    if( vmap->root == NULL ){
+        printf( "Error: in vmap_insert() (key = %d): failed to insert a new node.", key );
+        return;
+    }
+
+    vmap->size++;
 }
 
 void vmap_printInorder( vmap_t* vmap ){
