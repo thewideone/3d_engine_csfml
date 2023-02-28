@@ -22,7 +22,11 @@ endif
 OUTPUT	:= output
 
 # define source directory
+ifeq ($(OS),Windows_NT)
 SRC		:= src src/3d_engine src/3d_engine/vmap src/meshes
+else
+SRC		:= src
+endif
 
 # define include directory
 INCLUDE	:= include
