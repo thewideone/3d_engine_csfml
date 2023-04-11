@@ -25,9 +25,9 @@ void setup3D( void ){
 #ifdef USE_LOADING_FROM_OBJ
 	bool ret = mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
 #else
-	// bool ret = mesh_loadFromProgmem( &mesh, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
+	bool ret = mesh_loadFromProgmem( &mesh, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
 	// bool ret = mesh_loadFromProgmem( &mesh, sphere_mesh_verts, sphere_mesh_faces, SPHERE_MESH_V_CNT, SPHERE_MESH_F_CNT, false );
-	bool ret = mesh_loadFromProgmem( &mesh, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
+	// bool ret = mesh_loadFromProgmem( &mesh, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
 #endif
 	if( !ret ){
 		printf( "Error: in setup3D() loading mesh from file failed\n" );
@@ -405,9 +405,9 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
     // (only the visible ones are projected)
     // int: ID of vertex, vec3d: vertex data
 	vmap_free( mesh->vert2DSpaceMap );
-	mesh->vert2DSpaceMap = NULL;
+	// mesh->vert2DSpaceMap = NULL;
 
-	// printf( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", mesh->vertex_cnt );
+	printf( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", mesh->vertex_cnt );
 
 #ifdef RENDER_VISIBLE_ONLY
 	// Transform only visible vertices
@@ -491,17 +491,22 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 #endif
 	}
 
-	// printf( "mesh->vert2DSpaceMap:\n" );
-	// vmap_print( mesh->vert2DSpaceMap );
+	printf( "mesh->vert2DSpaceMap:\n" );
+	vmap_printInorder( &(mesh->vert2DSpaceMap) );
+
+	printf( "Freeing vis_edge_vec...\n" );
 
 	// Each entry is 4x int:
     // 1: start_vert_ID
     // 2: end_vert_ID
     // 3: num_of_faces_which_the_edge_belongs_to (1-2)
     // 4: ID_of_1st_face
-    arrfree(mesh->vis_edge_vec);
+	if( mesh->vis_edge_vec != NULL )
+    	arrfree(mesh->vis_edge_vec);
     // Reserve max number of visible edges? (9 for cube)
     //vis_edge_vec.reserve( 9*sizeof(int) );
+
+	printf( "Filling vis_edge_vec...\n" );
 
 	// Fill the visible edge vector
     // For each visible face
@@ -545,6 +550,8 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
             }
         }
     }
+
+	printf( "Done\n" );
 }
 
 // 

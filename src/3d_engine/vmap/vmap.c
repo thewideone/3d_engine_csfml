@@ -319,15 +319,15 @@ void vmap_graphAux( vmap_node_t* subroot, uint8_t indent ){
 // Auxillary recursive function.
 // Delete whole map.
 // 
-void vmap_freeAux( vmap_node_t* subroot ){
-    if (subroot == NULL)
-        return;
-    else{
-        vmap_freeAux(subroot->left);
-        vmap_freeAux(subroot->right);
-        // printf("Freeing node of key %d\n", subroot->key );
-        free( subroot );
-        subroot = NULL;
+void vmap_freeAux( vmap_node_t** subroot ){
+    if (*subroot != NULL){
+		printf("Freeing left subtree of key %d\n", (*subroot)->key );
+        vmap_freeAux( &( (*subroot)->left  ) );
+		printf("Freeing right subtree of key %d\n", (*subroot)->key );
+        vmap_freeAux( &( (*subroot)->right ) );
+        printf("Freeing node of key %d\n", (*subroot)->key );
+        free( *subroot );
+        *subroot = NULL;
     }
 }
 
@@ -440,8 +440,18 @@ void vmap_graph( vmap_t* vmap ){
 }
 
 void vmap_free( vmap_t* vmap ){
-    if( vmap->root == NULL )
+	printf("Entered vmap_free()\n");
+	if( vmap == NULL ){
+		printf("vmap is NULL.\n");
+		return;
+	}
+    if( vmap->root == NULL ){
+		printf("vmap empty.\n");
         return;
+	}
 
-    vmap_freeAux( vmap->root );
+	printf("Freeing vmap...\n");
+    vmap_freeAux( &(vmap->root) );
+
+	vmap->root = NULL;
 }

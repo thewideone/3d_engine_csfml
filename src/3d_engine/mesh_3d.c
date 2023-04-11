@@ -41,14 +41,22 @@ void mesh_makeEmpty( mesh_t* mesh ){
 }
 
 void mesh_free( mesh_t* mesh ){
+    // printf( "Freeing polygons...\n" );
     for( size_t i=0; i < mesh->face_cnt; i++ )
         polygon_free( &mesh->faces[i] );
+    // printf( "Freeing face array...\n" );
     arrfree( mesh->faces );
+    // printf( "Freeing transformedVertices...\n" );
     arrfree( mesh->transformedVertices );
+    // printf( "Freeing vert2DSpaceMap...\n" );
     vmap_free( mesh->vert2DSpaceMap );
+    // printf( "Freeing vertices...\n" );
     arrfree( mesh->vertices );
+    // printf( "Freeing vis_edge_vec...\n" );
     arrfree( mesh->vis_edge_vec );
+    // printf( "Freeing visFaceIDs...\n" );
     arrfree( mesh->visFaceIDs );
+    // printf( "Done.\n" );
 }
 
 #ifdef USE_LOADING_FROM_OBJ

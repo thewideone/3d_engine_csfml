@@ -267,6 +267,7 @@ void meshTest( void ){
 	mesh_free( &mesh );
 #endif
 
+	
 	mesh_t mesh_prgm;
 	mesh_makeEmpty( &mesh_prgm );
 	mesh_loadFromProgmem( &mesh_prgm, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
@@ -285,7 +286,9 @@ void meshTest( void ){
 	}
 
 	mesh_free( &mesh_prgm );
+	
 
+	
 	// Dynamic mesh
 	mesh_t* mesh_prgm_dyn = (mesh_t*)malloc( sizeof(mesh_t) );
 	mesh_makeEmpty( mesh_prgm_dyn );
@@ -305,6 +308,7 @@ void meshTest( void ){
 	}
 
 	mesh_free( mesh_prgm_dyn );
+	
 }
 
 void meshQueueTest( void ){
@@ -443,7 +447,7 @@ int main(){
 
 	// sf::CircleShape circle(2.0);
 
-	// setup3D();
+	setup3D();
 
 	flp_t f_theta = 0;
 	clock_t t1 = clock();
@@ -453,7 +457,7 @@ int main(){
 
 	// mathTest();
 	// dynamicArrayTest();
-	binarySearchTreeMapTest();
+	// binarySearchTreeMapTest();
 	// meshTest();
 	// meshQueueTest();
 
@@ -495,7 +499,7 @@ int main(){
 		flp_t elapsed_time = (flp_t)(t2-t1) / CLOCKS_PER_SEC;
 		t1 = t2;
 
-		// update3DFrame( window, elapsed_time, &f_theta );
+		update3DFrame( window, elapsed_time, &f_theta );
 
 		/* Update the window */
         sfRenderWindow_display(window);
@@ -505,7 +509,7 @@ int main(){
 	sfText_destroy(text);
     sfFont_destroy(font);
 
-	// free3D();
+	free3D();
 	freeGraphics();
 
 	return (0);

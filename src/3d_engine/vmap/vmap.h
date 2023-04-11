@@ -38,22 +38,22 @@ typedef struct {
 // 
 // Private functions
 // 
-vmap_node_t* vmap_createNode( vmap_key_t key, vec3d_t* v
-#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
-                            , bool vis_flag 
-#endif
-);
-vmap_node_t* vmap_insertAux( vmap_node_t** root, vmap_key_t key, vec3d_t* v
-#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
-                            , bool vis_flag 
-#endif
-);
+// vmap_node_t* vmap_createNode( vmap_key_t key, vec3d_t* v
+// #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+//                             , bool vis_flag 
+// #endif
+// );
+// vmap_node_t* vmap_insertAux( vmap_node_t** root, vmap_key_t key, vec3d_t* v
+// #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+//                             , bool vis_flag 
+// #endif
+// );
 
-vmap_node_t* vmap_findAux( vmap_node_t* root, vmap_key_t key );
+// vmap_node_t* vmap_findAux( vmap_node_t* root, vmap_key_t key );
 
-void vmap_printInorderAux( vmap_node_t* subroot );
-void vmap_graphAux( vmap_node_t* root, uint8_t indent );
-void vmap_freeAux( vmap_node_t* root );
+// void vmap_printInorderAux( vmap_node_t* subroot );
+// void vmap_graphAux( vmap_node_t* root, uint8_t indent );
+// void vmap_freeAux( vmap_node_t* root );
 
 // 
 // Public functions
