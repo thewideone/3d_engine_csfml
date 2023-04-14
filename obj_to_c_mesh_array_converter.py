@@ -23,13 +23,13 @@ face_fixed_vert_cnt = 0
 use_fixed_point = 1
 override_face_arr_type = 1
 # Vertex types
-floating_point_type = "flp_t"
+floating_point_type_name = "flp_t"
 fixed_point_type_name = "fxp_t"
 fixed_point_type = "int32"
 # Fixed point number of binary digits after decimal place
 fp_dp = 16
 # Define types of vertex and face arrays
-vert_arr_type = floating_point_type
+vert_arr_type = floating_point_type_name
 # Automatically adjusted
 face_arr_type = "uint8_t"
 # Define something separating IDs of vertices in face array
@@ -165,7 +165,7 @@ if print_to_file:
         out_file.write( "// \tFixed point type: \"" + fixed_point_type + "_t\"\n" )
         out_file.write( "// \tNumber of binary digits after the decimal place: " + str(fp_dp) + "\n" )
     else:
-        out_file.write( "floating point ("+floating_point_type+")\n" )
+        out_file.write( "floating point ("+floating_point_type_name+")\n" )
     out_file.write( "// \tFace array type: " + face_arr_type + "\n" )
     out_file.write( "// \tFixed number of vertices in faces: " )
     if face_fixed_vert_cnt:
@@ -185,7 +185,7 @@ if print_to_std_out:
         print( "// \tFixed point type: \"" + fixed_point_type + "_t\"" )
         print( "// \tNumber of binary digits after the decimal place: " + str(fp_dp) )
     else:
-        print( "floating point ("+floating_point_type+")" )
+        print( "floating point ("+floating_point_type_name+")" )
     print( "// \tFace array type: " + face_arr_type )
     print( "// \tFixed number of vertices in faces: ", end = '' )
     if face_fixed_vert_cnt:

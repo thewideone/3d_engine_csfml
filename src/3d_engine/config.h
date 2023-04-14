@@ -4,6 +4,14 @@
 // 
 // Debug:
 // 
+#define DEBUG 3
+
+#if defined(DEBUG) && DEBUG > 0
+ #define DEBUG_PRINT(fmt, args...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt, \
+    __FILE__, __LINE__, __func__, ##args)
+#else
+ #define DEBUG_PRINT(fmt, args...) /* Don't do anything in release builds */
+#endif
 // #define VERTEX_ID_DEBUG
 // #define VERTEX_DOT_DEBUG
 // Draw only outlines of meshes
@@ -50,10 +58,10 @@
 // Engine features:
 // 
 #define USE_CAMERA
-#define USE_FILLED_MESHES
+// #define USE_FILLED_MESHES
 // #define USE_LOADING_FROM_OBJ
 // Render only visible edges / faces
-#define RENDER_VISIBLE_ONLY
+// #define RENDER_VISIBLE_ONLY
 // #define REMOVE_HIDDEN_LINES
 
 // 

@@ -227,7 +227,11 @@ void binarySearchTreeMapTest( void ){
 	printf( "Printing...\n" );
 	vmap_printInorder( &map );
 
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
 	bool ret = vmap_updateNode( &map, 0, &v3, 1 );
+#else
+	bool ret = vmap_updateNode( &map, 0, &v3 );
+#endif
 
 	if( ret )
 		printf( "Successufully updated v0.\n" );
@@ -454,7 +458,9 @@ int main(){
 	clock_t t1 = clock();
 	clock_t t2 = clock();
 
-	printf( "Setup complete.\n" );
+	DEBUG_PRINT( "Setup complete %d\n", (int) 123 );
+
+	// printf( "Setup complete.\n" );
 
 	// mathTest();
 	// dynamicArrayTest();

@@ -241,7 +241,7 @@ void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f
 	processMesh( &mesh, *f_theta, (*f_theta)*0.5 );
 #endif
 
-	draw_mesh( &mesh, renderWindow );
+	drawMesh( &mesh, renderWindow );
 }
 
 // 
@@ -407,7 +407,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 	vmap_free( &(mesh->vert2DSpaceMap) );
 	// mesh->vert2DSpaceMap = NULL;
 
-	printf( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", mesh->vertex_cnt );
+	// printf( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", mesh->vertex_cnt );
 
 #ifdef RENDER_VISIBLE_ONLY
 	// Transform only visible vertices
@@ -491,10 +491,10 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 #endif
 	}
 
-	printf( "mesh->vert2DSpaceMap:\n" );
-	vmap_printInorder( &(mesh->vert2DSpaceMap) );
+	// printf( "mesh->vert2DSpaceMap:\n" );
+	// vmap_printInorder( &(mesh->vert2DSpaceMap) );
 
-	printf( "Freeing vis_edge_vec...\n" );
+	// printf( "Freeing vis_edge_vec...\n" );
 
 	// Each entry is 4x int:
     // 1: start_vert_ID
@@ -506,7 +506,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
     // Reserve max number of visible edges? (9 for cube)
     //vis_edge_vec.reserve( 9*sizeof(int) );
 
-	printf( "Filling vis_edge_vec...\n" );
+	// printf( "Filling vis_edge_vec...\n" );
 
 	// Fill the visible edge vector
     // For each visible face
@@ -550,8 +550,6 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
             }
         }
     }
-
-	printf( "Done\n" );
 }
 
 // 
@@ -559,7 +557,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 // Replace drawLine() function at the end with any function
 // drawing a straight line on your output device
 // 
-void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
+void drawMesh( mesh_t* mesh, sfRenderWindow* render_window ){
     // Draw every visible edge
     // Debug (commented): print the visible edge array
     for( int i=0; i<arrlen(mesh->vis_edge_vec); i+=4 ){
@@ -570,40 +568,35 @@ void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window ){
 
 		// printf( "Looking for verts %d and %d...\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1] );
         
-		vmap_node_t* v_proj_el = NULL;
-		// v_proj_el = vmap_search( mesh->vert2DSpaceMap, mesh->vis_edge_vec[i] );
-		printf( "In draw_mesh(): implement vmap_search()! Aborting.\n" );
-		return;
+		int vert1_ID = mesh->vis_edge_vec[i];
+		int vert2_ID = mesh->vis_edge_vec[i+1];
+		vec3d_t vertProjected1, vertProjected2;
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+		bool v1_vis_flg, v2_vis_flg;
 
-		if( v_proj_el == NULL ){
-			printf( "Error: in mesh->vert2DSpaceMap could not find vertex of ID=%d\n",
-					mesh->vis_edge_vec[i] );
+		bool ret1 = vmap_find( &(mesh->vert2DSpaceMap), vert1_ID, &vertProjected1, &v1_vis_flg );
+#else
+		bool ret1 = vmap_find( &(mesh->vert2DSpaceMap), vert1_ID, &vertProjected1 );
+#endif
+		if( !ret1 ){
+			printf( "Error: in mesh->vert2DSpaceMap could not find the first vertex of ID=%d\n",
+					vert1_ID );
 			return;
 		}
-		vec3d_t vertProjected1 = v_proj_el->v;
-		int vert1_ID = mesh->vis_edge_vec[i];//v_proj_el->key;
 
-		// vec3d_print( &v_proj_el->v, 0 );
-
-		v_proj_el = NULL;
-		// v_proj_el = vmap_search( mesh->vert2DSpaceMap, mesh->vis_edge_vec[i+1] );
-		if( v_proj_el == NULL ){
-			printf( "Error: in mesh->vert2DSpaceMap could not find vertex of ID=%d\n",
-					mesh->vis_edge_vec[i+1] );
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
+		bool ret2 = vmap_find( &(mesh->vert2DSpaceMap), vert2_ID, &vertProjected2, &v2_vis_flg );
+#else
+		bool ret2 = vmap_find( &(mesh->vert2DSpaceMap), vert2_ID, &vertProjected2 );
+#endif
+		if( !ret2 ){
+			printf( "Error: in mesh->vert2DSpaceMap could not find the second vertex of ID=%d\n",
+					vert2_ID );
 			return;
 		}
-		vec3d_t vertProjected2 = v_proj_el->v;
-		int vert2_ID = mesh->vis_edge_vec[i+1];//v_proj_el->key;
-
-		// vec3d_print( &v_proj_el->v, 1 );
 
 		// vec3d_print( &vertProjected1, 0 );
 		// vec3d_print( &vertProjected2, 1 );
-        // vec3d_t vertProjected1 = mesh.vert2DSpaceMap.find(mesh.vis_edge_vec[i])->second;
-        // vec3d_t vertProjected2 = mesh.vert2DSpaceMap.find(mesh.vis_edge_vec[i+1])->second;
-
-        // int vert1_ID = mesh.vert2DSpaceMap.find(mesh.vis_edge_vec[i])->first;
-        // int vert2_ID = mesh.vert2DSpaceMap.find(mesh.vis_edge_vec[i+1])->first;
 
 #ifdef VERTEX_DOT_DEBUG
         if( mesh.visVertexMap.size() > 0 ){

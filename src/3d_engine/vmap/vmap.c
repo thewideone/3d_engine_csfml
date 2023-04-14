@@ -321,11 +321,11 @@ void vmap_graphAux( vmap_node_t* subroot, uint8_t indent ){
 // 
 void vmap_freeAux( vmap_node_t** subroot ){
     if (*subroot != NULL){
-		printf("Freeing left subtree of key %d\n", (*subroot)->key );
+		// printf("Freeing left subtree of key %d\n", (*subroot)->key );
         vmap_freeAux( &( (*subroot)->left  ) );
-		printf("Freeing right subtree of key %d\n", (*subroot)->key );
+		// printf("Freeing right subtree of key %d\n", (*subroot)->key );
         vmap_freeAux( &( (*subroot)->right ) );
-        printf("Freeing node of key %d\n", (*subroot)->key );
+        // printf("Freeing node of key %d\n", (*subroot)->key );
         free( *subroot );
         *subroot = NULL;
     }
@@ -369,7 +369,9 @@ bool vmap_find( vmap_t* vmap, vmap_key_t key, vec3d_t* v
         return false;
     
     *v = node_ptr->v;
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
     *vis_flag = node_ptr->visible;
+#endif
 
     return true;
 }
@@ -396,7 +398,9 @@ bool vmap_updateNode( vmap_t* vmap, vmap_key_t key, vec3d_t* v
         return false;
     
     node_ptr->v = *v;
+#if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
     node_ptr->visible = vis_flag;
+#endif
 
     return true;
 }
@@ -440,17 +444,15 @@ void vmap_graph( vmap_t* vmap ){
 }
 
 void vmap_free( vmap_t* vmap ){
-	printf("Entered vmap_free()\n");
 	if( vmap == NULL ){
-		printf("vmap is NULL.\n");
+		// printf("Warning: in vmap_free(): vmap is already NULL.\n");
 		return;
 	}
     if( vmap->root == NULL ){
-		printf("vmap empty.\n");
+		// printf("Warning: in vmap_free(): vmap is already empty.\n");
         return;
 	}
 
-	printf("Freeing vmap...\n");
     vmap_freeAux( &(vmap->root) );
 
 	vmap->root = NULL;
