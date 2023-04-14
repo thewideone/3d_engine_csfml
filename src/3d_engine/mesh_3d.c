@@ -33,7 +33,12 @@ void mesh_makeEmpty( mesh_t* mesh ){
     mesh->face_cnt = 0;
     mesh->faces = NULL;
     mesh->transformedVertices = NULL;
-    mesh->vert2DSpaceMap = NULL;
+    // mesh->vert2DSpaceMap = NULL;
+    // mesh->vert2DSpaceMap = 
+    // vmap_makeEmpty( &(mesh->vert2DSpaceMap) );
+    mesh->vert2DSpaceMap.root = NULL;
+    mesh->vert2DSpaceMap.size = 0;
+
     mesh->vertex_cnt = 0;
     mesh->vertices = NULL;
     mesh->vis_edge_vec = NULL;
@@ -49,7 +54,7 @@ void mesh_free( mesh_t* mesh ){
     // printf( "Freeing transformedVertices...\n" );
     arrfree( mesh->transformedVertices );
     // printf( "Freeing vert2DSpaceMap...\n" );
-    vmap_free( mesh->vert2DSpaceMap );
+    vmap_free( &(mesh->vert2DSpaceMap) );
     // printf( "Freeing vertices...\n" );
     arrfree( mesh->vertices );
     // printf( "Freeing vis_edge_vec...\n" );

@@ -45,7 +45,7 @@ typedef struct {
     // vector<int> visFaceIDs;
     int* visFaceIDs;
     // map<int, vec3d> vert2DSpaceMap; // vertex ID, vertex object
-    vmap_t* vert2DSpaceMap;
+    vmap_t vert2DSpaceMap;
     
     // vis_edge_vec:
     // Each entry is 4x int

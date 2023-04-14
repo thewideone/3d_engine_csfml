@@ -404,7 +404,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 	// Map of projected vertices
     // (only the visible ones are projected)
     // int: ID of vertex, vec3d: vertex data
-	vmap_free( mesh->vert2DSpaceMap );
+	vmap_free( &(mesh->vert2DSpaceMap) );
 	// mesh->vert2DSpaceMap = NULL;
 
 	printf( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", mesh->vertex_cnt );

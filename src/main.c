@@ -209,7 +209,7 @@ void binarySearchTreeMapTest( void ){
 #else
 		bool ret = vmap_find( &map, i, &found_vert );
 #endif
-		if( ret )
+		if( ret ){
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
 			// printf( "Found node of key %d: %f, %f, %f, %f, %d\n", i, found_node->v.x, found_node->v.y, found_node->v.z, found_node->v.w, found_node->visible );
 			printf( "Found node of key %d and vis_flg %d: ", i, found_vis_flag );
@@ -219,6 +219,7 @@ void binarySearchTreeMapTest( void ){
 			printf( "Found node of key %d: ", i );
 			vec3d_print( &found_vert, true );
 #endif
+		}
 	}
 
 	printf( "Plotting graph...\n" );
