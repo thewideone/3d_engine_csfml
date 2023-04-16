@@ -29,7 +29,7 @@ void meshQueue_freeAllMeshes( mesh_queue_t* mq ){
     }
 
     if( mq->size != 0 )
-        printf( "Error: after meshQueue_freeMeshes() size not zero!\n" );
+        DEBUG_PRINT( "Error: after meshQueue_freeMeshes() size not zero!\n" );
     // mq->size = 0;
     mq->cursor = 0;
 }
@@ -66,7 +66,7 @@ bool meshQueue_push( mesh_queue_t* mq, mesh_t* mesh ){
 
     // If the queue is full
     if( mq->size == MESH_QUEUE_CAPACITY ){
-        printf( "Error: in meshQueue_push(): queue at its capacity.\n" );
+        DEBUG_PRINT( "Error: in meshQueue_push(): queue at its capacity.\n" );
         return false;
     }
 

@@ -183,29 +183,29 @@ vmap_node_t* vmap_insertAux( vmap_node_t** subroot, vmap_key_t key, vec3d_t* v, 
 #else
 vmap_node_t* vmap_insertAux( vmap_node_t** subroot, vmap_key_t key, vec3d_t* v ){
 #endif
-    // printf( "In vmap_insertAux(): " );
-    // printf( "subroot = %d\n", (*subroot) );
+    // DEBUG_PRINT( "In vmap_insertAux(): " );
+    // DEBUG_PRINT( "subroot = %d\n", (*subroot) );
     if( (*subroot) == NULL ){
         // Create a new node
-        // printf( "Creating a new node... " );
+        // DEBUG_PRINT( "Creating a new node... " );
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
         vmap_node_t* new_node_ptr = vmap_createNode( key, v, vis_flag );
 #else
         vmap_node_t* new_node_ptr = vmap_createNode( key, v );
 #endif
         if( new_node_ptr == NULL ){
-            printf( "Error: in vmap_insertAux(): memory allocation failed.\n" );
+            DEBUG_PRINT( "Error: in vmap_insertAux(): memory allocation failed.\n" );
             return NULL;
         }
 
-        // printf( "done.\n" );
+        // DEBUG_PRINT( "done.\n" );
 
         return new_node_ptr;
     }
 
     // Insert the new node
     if( key < (*subroot)->key ){
-        // printf( "Inserting to the left...\n" );
+        // DEBUG_PRINT( "Inserting to the left...\n" );
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
         (*subroot)->left = vmap_insertAux( &((*subroot)->left), key, v, vis_flag );
 #else
@@ -214,7 +214,7 @@ vmap_node_t* vmap_insertAux( vmap_node_t** subroot, vmap_key_t key, vec3d_t* v )
         (*subroot)->left->parent = *subroot;
     }
     else if( key > (*subroot)->key ){
-        // printf( "Inserting to the right...\n" );
+        // DEBUG_PRINT( "Inserting to the right...\n" );
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
         (*subroot)->right = vmap_insertAux( &((*subroot)->right), key, v, vis_flag );
 #else
@@ -224,11 +224,11 @@ vmap_node_t* vmap_insertAux( vmap_node_t** subroot, vmap_key_t key, vec3d_t* v )
     }
     else {
         // Key is already existing (duplicate found)
-        // printf( "Key duplicate.\n" );
+        // DEBUG_PRINT( "Key duplicate.\n" );
         return *subroot;
     }
 
-    // printf("Computing bf...\n ");
+    // DEBUG_PRINT("Computing bf...\n ");
     (*subroot)->bf = vmap_getBalanceFactor( *subroot );
 
     // Balance tree
@@ -257,14 +257,17 @@ void vmap_printInorderAux( vmap_node_t* subroot ){
         return;
     else {
         vmap_printInorderAux(subroot->left);
-        printf( "Key: %d, v: ", subroot->key );
+        
+        STDO_STR( "Key: " );
+        STDO_VMAP_KEY( subroot->key );
+        STDO_STR( ", v: " );
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
         vec3d_print( &(subroot->v), 0 );
 
-        printf( ", " );
+        STDO_STR( ", " );
         if( !(subroot->visible) )
-            printf( "not " );
-        printf( "visible\n" );
+            STDO_STR( "not " );
+        STDO_STR( "visible\n" );
 #else  
         vec3d_print( &(subroot->v), 1 );
 #endif
@@ -285,31 +288,36 @@ void vmap_graphAux( vmap_node_t* subroot, uint8_t indent ){
 
         // Make indent
         for( uint8_t i=0; i<indent; i++ )
-            printf( " " );
+            STDO_CHR( ' ' );
         
         // Print key
-        printf( "{%d, ", subroot->key );
+        STDO_CHR( '{' );
+        STDO_VMAP_KEY( subroot->key );
+        STDO_STR( ", " );
         // Print vec3d data
         vec3d_print( &(subroot->v), 0 );
         
 #if defined(REMOVE_HIDDEN_LINES) || defined(RENDER_VISIBLE_ONLY)
         // Print visibility
-        printf( ", " );
+        STDO_STR( ", " );
         if( subroot->visible )
-            printf( "v" );
+            STDO_CHR( 'v' );
         else
-            printf( "n" );
+            STDO_CHR( 'n' );
 #endif
         // Print balance factor
-        printf( "|%d", subroot->bf );
+        STDO_CHR( '|' );
+        STDO_UINT8( subroot->bf );
 
 #ifdef VMAP_SHOW_PARENT_KEY
         // Print parent's key
-        if( subroot->parent != NULL )
-            printf( " ] %d", subroot->parent->key );
+        if( subroot->parent != NULL ){
+            STDO_STR( " ] " );
+            STDO_VMAP_KEY( subroot->parent->key );
+        }
 #endif
 
-        printf( "}\n" );
+        STDO_STR( "}\n" );
 
         vmap_graphAux( subroot->left, indent + VMAP_GRAPH_INDENT );
     }
@@ -321,11 +329,11 @@ void vmap_graphAux( vmap_node_t* subroot, uint8_t indent ){
 // 
 void vmap_freeAux( vmap_node_t** subroot ){
     if (*subroot != NULL){
-		// printf("Freeing left subtree of key %d\n", (*subroot)->key );
+		// DEBUG_PRINT("Freeing left subtree of key %d\n", (vmap_key_t) (*subroot)->key );
         vmap_freeAux( &( (*subroot)->left  ) );
-		// printf("Freeing right subtree of key %d\n", (*subroot)->key );
+		// DEBUG_PRINT("Freeing right subtree of key %d\n", (vmap_key_t) (*subroot)->key );
         vmap_freeAux( &( (*subroot)->right ) );
-        // printf("Freeing node of key %d\n", (*subroot)->key );
+        // DEBUG_PRINT("Freeing node of key %d\n", (vmap_key_t) (*subroot)->key );
         free( *subroot );
         *subroot = NULL;
     }
@@ -418,7 +426,7 @@ void vmap_insert( vmap_t* vmap, vmap_key_t key, vec3d_t* v
 #endif
 
     if( vmap->root == NULL ){
-        printf( "Error: in vmap_insert() (key = %d): failed to insert a new node.", key );
+        DEBUG_PRINT( "Error: in vmap_insert() (key = %d): failed to insert a new node.", (vmap_key_t) key );
         return;
     }
 
@@ -427,7 +435,7 @@ void vmap_insert( vmap_t* vmap, vmap_key_t key, vec3d_t* v
 
 void vmap_printInorder( vmap_t* vmap ){
     if( vmap->size == 0 ){
-        printf( "Empty\n" );
+        DEBUG_PRINT( "Empty\n" );
         return;
     }
 
@@ -436,7 +444,7 @@ void vmap_printInorder( vmap_t* vmap ){
 
 void vmap_graph( vmap_t* vmap ){
     if( vmap->size == 0 ){
-        printf( "Empty\n" );
+        DEBUG_PRINT( "Empty\n" );
         return;
     }
 
@@ -445,11 +453,11 @@ void vmap_graph( vmap_t* vmap ){
 
 void vmap_free( vmap_t* vmap ){
 	if( vmap == NULL ){
-		// printf("Warning: in vmap_free(): vmap is already NULL.\n");
+        // DEBUG_PRINT( "Warning: in vmap_free(): vmap is already NULL.\n" );
 		return;
 	}
     if( vmap->root == NULL ){
-		// printf("Warning: in vmap_free(): vmap is already empty.\n");
+        // DEBUG_PRINT( "Warning: in vmap_free(): vmap is already empty.\n" );
         return;
 	}
 

@@ -13,7 +13,7 @@ sfFont* font;
 int initGraphics( void ){
     font = sfFont_createFromFile("Minecraft.ttf");
     if ( !font ){
-		printf( "Error: Could not load a font.\n" );
+		DEBUG_PRINT( "Error: Could not load a font.\n" );
         return 1;
 	}
     return 0;

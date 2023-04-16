@@ -1,5 +1,4 @@
 #include <stdio.h>
-// #include "../pc_routines.h" // for reading lines of files
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
@@ -22,14 +21,6 @@ fxp_t fixedDiv( fxp_t a, fxp_t b ){
 }
 #endif
 
-// void printVec3D( vec3d_t* v, char* name ){
-//     char vec_val[30];
-//     sprintf( vec_val, "{%f, %f, %f, %f}", v->x, v->y, v->z, v->w );
-//     strcat( name, vec_val );
-//     strcat( name, "\n" );
-//     printf( name );
-// }
-
 void vec3d_makeEmpty( vec3d_t* v ){
 #ifdef USE_FIXED_POINT_ARITHMETIC
     v->x = floatingToFixed( 0.0f );
@@ -46,13 +37,17 @@ void vec3d_makeEmpty( vec3d_t* v ){
 
 void printMatrix( mat4x4_t* mat ){
     for( int i=0; i<4; i++ ){
-        for( int j=0; j<4; j++ )
+        for( int j=0; j<4; j++ ){
 #ifdef USE_FIXED_POINT_ARITHMETIC
-            printf( "%f ", fixedToFloating(mat->m[i][j]) );
+            STDO_FLT( fixedToFloating(mat->m[i][j]) );
+            STDO_CHR( ' ' );
 #else
-			printf( "%f ", mat->m[i][j] );
+            STDO_FLT( mat->m[i][j] );
+            STDO_CHR( ' ' );
 #endif
-		printf( "\n" );
+        }
+
+        STDO_CHR( '\n' );
 	}
 }
 
@@ -116,7 +111,7 @@ vec3d_t vectorDiv( vec3d_t* v, rtnl_t k ){
     // v_ret.w = 0;
     // return v_ret;
     if( k == 0.0 ){
-        printf( "Error: in vectorDiv() division by 0. Aborting." );
+        DEBUG_PRINT( "Error: in vectorDiv() division by 0. Aborting." );
         exit(0);    // maybe replace with something better
     }
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -163,9 +158,9 @@ vec3d_t vectorNormalise( vec3d_t* v ){
 #ifdef USE_FIXED_POINT_ARITHMETIC 
     if( l == floatingToFixed( 0.0 ) )
         l = floatingToFixed( 0.0001 );
-    // printf( "vectorNormalise() l = %f\n", fixedToFloating(l) );
+    // DEBUG_PRINT( "vectorNormalise() l = %f\n", fixedToFloating(l) );
 // #else
-//     printf( "vectorNormalise() l = %f\n", l );
+//     DEBUG_PRINT( "vectorNormalise() l = %f\n", l );
 #endif
     // vec3d_t v_ret;
     // v_ret.x = v->x / l;
@@ -345,26 +340,26 @@ void matrix_mulMatrix( mat4x4_t* out_m, mat4x4_t* m1, mat4x4_t* m2 ){
 void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
     // Calculate new forward direction:
     vec3d_t newForward = vectorSub( target, pos );
-    // printf( "newForward init:\n" );
+    // DEBUG_PRINT( "newForward init:\n" );
 	// vec3d_print( &newForward, 1 );
     newForward = vectorNormalise( &newForward );
-    // printf( "newForward after norm:\n" );
+    // DEBUG_PRINT( "newForward after norm:\n" );
 	// vec3d_print( &newForward, 1 );
 
     // Calculate new up direction:
     vec3d_t a = vectorMul( &newForward, vectorDotProduct( up, &newForward ) );
-    // printf( "a:\n" );
+    // DEBUG_PRINT( "a:\n" );
 	// vec3d_print( &a, 1 );
     vec3d_t newUp = vectorSub( up, &a );
-    // printf( "newUp:\n" );
+    // DEBUG_PRINT( "newUp:\n" );
 	// vec3d_print( &newUp, 1 );
     newUp = vectorNormalise( &newUp );
-    // printf( "newUp after norm:\n" );
+    // DEBUG_PRINT( "newUp after norm:\n" );
 	// vec3d_print( &newUp, 1 );
 
     // Calculate new right direction:
     vec3d_t newRight = vectorCrossProduct( &newUp, &newForward );
-    // printf( "newRight:\n" );
+    // DEBUG_PRINT( "newRight:\n" );
 	// vec3d_print( &newRight, 1 );
 
     // Construct Dimensioning and Translation Matrix	
@@ -407,19 +402,43 @@ void matrix_quickInverse( mat4x4_t* out_mat, mat4x4_t* m ){
 
 void vec3d_print( vec3d_t* v, int new_line_flag ){
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    printf( "\t%f %f %f %f", fixedToFloating(v->x), fixedToFloating(v->y), fixedToFloating(v->z), fixedToFloating(v->w) );
+    // printf( "\t%f %f %f %f", fixedToFloating(v->x), fixedToFloating(v->y), fixedToFloating(v->z), fixedToFloating(v->w) );
+    STDO_CHR( '\t' );
+    STDO_FLT( fixedToFloating(v->x) );
+    STDO_CHR( ' ' );
+    STDO_FLT( fixedToFloating(v->y) );
+    STDO_CHR( ' ' );
+    STDO_FLT( fixedToFloating(v->z) );
+    STDO_CHR( ' ' );
+    STDO_FLT( fixedToFloating(v->w) );
 #else
-    printf( "\t%f %f %f %f", v->x, v->y, v->z, v->w );
+    // printf( "\t%f %f %f %f", v->x, v->y, v->z, v->w );
+    STDO_CHR( '\t' );
+    STDO_FLT( v->x );
+    STDO_CHR( ' ' );
+    STDO_FLT( v->y );
+    STDO_CHR( ' ' );
+    STDO_FLT( v->z );
+    STDO_CHR( ' ' );
+    STDO_FLT( v->w );
 #endif
     if( new_line_flag )
-        printf( "\n" );
+        STDO_CHR( '\n' );
 }
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 void vec3d_printAsFixed( vec3d_t* v, int new_line_flag ){
-    printf( "\t%d %d %d %d", v->x, v->y, v->z, v->w );
+    // printf( "\t%d %d %d %d", v->x, v->y, v->z, v->w );
+    STDO_CHR( '\t' );
+    STDO_RTNL( v->x );
+    STDO_CHR( ' ' );
+    STDO_RTNL( v->y );
+    STDO_CHR( ' ' );
+    STDO_RTNL( v->z );
+    STDO_CHR( ' ' );
+    STDO_RTNL( v->w );
     if( new_line_flag )
-        printf( "\n" );
+        STDO_CHR( '\n' );
 }
 #endif
 
@@ -439,12 +458,14 @@ void polygon_free( polygon_t* poly ){
 
 void polygon_print( polygon_t* poly ){
     if( poly == NULL || poly->p_count == 0 )
-        printf( "Empty\n" );
+        STDO_STR( "Empty\n" );
     else {
         for( int i=0; i < poly->p_count; i++ ){
-            printf( "%d ", poly->p[i] );
+            // printf( "%d ", poly->p[i] );
+            STDO_UINT16( poly->p[i] );
+            STDO_CHR( ' ' );
         }
-        printf( "\n" );
+        STDO_CHR( '\n' );
     }
 }
 
@@ -454,30 +475,30 @@ void polygon_print( polygon_t* poly ){
 #ifdef USE_FIXED_POINT_ARITHMETIC
 #warning "Function areCollinear() in math_3d.c not ported to fixed point arithmetic yet!"
 #endif
-bool areCollinear( vec3d_t* v1, vec3d_t* v2, vec3d_t* v3, bool object_num, sfRenderWindow* windowToDrawOnto ){
-    rtnl_t m, b; // line equation coefficients
-    rtnl_t y_expected;
+// bool areCollinear( vec3d_t* v1, vec3d_t* v2, vec3d_t* v3, bool object_num, sfRenderWindow* windowToDrawOnto ){
+//     rtnl_t m, b; // line equation coefficients
+//     rtnl_t y_expected;
 
-    m = (v2->y - v1->y) / (v2->x - v1->x);
+//     m = (v2->y - v1->y) / (v2->x - v1->x);
 
-    // v1.y = m*v1.x + b
-    b = v1->y - m*v1->x;
+//     // v1.y = m*v1.x + b
+//     b = v1->y - m*v1->x;
 
-    y_expected = m*v3->x + b;
+//     y_expected = m*v3->x + b;
 
-    // stringstream ss;
-    // ss << v3.y << endl << y_expected;
-    char str[16];
-    sprintf( str, "%f\n%f", v3->y, y_expected );
-    if( object_num )
-        putText( str, 50, 180, 10, sfMagenta, windowToDrawOnto );
-    else
-        putText( str, 10, 180, 10, sfMagenta, windowToDrawOnto );
+//     // stringstream ss;
+//     // ss << v3.y << endl << y_expected;
+//     char str[16];
+//     sprintf( str, "%f\n%f", v3->y, y_expected );
+//     if( object_num )
+//         putText( str, 50, 180, 10, sfMagenta, windowToDrawOnto );
+//     else
+//         putText( str, 10, 180, 10, sfMagenta, windowToDrawOnto );
 
-    if( floor(v3->y) == floor(y_expected) || floor(v3->y) == floor(y_expected) + 1.0 || floor(v3->y) == floor(y_expected) - 1.0 )
-        return true;
-    return false;
-}
+//     if( floor(v3->y) == floor(y_expected) || floor(v3->y) == floor(y_expected) + 1.0 || floor(v3->y) == floor(y_expected) - 1.0 )
+//         return true;
+//     return false;
+// }
 
 /*
 void computePlaneCoefficients( float* A, float* B, float* C, float* D, vec3d_t* vert1, vec3d_t* vert2, vec3d_t* vert3 ){
@@ -510,7 +531,7 @@ void calcFaceBoundaries( mesh_t* mesh, int face_id, int* min_x, int* max_x, int*
             if( curr_vert.y > *max_y )   *max_y = curr_vert.y;
         }
         else{
-            printf( "Error: in math.c: calcFaceBoundaries(): could not find vertex of id %d\n", vert_id );
+            DEBUG_PRINT( "Error: in math.c: calcFaceBoundaries(): could not find vertex of id %d\n", vert_id );
             return;
         }
     }

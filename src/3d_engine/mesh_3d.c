@@ -76,7 +76,7 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
     file_ptr = fopen( filename, "r" );
 
     if( file_ptr == NULL ){
-        printf( "Error: in mesh_loadFromObjFile(): could not open the file\n" );
+        DEBUG_PRINT( "Error: in mesh_loadFromObjFile(): could not open the file\n" );
         return false;
     }
 
@@ -112,7 +112,7 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
             #endif
 
             if( values_read != 4 ){
-                printf( "Error: in mesh_loadFromObjFile() could not read 4 values from line\n" );
+                DEBUG_PRINT( "Error: in mesh_loadFromObjFile() could not read 4 values from line\n" );
                 return false;
             }
             // printf( "Putting vertex...\n" );
@@ -124,7 +124,7 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
         if( line_buf[0] == 'f' ){
             
             if( sscanf( line_buf, "%c ", &letter ) != 1 ){
-                printf( "Error: in mesh_loadFromObjFile() could not read first letter from line\n" );
+                DEBUG_PRINT( "Error: in mesh_loadFromObjFile() could not read first letter from line\n" );
                 return false;
             }
 
@@ -267,10 +267,17 @@ void mesh_printVisFaceIDs( mesh_t* mesh ){
     //     cout << visFaceIDs[i] << ", ";
     // cout << endl;
 
-    printf( "IDs of visible faces (%lld in total):\n", arrlen(mesh->visFaceIDs) );
-    for( int i=0; i<arrlen(mesh->visFaceIDs); i++ )
-        printf( "%d, ", mesh->visFaceIDs[i] );
-    printf( "\n" );
+    // printf( "IDs of visible faces (%lld in total):\n", arrlen(mesh->visFaceIDs) );
+    STDO_STR( "IDs of visible faces (" );
+    STDO_UINT16( (uint16_t) arrlen(mesh->visFaceIDs) );
+    STDO_STR( " in total):\n" );
+
+    for( uint16_t i=0; i<arrlen(mesh->visFaceIDs); i++ ){
+        // printf( "%d, ", mesh->visFaceIDs[i] );
+        STDO_UINT16( mesh->visFaceIDs[i] );
+        STDO_STR( ", " );
+    }
+    STDO_CHR( '\n' );
 }
 
 void mesh_printVisEdgeVec( mesh_t* mesh ){
@@ -279,10 +286,21 @@ void mesh_printVisEdgeVec( mesh_t* mesh ){
     // for( int i=0; i < vis_edge_vec.size(); i+=4 ){
     //     cout << vis_edge_vec[i] << ", " << vis_edge_vec[i+1] << ", " << vis_edge_vec[i+2] << ", " << vis_edge_vec[i+3] << endl;
     // }
-    printf( "%lld visible edges:\n", arrlen(mesh->vis_edge_vec)/4 );
-    printf( "E1 E2 C S\n" );
-    for( int i=0; i<arrlen(mesh->vis_edge_vec); i+=4 )
-        printf( "%d, %d, %d, %d\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1], mesh->vis_edge_vec[2], mesh->vis_edge_vec[i+3] );
+    // printf( "%lld visible edges:\n", arrlen(mesh->vis_edge_vec)/4 );
+    STDO_UINT16( (uint16_t) arrlen(mesh->vis_edge_vec)/4 );
+    STDO_STR( " visible edges:\n" );
+    STDO_STR( "E1 E2 C S\n" );
+    for( uint16_t i=0; i<arrlen(mesh->vis_edge_vec); i+=4 ){
+        // printf( "%d, %d, %d, %d\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1], mesh->vis_edge_vec[2], mesh->vis_edge_vec[i+3] );
+        STDO_UINT16( mesh->vis_edge_vec[i] );
+        STDO_STR( ", " );
+        STDO_UINT16( mesh->vis_edge_vec[i+1] );
+        STDO_STR( ", " );
+        STDO_UINT16( mesh->vis_edge_vec[i+2] );
+        STDO_STR( ", " );
+        STDO_UINT16( mesh->vis_edge_vec[i+3] );
+        STDO_CHR( '\n' );
+    }
 }
 
 #ifndef COLOUR_MONOCHROME

@@ -30,7 +30,7 @@ void setup3D( void ){
 	// bool ret = mesh_loadFromProgmem( &mesh, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
 #endif
 	if( !ret ){
-		printf( "Error: in setup3D() loading mesh from file failed\n" );
+		DEBUG_PRINT( "Error: in setup3D() loading mesh from file failed\n" );
 	}
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -101,12 +101,12 @@ void computeViewMatrix( mat4x4_t* mat_view, flp_t f_elapsed_time ){
         f_yaw += floatingToFixed( 2.0f * f_elapsed_time );
     
     // We've integrated time into this, so it's a velocity vector:
-	// printf( "v_look_dir: " );
+	// DEBUG_PRINT( "v_look_dir: " );
 	// vec3d_print( &v_look_dir, 1 );
 
     vec3d_t v_forward = vectorMul( &v_look_dir, floatingToFixed( 4.0f * f_elapsed_time ) );
 
-	// printf( "f_yaw: %f\n", fixedToFloating(f_yaw) );
+	// DEBUG_PRINT( "f_yaw: %f\n", (float) fixedToFloating(f_yaw) );
 #else
     if (sfKeyboard_isKeyPressed(sfKeyUp))
         v_camera.y -= 2.0f * f_elapsed_time;
@@ -124,17 +124,17 @@ void computeViewMatrix( mat4x4_t* mat_view, flp_t f_elapsed_time ){
     }
     
     // We've integrated time into this, so it's a velocity vector:
-	// printf( "v_look_dir: " );
+	// DEBUG_PRINT( "v_look_dir: " );
 	// vec3d_print( &v_look_dir, 1 );
 
     vec3d_t v_forward = vectorMul( &v_look_dir, 4.0f * f_elapsed_time );
 
-	// printf( "f_yaw: %f\n", f_yaw );
+	// DEBUG_PRINT( "f_yaw: %f\n", (float) f_yaw );
 #endif
 
-	// printf( "v_camera: " );
+	// DEBUG_PRINT( "v_camera: " );
 	// vec3d_print( &v_camera, 1 );
-	// printf( "v_forward: " );
+	// DEBUG_PRINT( "v_forward: " );
 	// vec3d_print( &v_forward, 1 );
 
     // My trial of implementing left and right strafing
@@ -154,11 +154,11 @@ void computeViewMatrix( mat4x4_t* mat_view, flp_t f_elapsed_time ){
     vec3d_t v_right = vectorMul( &v_right_raw, 64.0f * f_elapsed_time );
 #endif
 
-	// printf( "temp_vUp: " );
+	// DEBUG_PRINT( "temp_vUp: " );
 	// vec3d_print( &temp_vUp, 1 );
-	// printf( "v_right_raw: " );
+	// DEBUG_PRINT( "v_right_raw: " );
 	// vec3d_print( &v_right_raw, 1 );
-	// printf( "v_right: " );
+	// DEBUG_PRINT( "v_right: " );
 	// vec3d_print( &v_right, 1 );
     
     if (sfKeyboard_isKeyPressed(sfKeyW))
@@ -182,11 +182,11 @@ void computeViewMatrix( mat4x4_t* mat_view, flp_t f_elapsed_time ){
     vec3d_t v_target = { 0, 0, 1, 1 };
 #endif
 
-	// printf( "v_camera: " );
+	// DEBUG_PRINT( "v_camera: " );
 	// vec3d_print( &v_camera, 1 );
-	// printf( "v_up: " );
+	// DEBUG_PRINT( "v_up: " );
 	// vec3d_print( &v_up, 1 );
-	// printf( "v_target: " );
+	// DEBUG_PRINT( "v_target: " );
 	// vec3d_print( &v_target, 1 );
 	
     mat4x4_t mat_camera_rot;
@@ -201,48 +201,19 @@ void computeViewMatrix( mat4x4_t* mat_view, flp_t f_elapsed_time ){
     matrix_quickInverse( mat_view, &mat_camera );
 
 	
-	// printf( "mat_camera_rot:\n" );
+	// DEBUG_PRINT( "mat_camera_rot:\n" );
 	// printMatrix( &mat_camera_rot );	
-	// printf( "v_look_dir: " );
+	// DEBUG_PRINT( "v_look_dir: " );
 	// vec3d_print( &v_look_dir, 1 );
-	// printf( "v_target: " );
+	// DEBUG_PRINT( "v_target: " );
 	// vec3d_print( &v_target, 1 );
 
-	// printf( "mat_camera:\n" );
+	// DEBUG_PRINT( "mat_camera:\n" );
 	// printMatrix( &mat_camera );	
-	// printf( "mat_view:\n" );
+	// DEBUG_PRINT( "mat_view:\n" );
 	// printMatrix( &mat_view );	
 }
 #endif
-
-void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f_theta ){
-	// mat4x4 matRotZ, matRotX;
-    // Current angle:
-    if( animate )
-        *f_theta += 1.0 * f_elapsed_time;
-	
-	// printf( "f_theta = %f,\f_elapsed_time = %f\n", (*f_theta), f_elapsed_time );
-
-#ifdef USE_FIXED_POINT_ARITHMETIC
-	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
-    // vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
-#else
-    vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
-    // vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
-#endif
-
-	mesh.pos = pos1;
-	
-#ifdef USE_CAMERA
-	mat4x4_t mat_view;
-	computeViewMatrix( &mat_view, f_elapsed_time );
-    processMesh( &mesh, &mat_view, *f_theta, (*f_theta)*0.5 );
-#else
-	processMesh( &mesh, *f_theta, (*f_theta)*0.5 );
-#endif
-
-	drawMesh( &mesh, renderWindow );
-}
 
 // 
 // Project a 3D mesh on 2D surface,
@@ -264,8 +235,8 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 	mat4x4_t matRotZ, matRotX;
 	matrix_makeRotZ( &matRotZ, floatingToFixed( rot_angle_z ) );
     matrix_makeRotX( &matRotX, floatingToFixed( rot_angle_x ) );
-	// printf( "rot_angle_x = %f\n", rot_angle_x );
-	// printf( "rot_angle_z = %f\n", rot_angle_z );
+	// DEBUG_PRINT( "rot_angle_x = %f\n", (float) rot_angle_x );
+	// DEBUG_PRINT( "rot_angle_z = %f\n", (float) rot_angle_z );
 	// printMatrix( &matRotX );
 	// printMatrix( &matRotZ );
 #else
@@ -287,15 +258,15 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
     matrix_mulMatrix( &mat_temp, &matRotZ, &matRotX );     // order important
     matrix_mulMatrix( &matWorld, &mat_temp, &matTrans );   // second
 
-	// printf( "matRotZ:\n" );
+	// DEBUG_PRINT( "matRotZ:\n" );
 	// printMatrix( &matRotZ );
-	// printf( "matRotX:\n" );
+	// DEBUG_PRINT( "matRotX:\n" );
 	// printMatrix( &matRotX );
-	// printf( "matTrans:\n" );
+	// DEBUG_PRINT( "matTrans:\n" );
 	// printMatrix( &matTrans );
-	// printf( "MatWorld:\n" );
+	// DEBUG_PRINT( "MatWorld:\n" );
 	// printMatrix( &matWorld );
-	// printf( "MatProj:\n" );
+	// DEBUG_PRINT( "MatProj:\n" );
 	// printMatrix( &mat_proj );
 
 	arrfree( mesh->transformedVertices );
@@ -305,7 +276,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 	// arrsetcap( mesh->transformedVertices, mesh->vertex_cnt );
 
 	// Transform every vertex of the mesh
-	// printf( "mesh->transformedVertices:\n" );
+	// DEBUG_PRINT( "mesh->transformedVertices:\n" );
 
     for( size_t i=0; i < mesh->vertex_cnt; i++ ){
 		vec3d_t vertex = mesh->vertices[i];
@@ -315,36 +286,36 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 		arrput( mesh->transformedVertices, v_transformed );
     }
 
-	// printf( "Transformed vertices.\n" );
+	// DEBUG_PRINT( "Transformed vertices.\n" );
 
 	// Vector storing only IDs of visible faces
 	arrfree( mesh->visFaceIDs );
 
-	// printf( "Freed mesh->visFaceIDs.\n" );
+	// DEBUG_PRINT( "Freed mesh->visFaceIDs.\n" );
 	// mesh->visFaceIDs = NULL;
 	// arrsetcap( mesh->visFaceIDs, mesh->face_cnt );	// is it needed?
 
 	/* // Debug print:
 
-	printf( "mesh->vertices:\n" );
+	DEBUG_PRINT( "mesh->vertices:\n" );
 	for( size_t i=0; i < mesh->vertex_cnt; i++ )
-		printf( "%f %f %f\n", mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z );
+		DEBUG_PRINT( "%f %f %f\n", (float) mesh->vertices[i].x, (float) mesh->vertices[i].y, (float) mesh->vertices[i].z );
 	
-	printf( "mesh.vertices (%lld):\n", mesh->vertex_cnt );
+	DEBUG_PRINT( "mesh.vertices (%lld):\n", (size_t) mesh->vertex_cnt );
 	for( size_t i=0; i < mesh->vertex_cnt; i++ ){
 		vec3d_t v = mesh->vertices[i];
-		printf( "v %lld: ", i );
+		DEBUG_PRINT( "v %lld: ", (int) i );
 		vec3d_print( &v, 1 );
 	}
 
-	printf( "mesh.faces (%lld):\n", mesh->face_cnt );
+	DEBUG_PRINT( "mesh.faces (%lld):\n", (size_t) mesh->face_cnt );
 	for( size_t i=0; i < mesh->face_cnt; i++ ){
 		polygon_t poly = mesh->faces[i];
-		printf( "Face %lld: ", i );
+		DEBUG_PRINT( "Face %lld: ", (int) i );
 		polygon_print( &poly );
 	}
 
-	printf( "mesh.transformedVertices (%lld):\n", arrlen(mesh->transformedVertices) );
+	DEBUG_PRINT( "mesh.transformedVertices (%lld):\n", (size_t) arrlen(mesh->transformedVertices) );
 	for( size_t i=0; i < arrlen(mesh->transformedVertices); i++ ){
 		vec3d_t v = mesh->transformedVertices[i];
 		vec3d_print( &v, 1 );
@@ -353,42 +324,43 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 
 	// Add each visible face's ID to the visFaceIDs vector
     int face_id = 0;
-    for( size_t i=0; i < mesh->face_cnt; i++ ){ 
-		polygon_t face = mesh->faces[i];	// idk how but it works
-		// printf( "Processing face %d: ", i );
-		// polygon_print( &face );
+    for( size_t i=0; i < mesh->face_cnt; i++ ){
 #ifdef RENDER_VISIBLE_ONLY
+		polygon_t face = mesh->faces[i];	// idk how but it works
+		// DEBUG_PRINT( "Processing face %d: ", (size_t) i );
+		// polygon_print( &face );
+
         // Use cross-product to get surface normal:
         vec3d_t normal, edge1, edge2;
         edge1 = vectorSub( &mesh->transformedVertices[face.p[2]],
                            &mesh->transformedVertices[face.p[1]] );
         edge2 = vectorSub( &mesh->transformedVertices[face.p[0]],
                            &mesh->transformedVertices[face.p[1]] );
-		// printf( "Face %d edge1: ", i );
+		// DEBUG_PRINT( "Face %d edge1: ", (size_t) i );
 		// vec3d_print( &edge1, true );
-		// printf( "Face %d edge2: ", i );
+		// DEBUG_PRINT( "Face %d edge2: ", (size_t) i );
 		// vec3d_print( &edge2, true );
 		// The normal vector is a cross product of two edges of the face:
         normal = vectorCrossProduct( &edge1, &edge2 );
-		// printf( "Face %d normal: ", i );
+		// DEBUG_PRINT( "Face %d normal: ", (size_t) i );
 		// vec3d_print( &normal, true );
         // Normalise the normal (normalised length = 1.0 unit):
         normal = vectorNormalise( &normal );
 
-		// printf( "Face %d normal normalised: ", i );
+		// DEBUG_PRINT( "Face %d normal normalised: ", (size_t) i );
 		// vec3d_print( &normal, true );
 
         // Get ray from the face to the camera:
         vec3d_t v_camera_ray = vectorSub( &mesh->transformedVertices[face.p[0]],
                                       &v_camera );
-		// printf( "Face %d v_camera_ray: ", i );
+		// DEBUG_PRINT( "Face %d v_camera_ray: ", (size_t) i );
 		// vec3d_print( &v_camera_ray, true );
 
         // If the ray is aligned with normal, then face is visible:
         // Use '>' to render in inverse (like a view from inside):
 #ifdef USE_FIXED_POINT_ARITHMETIC
 		// vectorDotProduct() is of floating point type for now
-		// printf( "Face %d dot product: %f\n", i, fixedToFloating(vectorDotProduct( &normal, &v_camera_ray ) ) );
+		// DEBUG_PRINT( "Face %d dot product: %f\n", i, (float) fixedToFloating(vectorDotProduct( &normal, &v_camera_ray ) ) );
 		if( vectorDotProduct( &normal, &v_camera_ray ) < floatingToFixed(0.0f) ){
 #else
 		if( vectorDotProduct( &normal, &v_camera_ray ) < 0.0f ){
@@ -407,7 +379,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 	vmap_free( &(mesh->vert2DSpaceMap) );
 	// mesh->vert2DSpaceMap = NULL;
 
-	// printf( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", mesh->vertex_cnt );
+	// DEBUG_PRINT( "Freed vert2DSpaceMap. Transforming vertices (%lld)...\n", (size_t) mesh->vertex_cnt );
 
 #ifdef RENDER_VISIBLE_ONLY
 	// Transform only visible vertices
@@ -433,7 +405,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
         LABEL_VERTEX_VISIBLE:
 #else
 	// Transform all vertices
-    for( int curr_vert_id = 0; curr_vert_id < mesh->vertex_cnt; curr_vert_id++ ){
+    for( uint16_t curr_vert_id = 0; curr_vert_id < mesh->vertex_cnt; curr_vert_id++ ){
 #endif
             // Transform current vertex
 #ifdef USE_CAMERA
@@ -441,12 +413,12 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
             vec3d_t vertViewed = matrix_mulVector( mat_view, &mesh->transformedVertices[curr_vert_id] );
             vec3d_t vertProjected = matrix_mulVector( &mat_proj, &vertViewed );
 #else   // NOT USING CAMERA
-			// printf( "vertex to use: " );
+			// DEBUG_PRINT( "vertex to use: " );
 			// vec3d_print( &mesh->transformedVertices[curr_vert_id], 1 );
 
             vec3d_t vertProjected = matrix_mulVector( &mat_proj, &mesh->transformedVertices[curr_vert_id] );
 
-			// printf( "vertProjected initially: " );
+			// DEBUG_PRINT( "vertProjected initially: " );
 			// vec3d_print( &vertProjected, 1 );
 #endif
             // Scale into view, we moved the normalising into cartesian space
@@ -454,7 +426,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
             // do this manually:
             vertProjected = vectorDiv( &vertProjected, vertProjected.w );
 
-			// printf( "vertProjected after div: " );
+			// DEBUG_PRINT( "vertProjected after div: " );
 			// vec3d_print( &vertProjected, 1 );
 	
             // But since the result is in range of -1 to 1,
@@ -467,13 +439,13 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 
             vertProjected = vectorAdd( &vertProjected, &vOffsetView );
 
-			// printf( "vertProjected after add: " );
+			// DEBUG_PRINT( "vertProjected after add: " );
 			// vec3d_print( &vertProjected, 1 );
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 			vertProjected.x = fixedMul( vertProjected.x, floatingToFixed( 0.5f * (flp_t)SCREEN_WIDTH ) );
             vertProjected.y = fixedMul( vertProjected.y, floatingToFixed( 0.5f * (flp_t)SCREEN_HEIGHT ) );
-			// printf( "vertProjected after mul: " );
+			// DEBUG_PRINT( "vertProjected after mul: " );
 			// vec3d_print( &vertProjected, 1 );
 #else
             vertProjected.x *= 0.5f * (flp_t)SCREEN_WIDTH;
@@ -491,10 +463,10 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 #endif
 	}
 
-	// printf( "mesh->vert2DSpaceMap:\n" );
+	// DEBUG_PRINT( "mesh->vert2DSpaceMap:\n" );
 	// vmap_printInorder( &(mesh->vert2DSpaceMap) );
 
-	// printf( "Freeing vis_edge_vec...\n" );
+	// DEBUG_PRINT( "Freeing vis_edge_vec...\n" );
 
 	// Each entry is 4x int:
     // 1: start_vert_ID
@@ -506,18 +478,18 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
     // Reserve max number of visible edges? (9 for cube)
     //vis_edge_vec.reserve( 9*sizeof(int) );
 
-	// printf( "Filling vis_edge_vec...\n" );
+	// DEBUG_PRINT( "Filling vis_edge_vec...\n" );
 
 	// Fill the visible edge vector
     // For each visible face
-    for( int i=0; i < arrlen(mesh->visFaceIDs); i++ ){
+    for( size_t i=0; i < arrlen(mesh->visFaceIDs); i++ ){
 
-        int vert_cnt = mesh->faces[ mesh->visFaceIDs[i] ].p_count;
+        size_t vert_cnt = mesh->faces[ mesh->visFaceIDs[i] ].p_count;
         
         // For each point
-        for( int vert_id = 0; vert_id < vert_cnt; vert_id++ ){
+        for( size_t vert_id = 0; vert_id < vert_cnt; vert_id++ ){
 
-			int edge_start_v_id, edge_end_v_id;
+			size_t edge_start_v_id, edge_end_v_id;
 			bool presence_flag = 0;
 
 			edge_start_v_id = mesh->faces[ mesh->visFaceIDs[i] ].p[vert_id];
@@ -529,7 +501,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 				edge_end_v_id = mesh->faces[ mesh->visFaceIDs[i] ].p[vert_id + 1];
 
             // For the whole visible edge array
-            for( int j=0; j < arrlen(mesh->vis_edge_vec); j+=4 ){                
+            for( size_t j=0; j < arrlen(mesh->vis_edge_vec); j+=4 ){                
                 // If the edge exists in the visible edge array
                 if( (mesh->vis_edge_vec[j]   == edge_start_v_id &&
 					 mesh->vis_edge_vec[j+1] == edge_end_v_id   ) || 
@@ -566,7 +538,7 @@ void drawMesh( mesh_t* mesh, sfRenderWindow* render_window ){
             continue;
 #endif
 
-		// printf( "Looking for verts %d and %d...\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1] );
+		// DEBUG_PRINT( "Looking for verts %d and %d...\n", (int) mesh->vis_edge_vec[i], (int) mesh->vis_edge_vec[i+1] );
         
 		int vert1_ID = mesh->vis_edge_vec[i];
 		int vert2_ID = mesh->vis_edge_vec[i+1];
@@ -579,8 +551,8 @@ void drawMesh( mesh_t* mesh, sfRenderWindow* render_window ){
 		bool ret1 = vmap_find( &(mesh->vert2DSpaceMap), vert1_ID, &vertProjected1 );
 #endif
 		if( !ret1 ){
-			printf( "Error: in mesh->vert2DSpaceMap could not find the first vertex of ID=%d\n",
-					vert1_ID );
+			DEBUG_PRINT( "Error: in mesh->vert2DSpaceMap could not find the first vertex of ID=%d\n",
+					(int) vert1_ID );
 			return;
 		}
 
@@ -590,8 +562,8 @@ void drawMesh( mesh_t* mesh, sfRenderWindow* render_window ){
 		bool ret2 = vmap_find( &(mesh->vert2DSpaceMap), vert2_ID, &vertProjected2 );
 #endif
 		if( !ret2 ){
-			printf( "Error: in mesh->vert2DSpaceMap could not find the second vertex of ID=%d\n",
-					vert2_ID );
+			DEBUG_PRINT( "Error: in mesh->vert2DSpaceMap could not find the second vertex of ID=%d\n",
+					(int) vert2_ID );
 			return;
 		}
 
@@ -668,4 +640,33 @@ void drawMesh( mesh_t* mesh, sfRenderWindow* render_window ){
 #endif
 #endif
     }
+}
+
+void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f_theta ){
+	// mat4x4 matRotZ, matRotX;
+    // Current angle:
+    if( animate )
+        *f_theta += 1.0 * f_elapsed_time;
+	
+	// DEBUG_PRINT( "f_theta = %f,\f_elapsed_time = %f\n", (float) (*f_theta), (float) f_elapsed_time );
+
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
+    // vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
+#else
+    vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
+    // vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
+#endif
+
+	mesh.pos = pos1;
+	
+#ifdef USE_CAMERA
+	mat4x4_t mat_view;
+	computeViewMatrix( &mat_view, f_elapsed_time );
+    processMesh( &mesh, &mat_view, *f_theta, (*f_theta)*0.5 );
+#else
+	processMesh( &mesh, *f_theta, (*f_theta)*0.5 );
+#endif
+
+	drawMesh( &mesh, renderWindow );
 }

@@ -43,7 +43,7 @@ typedef struct {
     // vector<vec3d> transformedVertices;
     vec3d_t* transformedVertices;
     // vector<int> visFaceIDs;
-    int* visFaceIDs;
+    size_t* visFaceIDs;
     // map<int, vec3d> vert2DSpaceMap; // vertex ID, vertex object
     vmap_t vert2DSpaceMap;
     
@@ -54,7 +54,7 @@ typedef struct {
     // 3: num_of_faces_which_the_edge_belongs_to (1-2)
     // 4: ID_of_1st_face (from visFaceIDs)
     // vector<int> vis_edge_vec;
-    int* vis_edge_vec;
+    size_t* vis_edge_vec;
 
 // #ifdef REMOVE_HIDDEN_LINES
     // map<int, bool> visVertexMap; // vertex ID, vertex visibility flag

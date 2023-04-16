@@ -55,10 +55,10 @@ typedef struct {
 typedef struct {
     // Vector of vertex IDs
     // vector<int> p;
-    int* p;
+    uint16_t* p;
     // Number of vertices;
     // ( faster access than arrlen() I guess )
-	int p_count;
+	uint16_t p_count;
 } polygon_t;
 
 void vec3d_makeEmpty( vec3d_t* v );

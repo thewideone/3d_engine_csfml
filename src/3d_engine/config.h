@@ -4,7 +4,34 @@
 // 
 // Debug:
 // 
+
+// Simple default text output function (for string, char, int, float, etc)
+// For places where not-debug text output is the purpose of a function
+// Usage:
+//  STDO_STR( "yo mama obama" );
+//  STDO_CHR( 'F' );
+//  STDO_INT( 123 );
+//  STDO_FLT( 12.34 );
+#define STDO_STR(x) printf(x)
+#define STDO_CHR(x) printf("%c", x)
+#define STDO_INT(x) printf("%d", x)
+#define STDO_FLT(x) printf("%f", x)
+
+#define STDO_INT8   STDO_INT
+#define STDO_UINT8  STDO_INT
+#define STDO_UINT16 STDO_INT
+#define STDO_INT16  STDO_INT
+#define STDO_UINT32 STDO_INT
+#define STDO_INT32  STDO_INT
+// For size_t:
+#define STDO_UINT64 STDO_INT
+#define STDO_INT64  STDO_INT
+
+#define STDO_SIZET STDO_UINT64
+
 #define DEBUG 3
+// Usage:
+//  DEBUG_PRINT( "Setup complete %d\n", (int) 123 );
 
 #if defined(DEBUG) && DEBUG > 0
  #define DEBUG_PRINT(fmt, args...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt, \
@@ -12,8 +39,10 @@
 #else
  #define DEBUG_PRINT(fmt, args...) /* Don't do anything in release builds */
 #endif
+
 // #define VERTEX_ID_DEBUG
 // #define VERTEX_DOT_DEBUG
+
 // Draw only outlines of meshes
 // #define DRAW_CONTOUR_ONLY
 
@@ -73,6 +102,11 @@
 #define false 0
 #define bool int
 
+#ifndef _SIZE_T_DEFINED 
+#define _SIZE_T_DEFINED
+typedef unsigned int size_t;
+#endif
+
 // Fixed point arithmetic:
 // Functions taken from javidx9's
 // "Back To Basics! Fixed Point Numbers in C++" video
@@ -89,9 +123,13 @@
 #ifdef USE_FIXED_POINT_ARITHMETIC
 // Rational number type (fxp_t for fixed point representation)
 #define rtnl_t fxp_t
+// For debug:
+#define STDO_RTNL STDO_INT32
 #else
 // Rational number type (flp_t for floating point representation)
 #define rtnl_t flp_t
+// For debug:
+#define STDO_RTNL STDO_FLT
 #endif
 
 // 

@@ -1,22 +1,22 @@
 #ifndef _VMAP_H_
 #define _VMAP_H_
 
-#include "../config.h"
-#include "../math_3d.h"
-
-// Number of spaces before each level of graph
-#define VMAP_GRAPH_INDENT 6
-#define VMAP_SHOW_PARENT_KEY
-
-#define vmap_key_t int
-
-// TODO:
-//  - change implementation to some autobalanced tree like AVL or Red-Black one
-
 // 
 // Binary tree map for storing 3D vectors and their visibility flags
 // vmap is short for "vector 3D map"
 // 
+
+#include "../config.h"
+#include "../math_3d.h"
+
+// Number of spaces before each level of text-graph for vmap_graph()
+#define VMAP_GRAPH_INDENT 6
+#define VMAP_SHOW_PARENT_KEY
+
+// Define vmap key type
+#define vmap_key_t int
+// Define what function/macro to use to print out vmap key
+#define STDO_VMAP_KEY STDO_INT
 
 typedef struct vmap_node_t {
     vmap_key_t key;                 // used as vector's ID

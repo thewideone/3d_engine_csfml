@@ -40,6 +40,7 @@
 // 
 
 void mathTest( void ){
+	printf( "===== MATH TEST =====\n" );
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	fxp_t a = floatingToFixed( 5.6 );
 	fxp_t b = floatingToFixed( 2.7 );
@@ -104,6 +105,7 @@ void mathTest( void ){
 }
 
 void dynamicArrayTest( void ){
+	printf( "===== DYNAMIC ARRAY TEST =====\n" );
 	vec3d_t* vertices = NULL;
 
 	printf( "Putting vertices.\n" );
@@ -153,6 +155,7 @@ void dynamicArrayTest( void ){
 }
 
 void binarySearchTreeMapTest( void ){
+	printf( "===== VMAP TEST =====\n" );
 	vec3d_t v1;
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -248,6 +251,7 @@ void binarySearchTreeMapTest( void ){
 }
 
 void meshTest( void ){
+	printf( "===== MESH TEST =====\n" );
 #ifdef USE_LOADING_FROM_OBJ
 	mesh_t mesh;
 	mesh_makeEmpty( &mesh );
@@ -317,6 +321,7 @@ void meshTest( void ){
 }
 
 void meshQueueTest( void ){
+	printf( "===== MESH QUEUE TEST =====\n" );
 
 	mesh_queue_t mq;
 	meshQueue_makeEmpty( &mq );
@@ -356,16 +361,16 @@ void meshQueueTest( void ){
 			continue;
 		}
 
-		printf( "mesh%d.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
+		printf( "mesh%lld.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
 
-		printf( "mesh%d.faces (%lld):\n", mi+1, mptr->face_cnt );
+		printf( "mesh%lld.faces (%lld):\n", mi+1, mptr->face_cnt );
 
 		meshQueue_goToNext( &mq );
 	}
 
 	meshQueue_removeAt( &mq, 1 );
 
-	printf( "Removed 2nd mesh, size = %d.\n", mq.size );
+	printf( "Removed 2nd mesh, size = %lld.\n", mq.size );
 
 	for( size_t mi=0; mi < mq.size; mi++ ){
 		mesh_t* mptr = meshQueue_getCurrent( &mq );
@@ -375,9 +380,9 @@ void meshQueueTest( void ){
 			continue;
 		}
 
-		printf( "mesh%d.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
+		printf( "mesh%lld.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
 
-		printf( "mesh%d.faces (%lld):\n", mi+1, mptr->face_cnt );
+		printf( "mesh%lld.faces (%lld):\n", mi+1, mptr->face_cnt );
 
 		meshQueue_goToNext( &mq );
 	}
@@ -392,9 +397,9 @@ void meshQueueTest( void ){
 			continue;
 		}
 
-		printf( "mesh%d.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
+		printf( "mesh%lld.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
 
-		printf( "mesh%d.faces (%lld):\n", mi+1, mptr->face_cnt );
+		printf( "mesh%lld.faces (%lld):\n", mi+1, mptr->face_cnt );
 
 		meshQueue_goToNext( &mq );
 	}
@@ -403,6 +408,8 @@ void meshQueueTest( void ){
 }
 
 void graphicsTest( sfRenderWindow* renderWindow ){
+	printf( "===== GRAPHICS TEST =====\n" );
+
 	drawLine( 50, 50, 100, 100, sfWhite, renderWindow );
 
 	char str[20];
@@ -462,9 +469,9 @@ int main(){
 
 	// printf( "Setup complete.\n" );
 
-	// mathTest();
+	mathTest();
 	// dynamicArrayTest();
-	// binarySearchTreeMapTest();
+	binarySearchTreeMapTest();
 	// meshTest();
 	// meshQueueTest();
 
