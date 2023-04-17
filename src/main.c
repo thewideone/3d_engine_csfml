@@ -25,10 +25,16 @@
 // TODO:
 // 	- make the engine available to use as a submodule in AVR project:
 // 		- separate the core of the engine from main.c on github:
+// 			- test usage of the engine from main.c directly, that is:
+// 				* add a test mesh to a queue in main() before the loop
+// 				  and call update3DFrame() for that queue
+// 				* update f_theta in the main loop and apply it for the test mesh
+// 				  to remove f_theta parameter from update3DFrame()
 // 			- SFML-dependent functions:
 // 				* whole graphics.h and *.c
 // 				* computeViewMatrix() in 3d_main.c
 // 				* drawMesh() in 3d_main.c -> drawLine()
+// 			- call this file sth like "engine tests"
 // 	- left-right movement too slow but only sometimes??
 // 	- don't draw meshes behind camera
 // 	- add screen clipping
