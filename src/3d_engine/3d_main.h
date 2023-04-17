@@ -11,6 +11,10 @@
 #include "vmap/vmap.h"
 #include "mesh_3d.h"
 
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
+#include "camera.h"
+#endif
+
 #include "stb_ds.h"
 
 #include "graphics.h"

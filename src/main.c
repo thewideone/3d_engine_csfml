@@ -23,20 +23,25 @@
 
 // 
 // TODO:
-// 	- upgrade vmap to AVL
-// 	- make the engine available to use as a submodule in AVR project
+// 	- make the engine available to use as a submodule in AVR project:
+// 		- separate the core of the engine from main.c on github:
+// 			- SFML-dependent functions:
+// 				* whole graphics.h and *.c
+// 				* computeViewMatrix() in 3d_main.c
+// 				* drawMesh() in 3d_main.c -> drawLine()
+// 	- left-right movement too slow but only sometimes??
+// 	- don't draw meshes behind camera
+// 	- add screen clipping
+// 	- filled meshes
+// 	- inverted line colour when in front of filled object?
+// 	- X upgrade vmap to AVL
 // 	- X add a mesh queue
 // 	- X loading meshes from program memory
 // 	- X dynamic meshes
 // 	- X add "destructors" to free for example meshes' dynamic arrays
-// 	- left-right movement too slow but only sometimes??
 // 	- X move global variables and mesh processing functions to a separate file
-// 	- don't draw meshes behind camera
-// 	- add screen clipping
 // 	- X coloured meshes:
 // 	- X (fill and edge colours separated)
-// 	- filling meshes
-// 	- inverted line colour when in front of filled object?
 // 
 
 void mathTest( void ){
@@ -168,7 +173,7 @@ void binarySearchTreeMapTest( void ){
 	v1.y = 1;
 	v1.z = 2;
 	v1.w = 3;
-#endif;
+#endif
 	vec3d_t v2 = v1;
 	vec3d_t v3;
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -469,9 +474,9 @@ int main(){
 
 	// printf( "Setup complete.\n" );
 
-	mathTest();
+	// mathTest();
 	// dynamicArrayTest();
-	binarySearchTreeMapTest();
+	// binarySearchTreeMapTest();
 	// meshTest();
 	// meshQueueTest();
 

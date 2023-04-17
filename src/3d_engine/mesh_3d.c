@@ -269,12 +269,12 @@ void mesh_printVisFaceIDs( mesh_t* mesh ){
 
     // printf( "IDs of visible faces (%lld in total):\n", arrlen(mesh->visFaceIDs) );
     STDO_STR( "IDs of visible faces (" );
-    STDO_UINT16( (uint16_t) arrlen(mesh->visFaceIDs) );
+    STDO_SIZET( arrlen(mesh->visFaceIDs) );
     STDO_STR( " in total):\n" );
 
     for( uint16_t i=0; i<arrlen(mesh->visFaceIDs); i++ ){
         // printf( "%d, ", mesh->visFaceIDs[i] );
-        STDO_UINT16( mesh->visFaceIDs[i] );
+        STDO_SIZET( mesh->visFaceIDs[i] );
         STDO_STR( ", " );
     }
     STDO_CHR( '\n' );
@@ -292,13 +292,13 @@ void mesh_printVisEdgeVec( mesh_t* mesh ){
     STDO_STR( "E1 E2 C S\n" );
     for( uint16_t i=0; i<arrlen(mesh->vis_edge_vec); i+=4 ){
         // printf( "%d, %d, %d, %d\n", mesh->vis_edge_vec[i], mesh->vis_edge_vec[i+1], mesh->vis_edge_vec[2], mesh->vis_edge_vec[i+3] );
-        STDO_UINT16( mesh->vis_edge_vec[i] );
+        STDO_SIZET( mesh->vis_edge_vec[i] );
         STDO_STR( ", " );
-        STDO_UINT16( mesh->vis_edge_vec[i+1] );
+        STDO_SIZET( mesh->vis_edge_vec[i+1] );
         STDO_STR( ", " );
-        STDO_UINT16( mesh->vis_edge_vec[i+2] );
+        STDO_SIZET( mesh->vis_edge_vec[i+2] );
         STDO_STR( ", " );
-        STDO_UINT16( mesh->vis_edge_vec[i+3] );
+        STDO_SIZET( mesh->vis_edge_vec[i+3] );
         STDO_CHR( '\n' );
     }
 }

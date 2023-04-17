@@ -24,7 +24,7 @@
 #define STDO_UINT32 STDO_INT
 #define STDO_INT32  STDO_INT
 // For size_t:
-#define STDO_UINT64 STDO_INT
+#define STDO_UINT64(x) printf("%lld", x)
 #define STDO_INT64  STDO_INT
 
 #define STDO_SIZET STDO_UINT64
@@ -102,10 +102,11 @@
 #define false 0
 #define bool int
 
-#ifndef _SIZE_T_DEFINED 
-#define _SIZE_T_DEFINED
-typedef unsigned int size_t;
-#endif
+// Improper typedef (like unsigned int) causes a dramatic crash
+// #ifndef _SIZE_T_DEFINED 
+// #define _SIZE_T_DEFINED
+// typedef unsigned long long size_t;
+// #endif
 
 // Fixed point arithmetic:
 // Functions taken from javidx9's
