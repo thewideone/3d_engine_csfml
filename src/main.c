@@ -24,15 +24,11 @@
 // 
 // TODO:
 // 	- make the engine available to use as a submodule in AVR project:
-<<<<<<< HEAD
 // 		- separate the core of the engine from main.c on github:
 // 			- SFML-dependent functions:
 // 				* whole graphics.h and *.c
 // 				* computeViewMatrix() in 3d_main.c
 // 				* drawMesh() in 3d_main.c -> drawLine()
-=======
-// 		- separate the core of the engine from main.c on github
->>>>>>> 5b5a6611c29032b94d1b34f13c98f8c4254e7af8
 // 	- left-right movement too slow but only sometimes??
 // 	- don't draw meshes behind camera
 // 	- add screen clipping
