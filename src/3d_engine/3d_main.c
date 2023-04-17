@@ -42,8 +42,10 @@ void setup3D( void ){
 	}
 
 	setupProjectionMatrix( &mat_proj );
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 	camera_makeDefault( &cam0 );
 	camera_setActive( &cam0 );
+#endif
 }
 
 void free3D( void ){
@@ -328,7 +330,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 
         // Get ray from the face to the camera:
         vec3d_t v_camera_ray = vectorSub( &mesh->transformedVertices[face.p[0]],
-                                      &(cam->pos) );
+                                      &(camera_getActive()->pos) );
 		// DEBUG_PRINT( "Face %d v_camera_ray: ", (size_t) i );
 		// vec3d_print( &v_camera_ray, true );
 

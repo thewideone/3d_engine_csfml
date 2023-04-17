@@ -15,11 +15,9 @@ typedef struct {
 #endif
 } camera_t;
 
-#ifdef USE_CAMERA
 void camera_makeDefault( camera_t* cam );
 camera_t* camera_getActive( void );
 void camera_setActive( camera_t* cam );
-#endif
 
 #endif
 

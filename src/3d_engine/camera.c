@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
+
 camera_t* cam_active_ptr = NULL;
 
 // 
@@ -10,12 +12,10 @@ camera_t* cam_active_ptr = NULL;
 // 
 void camera_makeDefault( camera_t* cam ){
 	#ifdef USE_FIXED_POINT_ARITHMETIC
-	#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 		cam->pos.x = floatingToFixed(0);
 		cam->pos.y = floatingToFixed(0);
 		cam->pos.z = floatingToFixed(0);
 		cam->pos.w = floatingToFixed(1);
-	#endif
 	#ifdef USE_CAMERA
 		cam->look_dir.x = floatingToFixed(0);
 		cam->look_dir.y = floatingToFixed(0);
@@ -25,12 +25,10 @@ void camera_makeDefault( camera_t* cam ){
 	#endif
 	
 	#else
-	#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 		cam->pos.x = 0;
 		cam->pos.y = 0;
 		cam->pos.z = 0;
 		cam->pos.w = 1;
-	#endif
 	#ifdef USE_CAMERA
 		cam->look_dir.x = 0;
 		cam->look_dir.y = 0;
@@ -56,3 +54,5 @@ camera_t* camera_getActive( void ){
 void camera_setActive( camera_t* cam ){
     cam_active_ptr = cam;
 }
+
+#endif // defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
