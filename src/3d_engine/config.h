@@ -90,7 +90,7 @@
 // #define USE_FILLED_MESHES
 // #define USE_LOADING_FROM_OBJ
 // Render only visible edges / faces
-// #define RENDER_VISIBLE_ONLY
+#define RENDER_VISIBLE_ONLY
 // #define REMOVE_HIDDEN_LINES
 
 // 

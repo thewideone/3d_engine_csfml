@@ -16,15 +16,21 @@
 // for random stuff:
 #include <stdlib.h>     /* srand, rand */
 
-int initGraphics( void );
+int initGraphics( sfRenderWindow* render_window );
 void freeGraphics( void );
-#ifdef USE_FIXED_POINT_ARITHMETIC
-int putText( char* str, fxp_t x, fxp_t y, int size, sfColor colour, sfRenderWindow* renderWindow );
-void drawLine( fxp_t x0, fxp_t y0, fxp_t x1, fxp_t y1, sfColor colour, sfRenderWindow* renderWindow );
-#else
-int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWindow* renderWindow );
-void drawLine( float x0, float y0, float x1, float y1, sfColor colour, sfRenderWindow* renderWindow );
+
+int putText( char* str, rtnl_t x, rtnl_t y, int size
+#ifndef COLOUR_MONOCHROME
+            , colour_t* colour
 #endif
+            );
+
+void drawLine( rtnl_t x0, rtnl_t y0, rtnl_t x1, rtnl_t y1
+#ifndef COLOUR_MONOCHROME
+            , colour_t* colour
+#endif
+            );
+
 vec3d_t findCentre( mesh_t* mesh, int face_ID );
 int getOutlineEdgeCount( mesh_t* mesh );
 // void paintPolygonContours( mesh& mesh, int face_ID, sf::Color colour, sf::RenderWindow &renderWindow );

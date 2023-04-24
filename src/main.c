@@ -421,14 +421,32 @@ void meshQueueTest( void ){
 void graphicsTest( sfRenderWindow* renderWindow ){
 	printf( "===== GRAPHICS TEST =====\n" );
 
-	drawLine( 50, 50, 100, 100, sfWhite, renderWindow );
+	// drawLine( 50, 50, 100, 100, sfWhite, renderWindow );
+#ifndef COLOUR_MONOCHROME
+	colour_t colour;
+	colour.rgb = COLOUR_WHITE;
+	drawLine( 50, 50, 100, 100, &colour );
+	colour.rgb = COLOUR_RED;
+#else
+	drawLine( 50, 50, 100, 100 );
+#endif
 
 	char str[20];
 	sprintf( str, "Hello putText %d", 123 );
 #ifdef USE_FIXED_POINT_ARITHMETIC
-	putText( str, floatingToFixed(150), floatingToFixed(150), 50, sfMagenta, renderWindow );
+	// putText( str, floatingToFixed(150), floatingToFixed(150), 50, sfMagenta, renderWindow );
+#ifndef COLOUR_MONOCHROME
+	putText( str, floatingToFixed(150), floatingToFixed(150), 50, &colour );
 #else
-	putText( str, 150, 150, 50, sfMagenta, renderWindow );
+	putText( str, floatingToFixed(150), floatingToFixed(150), 50 );
+#endif
+#else
+	// putText( str, 150, 150, 50, sfMagenta, renderWindow );
+#ifndef COLOUR_MONOCHROME
+	putText( str, 150, 150, 50, &colour );
+#else
+	putText( str, 150, 150, 50 );
+#endif
 #endif
 }
 
@@ -454,7 +472,7 @@ int main(){
         return 1;
 	}
 
-	initGraphics();
+	initGraphics( window );
 
 	/* Create a graphical text to display */
     font = sfFont_createFromFile("Minecraft.ttf");
@@ -524,7 +542,7 @@ int main(){
 		flp_t elapsed_time = (flp_t)(t2-t1) / CLOCKS_PER_SEC;
 		t1 = t2;
 
-		update3DFrame( window, elapsed_time, &f_theta );
+		update3DFrame( elapsed_time, &f_theta );
 
 		/* Update the window */
         sfRenderWindow_display(window);

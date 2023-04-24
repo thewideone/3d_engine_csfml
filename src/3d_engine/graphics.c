@@ -9,8 +9,11 @@
 #include "vmap/vmap.h"
 
 sfFont* font;
+sfRenderWindow* rend_win_global;
 
-int initGraphics( void ){
+int initGraphics( sfRenderWindow* render_window ){
+    rend_win_global = render_window;
+
     font = sfFont_createFromFile("Minecraft.ttf");
     if ( !font ){
 		DEBUG_PRINT( "Error: Could not load a font.\n" );
@@ -23,11 +26,11 @@ void freeGraphics( void ){
     sfFont_destroy(font);
 }
 
-#ifdef USE_FIXED_POINT_ARITHMETIC
-int putText( char* str, fxp_t x, fxp_t y, int size, sfColor colour, sfRenderWindow* renderWindow ){
-#else
-int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWindow* renderWindow ){
+int putText( char* str, rtnl_t x, rtnl_t y, int size
+#ifndef COLOUR_MONOCHROME
+            , colour_t* colour
 #endif
+            ){
     // sf::Font font;
     // if (!font.loadFromFile("Minecraft.ttf"))
     //     cout<<"Failed to load Minecraft.ttf\n";
@@ -42,6 +45,29 @@ int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWind
     // text.setPosition( x, y );
     // renderWindow.draw(text);
 
+    sfColor txt_colour;
+
+#ifdef COLOUR_MONOCHROME
+    txt_colour = sfWhite;
+#else
+#ifdef COLOUR_SINGLE_BYTE
+#if COLOUR_DEPTH == 1
+    uint8_t r = ((colour->rgb) >> 6) & 0b0000001;
+    uint8_t g = ((colour->rgb) >> 4) & 0b0000001;
+    uint8_t b = ((colour->rgb) >> 2) & 0b0000001;
+    txt_colour = sfColor_fromRGB( r*255, g*255, b*255 );
+#else   // COLOUR_DEPTH != 1
+    uint8_t r = ((colour->rgb) >> 6) & 0b0000011;
+    uint8_t g = ((colour->rgb) >> 4) & 0b0000011;
+    uint8_t b = ((colour->rgb) >> 2) & 0b0000011;
+
+    txt_colour = sfColor_fromRGB( r*(255/3), g*(255/3), b*(255/3) );
+#endif  // COLOUR_DEPTH
+#else   // colour not single byte
+    txt_colour = sfColor_fromRGB( colour->r, colour->g, colour->b );
+#endif
+#endif
+
     sfText* text = sfText_create();
     sfText_setString( text, str );
     sfText_setFont( text, font );
@@ -54,20 +80,20 @@ int putText( char* str, float x, float y, int size, sfColor colour, sfRenderWind
 #endif
     sfText_setPosition( text, pos );
 
-    sfText_setColor( text, colour );
+    sfText_setColor( text, txt_colour );
 
-    sfRenderWindow_drawText( renderWindow, text, NULL );
+    sfRenderWindow_drawText( rend_win_global, text, NULL );
 
     sfText_destroy(text);
 
     return 0;
 }
 
-#ifdef USE_FIXED_POINT_ARITHMETIC
-void drawLine( fxp_t x0, fxp_t y0, fxp_t x1, fxp_t y1, sfColor colour, sfRenderWindow* renderWindow ){
-#else
-void drawLine( float x0, float y0, float x1, float y1, sfColor colour, sfRenderWindow* renderWindow ){
+void drawLine( rtnl_t x0, rtnl_t y0, rtnl_t x1, rtnl_t y1
+#ifndef COLOUR_MONOCHROME
+            , colour_t* colour
 #endif
+            ){
     sfVertexArray* vert_array;
     vert_array = sfVertexArray_create();
 
@@ -86,12 +112,36 @@ void drawLine( float x0, float y0, float x1, float y1, sfColor colour, sfRenderW
     v2.position.y = y1;
 #endif
 
-    v1.color = colour;
-    v2.color = colour;
+#ifdef COLOUR_MONOCHROME
+    v1.color = sfWhite;
+    v2.color = sfWhite;
+#else
+#ifdef COLOUR_SINGLE_BYTE
+#if COLOUR_DEPTH == 1
+    uint8_t r = ((colour->rgb) >> 6) & 0b0000001;
+    uint8_t g = ((colour->rgb) >> 4) & 0b0000001;
+    uint8_t b = ((colour->rgb) >> 2) & 0b0000001;
+    v1.color = sfColor_fromRGB( r*255, g*255, b*255 );
+    v2.color = sfColor_fromRGB( r*255, g*255, b*255 );
+#else   // COLOUR_DEPTH != 1
+    uint8_t r = ((colour->rgb) >> 6) & 0b0000011;
+    uint8_t g = ((colour->rgb) >> 4) & 0b0000011;
+    uint8_t b = ((colour->rgb) >> 2) & 0b0000011;
+
+    v1.color = sfColor_fromRGB( r*(255/3), g*(255/3), b*(255/3) );
+    v2.color = sfColor_fromRGB( r*(255/3), g*(255/3), b*(255/3) );
+#endif  // COLOUR_DEPTH
+#else   // colour not single byte
+    v1.color = sfColor_fromRGB( colour->r, colour->g, colour->b );
+    v2.color = sfColor_fromRGB( colour->r, colour->g, colour->b );
+#endif
+#endif
+    // v1.color = colour;
+    // v2.color = colour;
     sfVertexArray_append( vert_array, v1 );
     sfVertexArray_append( vert_array, v2 );
 
-    sfRenderWindow_drawVertexArray( renderWindow, vert_array, NULL );
+    sfRenderWindow_drawVertexArray( rend_win_global, vert_array, NULL );
 }
 
 /*

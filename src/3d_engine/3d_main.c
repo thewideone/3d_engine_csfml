@@ -16,11 +16,11 @@ void setAnimateFlag( bool value ){
 
 void setupProjectionMatrix( mat4x4_t* mat ){
 	#ifdef USE_FIXED_POINT_ARITHMETIC
-	matrix_makeProjection( &mat_proj,
+	matrix_makeProjection( mat,
 			floatingToFixed(90.0), floatingToFixed( (flp_t)SCREEN_HEIGHT / (flp_t)SCREEN_WIDTH ),
 			floatingToFixed( 0.1f ), floatingToFixed( 1000.0f ) );
 	#else
-	matrix_makeProjection( &mat_proj,
+	matrix_makeProjection( mat,
 			90.0,
 			(flp_t)SCREEN_HEIGHT / (flp_t)SCREEN_WIDTH,
 			0.1f, 1000.0f );
@@ -204,7 +204,7 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
 // rot_angle_z	- angle of rotation of the mesh (in degrees) in Z axis
 // 
 #ifdef USE_CAMERA
-void processMesh( mesh_t* mesh, mat4x4_t* mat_view, flp_t rot_angle_x, flp_t rot_angle_z ){
+void processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view, flp_t rot_angle_x, flp_t rot_angle_z ){
 #else
 void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 #endif
@@ -389,12 +389,12 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 #ifdef USE_CAMERA
             // Convert world space to view space
             vec3d_t vertViewed = matrix_mulVector( mat_view, &mesh->transformedVertices[curr_vert_id] );
-            vec3d_t vertProjected = matrix_mulVector( &mat_proj, &vertViewed );
+            vec3d_t vertProjected = matrix_mulVector( mat_proj, &vertViewed );
 #else   // NOT USING CAMERA
 			// DEBUG_PRINT( "vertex to use: " );
 			// vec3d_print( &mesh->transformedVertices[curr_vert_id], 1 );
 
-            vec3d_t vertProjected = matrix_mulVector( &mat_proj, &mesh->transformedVertices[curr_vert_id] );
+            vec3d_t vertProjected = matrix_mulVector( mat_proj, &mesh->transformedVertices[curr_vert_id] );
 
 			// DEBUG_PRINT( "vertProjected initially: " );
 			// vec3d_print( &vertProjected, 1 );
@@ -507,7 +507,7 @@ void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z ){
 // Replace drawLine() function at the end with any function
 // drawing a straight line on your output device
 // 
-void drawMesh( mesh_t* mesh, sfRenderWindow* render_window ){
+void drawMesh( mesh_t* mesh ){
     // Draw every visible edge
     // Debug (commented): print the visible edge array
     for( int i=0; i<arrlen(mesh->vis_edge_vec); i+=4 ){
@@ -549,22 +549,22 @@ void drawMesh( mesh_t* mesh, sfRenderWindow* render_window ){
 		// vec3d_print( &vertProjected2, 1 );
 
 #ifdef VERTEX_DOT_DEBUG
-        if( mesh.visVertexMap.size() > 0 ){
-            sf::CircleShape dot(3);
-            if( mesh.visVertexMap.find( vert1_ID )->second )
-                dot.setFillColor(sf::Color(50,255,50));
-            else
-                dot.setFillColor(sf::Color(255,50,50));
+        // if( mesh.visVertexMap.size() > 0 ){
+        //     sf::CircleShape dot(3);
+        //     if( mesh.visVertexMap.find( vert1_ID )->second )
+        //         dot.setFillColor(sf::Color(50,255,50));
+        //     else
+        //         dot.setFillColor(sf::Color(255,50,50));
             
-            dot.setPosition( vertProjected1.x, vertProjected1.y );
-            render_window.draw(dot);
-        }
+        //     dot.setPosition( vertProjected1.x, vertProjected1.y );
+        //     render_window.draw(dot);
+        // }
 #endif // VERTEX_DOT_DEBUG
 
 #ifdef VERTEX_ID_DEBUG
-        stringstream s1;
+        // stringstream s1;
 
-        s1 << vert1_ID;
+        // s1 << vert1_ID;
         // putText( s1, vertProjected1.x, vertProjected1.y, 8, sf::Color::Yellow,  render_window );
         // s2 << vert2_ID;  // one is enough, because the printed values are the same and overlap on the screen
         // putText( s2, vertProjected2.x, vertProjected2.y, 8, sf::Color::Green,  render_window );
@@ -575,52 +575,21 @@ void drawMesh( mesh_t* mesh, sfRenderWindow* render_window ){
 
 #ifdef COLOUR_MONOCHROME
 		drawLine( vertProjected1.x, vertProjected1.y,
-                  vertProjected2.x, vertProjected2.y,
-                  sfWhite, render_window );
+                  vertProjected2.x, vertProjected2.y );
 #else
-#ifdef COLOUR_SINGLE_BYTE
-
-#if COLOUR_DEPTH == 1
-		uint8_t r = ((mesh->edge_colour.rgb) >> 6) & 0b0000001;
-		uint8_t g = ((mesh->edge_colour.rgb) >> 4) & 0b0000001;
-		uint8_t b = ((mesh->edge_colour.rgb) >> 2) & 0b0000001;
 		drawLine( vertProjected1.x, vertProjected1.y,
                   vertProjected2.x, vertProjected2.y,
-                  sfColor_fromRGB( r*255, g*255, b*255 ), render_window );
-#ifdef USE_FILLED_MESHES
-		r = ((mesh->fill_colour.rgb) >> 6) & 0b0000001;
-		g = ((mesh->fill_colour.rgb) >> 4) & 0b0000001;
-		b = ((mesh->fill_colour.rgb) >> 2) & 0b0000001;
-		// Fill the mesh
+				  &(mesh->edge_colour) );
 #endif
-#else
-		uint8_t r = ((mesh->edge_colour.rgb) >> 6) & 0b0000011;
-		uint8_t g = ((mesh->edge_colour.rgb) >> 4) & 0b0000011;
-		uint8_t b = ((mesh->edge_colour.rgb) >> 2) & 0b0000011;
-		drawLine( vertProjected1.x, vertProjected1.y,
-                  vertProjected2.x, vertProjected2.y,
-                  sfColor_fromRGB( r*(255/3), g*(255/3), b*(255/3) ), render_window );
-#ifdef USE_FILLED_MESHES
-		r = ((mesh->fill_colour.rgb) >> 6) & 0b0000011;
-		g = ((mesh->fill_colour.rgb) >> 4) & 0b0000011;
-		b = ((mesh->fill_colour.rgb) >> 2) & 0b0000011;
 
+#ifdef USE_FILLED_MESHES
 		// Fill the mesh
 #endif
-#endif
-#else
-        drawLine( vertProjected1.x, vertProjected1.y,
-                  vertProjected2.x, vertProjected2.y,
-                  sfColor_fromRGB( mesh->edge_colour.r, mesh->edge_colour.g, mesh->edge_colour.b ), render_window );
-#ifdef USE_FILLED_MESHE
-		// Fill the mesh
-#endif
-#endif
-#endif
+
     }
 }
 
-void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f_theta ){
+void update3DFrame( flp_t f_elapsed_time, flp_t* f_theta ){
 	// mat4x4 matRotZ, matRotX;
     // Current angle:
     if( animate )
@@ -640,11 +609,15 @@ void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f
 	
 #ifdef USE_CAMERA
 	mat4x4_t mat_view;
-	computeViewMatrix( &cam0, &mat_view, f_elapsed_time );
-    processMesh( &mesh, &mat_view, *f_theta, (*f_theta)*0.5 );
+	if( camera_getActive() == NULL ){
+		DEBUG_PRINT( "Set active camera to update 3D frame. Skipping.\n" );
+		return;
+	}
+	computeViewMatrix( camera_getActive(), &mat_view, f_elapsed_time );
+    processMesh( &mesh, &mat_proj, &mat_view, *f_theta, (*f_theta)*0.5 );
 #else
-	processMesh( &mesh, *f_theta, (*f_theta)*0.5 );
+	processMesh( &mesh, &mat_proj, *f_theta, (*f_theta)*0.5 );
 #endif
 
-	drawMesh( &mesh, renderWindow );
+	drawMesh( &mesh );
 }

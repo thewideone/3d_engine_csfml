@@ -28,14 +28,14 @@ void setAnimateFlag( bool value );
 
 void setup3D( void );
 void free3D( void );
-void draw_mesh( mesh_t* mesh, sfRenderWindow* render_window );
+void draw_mesh( mesh_t* mesh );
 
 #ifdef USE_CAMERA
-void processMesh( mesh_t* mesh, mat4x4_t* mat_view, flp_t rot_angle_x, flp_t rot_angle_z );
+void processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view, flp_t rot_angle_x, flp_t rot_angle_z );
 #else
-void processMesh( mesh_t* mesh, flp_t rot_angle_x, flp_t rot_angle_z );
+void processMesh( mesh_t* mesh, mat4x4_t* mat_proj, flp_t rot_angle_x, flp_t rot_angle_z );
 #endif
 
-void update3DFrame( sfRenderWindow* renderWindow, flp_t f_elapsed_time, flp_t* f_theta );
+void update3DFrame( flp_t f_elapsed_time, flp_t* f_theta );
 
 #endif // _3D_ENGINE_MAIN_H_
