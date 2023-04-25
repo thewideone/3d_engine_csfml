@@ -1,8 +1,9 @@
 #include "3d_main.h"
 
+bool animate = 0;	// for testing, toggles motion of objects caused by "f_theta"
+
 mesh_t mesh;		// test mesh
 mat4x4_t mat_proj;	// projection matrix
-bool animate = 0;	// for testing, toggles motion of objects caused by "f_theta"
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 camera_t cam0;
 #endif

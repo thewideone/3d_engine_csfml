@@ -31,20 +31,6 @@ int putText( char* str, rtnl_t x, rtnl_t y, int size
             , colour_t* colour
 #endif
             ){
-    // sf::Font font;
-    // if (!font.loadFromFile("Minecraft.ttf"))
-    //     cout<<"Failed to load Minecraft.ttf\n";
-    // //font.setSmooth(false);
-    // sf::Text text;
-    // text.setFont(font);
-    // text.setString(ss.str());
-    // // set the character size
-    // text.setCharacterSize(size); // in pixels, not points!
-    // // set the color
-    // text.setFillColor( colour );
-    // text.setPosition( x, y );
-    // renderWindow.draw(text);
-
     sfColor txt_colour;
 
 #ifdef COLOUR_MONOCHROME
