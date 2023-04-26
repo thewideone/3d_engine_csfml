@@ -21,6 +21,8 @@ void camera_makeDefault( camera_t* cam ){
 		cam->look_dir.y = floatingToFixed(0);
 		cam->look_dir.z = floatingToFixed(0);
 		cam->look_dir.w = floatingToFixed(1);
+		cam->roll = floatingToFixed(0);
+		cam->pitch = floatingToFixed(0);
 		cam->yaw = floatingToFixed(0);
 	#endif
 	
@@ -34,6 +36,8 @@ void camera_makeDefault( camera_t* cam ){
 		cam->look_dir.y = 0;
 		cam->look_dir.z = 0;
 		cam->look_dir.w = 1;
+		cam->roll = 0;
+		cam->pitch = 0;
 		cam->yaw = 0;
 	#endif
 	
