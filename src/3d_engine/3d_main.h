@@ -17,7 +17,8 @@
 
 #include "stb_ds.h"
 
-#include "graphics.h"
+// #include "graphics.h"
+#include "external_dependencies.h"
 
 #include "../meshes/cube.h"
 #include "../meshes/sphere.h"

@@ -4,7 +4,6 @@
 #include "stb_ds.h"
 
 #include "math_3d.h"
-#include "graphics.h"
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 fxp_t floatingToFixed( flp_t num ){

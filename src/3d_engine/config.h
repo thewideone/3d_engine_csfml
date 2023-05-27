@@ -1,56 +1,27 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#include <inttypes.h>   // for int32_t etc.
+
 // 
-// Debug:
+// Info
 // 
+// See "Hardware dependend stuff" section
+// STB_DS_IMPLEMENTATION defined in math_3d.c
 
-// Simple default text output function (for string, char, int, float, etc)
-// For places where not-debug text output is the purpose of a function
-// Usage:
-//  STDO_STR( "yo mama obama" );
-//  STDO_CHR( 'F' );
-//  STDO_INT( 123 );
-//  STDO_FLT( 12.34 );
-#define STDO_STR(x) printf(x)
-#define STDO_CHR(x) printf("%c", x)
-#define STDO_INT(x) printf("%d", x)
-#define STDO_FLT(x) printf("%f", x)
+// 
+// Hardware dependend stuff
+// 
+// For application-specific functions, see external_dependencies.h
 
-#define STDO_INT8   STDO_INT
-#define STDO_UINT8  STDO_INT
-#define STDO_UINT16 STDO_INT
-#define STDO_INT16  STDO_INT
-#define STDO_UINT32 STDO_INT
-#define STDO_INT32  STDO_INT
-// For size_t:
-#define STDO_UINT64(x) printf("%lld", x)
-#define STDO_INT64  STDO_INT
-
-#define STDO_SIZET STDO_UINT64
-
-#define DEBUG 3
-// Usage:
-//  DEBUG_PRINT( "Setup complete %d\n", (int) 123 );
-
-#if defined(DEBUG) && DEBUG > 0
- #define DEBUG_PRINT(fmt, args...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt, \
-    __FILE__, __LINE__, __func__, ##args)
-#else
- #define DEBUG_PRINT(fmt, args...) /* Don't do anything in release builds */
-#endif
-
-// #define VERTEX_ID_DEBUG
-// #define VERTEX_DOT_DEBUG
-
-// Draw only outlines of meshes
-// #define DRAW_CONTOUR_ONLY
+// For CSFML:
+#define FRAMERATE 30
 
 // 
 // Display:
 // 
-#define SCREEN_WIDTH 390//256
-#define SCREEN_HEIGHT 390//240
+#define SCREEN_WIDTH 240//390//256
+#define SCREEN_HEIGHT 240//390//240
 // #define COLOUR_MONOCHROME
 
 #ifndef COLOUR_MONOCHROME
@@ -92,6 +63,8 @@
 // Render only visible edges / faces
 #define RENDER_VISIBLE_ONLY
 // #define REMOVE_HIDDEN_LINES
+// Draw only outlines of meshes
+// #define DRAW_CONTOUR_ONLY
 
 // 
 // Math:
@@ -138,5 +111,47 @@
 // 
 #define MESH_QUEUE_FIXED_SIZE
 #define MESH_QUEUE_CAPACITY 10
+
+// 
+// Debug:
+// 
+
+// #define VERTEX_ID_DEBUG
+// #define VERTEX_DOT_DEBUG
+
+// Simple default text output function (for string, char, int, float, etc)
+// For places where not-debug text output is the purpose of a function
+// Usage:
+//  STDO_STR( "yo mama obama" );
+//  STDO_CHR( 'F' );
+//  STDO_INT( 123 );
+//  STDO_FLT( 12.34 );
+#define STDO_STR(x) printf(x)
+#define STDO_CHR(x) printf("%c", x)
+#define STDO_INT(x) printf("%d", x)
+#define STDO_FLT(x) printf("%f", x)
+
+#define STDO_INT8   STDO_INT
+#define STDO_UINT8  STDO_INT
+#define STDO_UINT16 STDO_INT
+#define STDO_INT16  STDO_INT
+#define STDO_UINT32 STDO_INT
+#define STDO_INT32  STDO_INT
+// For size_t:
+#define STDO_UINT64(x) printf("%lld", x)
+#define STDO_INT64  STDO_INT
+
+#define STDO_SIZET STDO_UINT64
+
+#define DEBUG 3
+// Usage:
+//  DEBUG_PRINT( "Setup complete %d\n", (int) 123 );
+
+#if defined(DEBUG) && DEBUG > 0
+ #define DEBUG_PRINT(fmt, args...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt, \
+    __FILE__, __LINE__, __func__, ##args)
+#else
+ #define DEBUG_PRINT(fmt, args...) /* Don't do anything in release builds */
+#endif
 
 #endif /* _CONFIG_H_ */

@@ -11,6 +11,7 @@ typedef struct {
 	vec3d_t pos;        //v_camera;  // only a placeholder now
 #ifdef USE_CAMERA
 	vec3d_t look_dir;   //v_look_dir;
+	vec3d_t up_dir;
 	rtnl_t yaw;         //f_yaw;
 	rtnl_t pitch;
 	rtnl_t roll;

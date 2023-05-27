@@ -1,17 +1,17 @@
-#include "graphics.h"
+#include "csfml_graphics.h"
 
 #include <assert.h>
 #include <stdio.h>
 
-#include "stb_ds.h"
+#include "3d_engine/stb_ds.h"
 
-#include "math_3d.h"
-#include "vmap/vmap.h"
+#include "3d_engine/math_3d.h"
+#include "3d_engine/vmap/vmap.h"
 
 sfFont* font;
 sfRenderWindow* rend_win_global;
 
-int initGraphics( sfRenderWindow* render_window ){
+int SFML_initGraphics( sfRenderWindow* render_window ){
     rend_win_global = render_window;
 
     font = sfFont_createFromFile("Minecraft.ttf");
@@ -22,11 +22,11 @@ int initGraphics( sfRenderWindow* render_window ){
     return 0;
 }
 
-void freeGraphics( void ){
+void SFML_freeGraphics( void ){
     sfFont_destroy(font);
 }
 
-int putText( char* str, rtnl_t x, rtnl_t y, int size
+void CSFML_putText( char* str, rtnl_t x, rtnl_t y, int size
 #ifndef COLOUR_MONOCHROME
             , colour_t* colour
 #endif
@@ -71,11 +71,9 @@ int putText( char* str, rtnl_t x, rtnl_t y, int size
     sfRenderWindow_drawText( rend_win_global, text, NULL );
 
     sfText_destroy(text);
-
-    return 0;
 }
 
-void drawLine( rtnl_t x0, rtnl_t y0, rtnl_t x1, rtnl_t y1
+void CSFML_drawLine( rtnl_t x0, rtnl_t y0, rtnl_t x1, rtnl_t y1
 #ifndef COLOUR_MONOCHROME
             , colour_t* colour
 #endif

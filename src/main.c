@@ -13,7 +13,9 @@
 
 #include "3d_engine/stb_ds.h"
 
-#include "3d_engine/graphics.h"
+#include "csfml_graphics.h"
+
+#include "3d_engine/external_dependencies.h"
 
 #include "3d_engine/3d_main.h"
 
@@ -23,6 +25,10 @@
 
 // 
 // TODO:
+// 	- add an appriopriate comment in external_dependencies.h
+// 	- move getOutlineEdgeCount() from csfml_graphics.* to some math file
+// 	- fix view matrix multiplication in 3d_main.c
+// 	- change the name of 3d_main.c to some more intelligent one
 // 	- make the engine available to use as a submodule in AVR project:
 // 		- separate the core of the engine from main.c on github:
 // 			- test usage of the engine from main.c directly, that is:
@@ -31,7 +37,7 @@
 // 				* update f_theta in the main loop and apply it for the test mesh
 // 				  to remove f_theta parameter from update3DFrame()
 // 			- SFML-dependent functions:
-// 				* whole graphics.h and *.c
+// 				* X whole graphics.h and *.c
 // 				* computeViewMatrix() in 3d_main.c
 // 				* drawMesh() in 3d_main.c -> drawLine()
 // 			- call this file sth like "engine tests"
@@ -464,15 +470,16 @@ int main(){
 	sfText* text;
 	sfEvent event;
 
-	window = sfRenderWindow_create(videoMode, "SFML window", sfResize | sfClose, NULL);
-			//( sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "3D test" );
+	window = sfRenderWindow_create(videoMode, "3D engine CSFML test", sfResize | sfClose, NULL);
     
 	if (!window){
 		printf( "Error: Could not create a window.\n" );
         return 1;
 	}
 
-	initGraphics( window );
+	sfRenderWindow_setFramerateLimit( window, FRAMERATE );
+
+	SFML_initGraphics( window );
 
 	/* Create a graphical text to display */
     font = sfFont_createFromFile("Minecraft.ttf");
@@ -484,9 +491,9 @@ int main(){
     sfText_setString(text, "Hello SFML");
     sfText_setFont(text, font);
     sfText_setCharacterSize(text, 50);
-	// window.setFramerateLimit( 144 );
 
-	// sf::CircleShape circle(2.0);
+	engine3D_register_drawLine( &CSFML_drawLine );
+	engine3D_register_putText( &CSFML_putText );
 
 	setup3D();
 
@@ -553,7 +560,7 @@ int main(){
     sfFont_destroy(font);
 
 	free3D();
-	freeGraphics();
+	SFML_freeGraphics();
 
 	return (0);
 }

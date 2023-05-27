@@ -62,10 +62,6 @@ void free3D( void ){
 // mat_view			- view matrix
 // f_elapsed_time	- elapsed time since the last frame,
 // 					  don't ask me about the unit XD
-// Input parameters not listed in the function declaration:
-// cam->pos
-// cam->yaw
-// cam->look_dir
 // 
 void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time ){
     // Camera movement (WSAD hehe) and looking around (arrows)
@@ -87,6 +83,21 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
         cam->roll -= floatingToFixed( 2.0f * f_elapsed_time );
     if (sfKeyboard_isKeyPressed(sfKeyPeriod))
         cam->roll += floatingToFixed( 2.0f * f_elapsed_time );
+	
+	// Clip the angles to allow for later usage of
+	// look-up tables instead of sin() and cos() functions
+	if( cam->yaw > floatingToFixed(3.15*2) )
+		cam->yaw -= floatingToFixed(3.15*2);
+	else if( cam->yaw < -floatingToFixed(3.15*2))
+		cam->yaw += floatingToFixed(3.15*2);
+	if( cam->pitch > floatingToFixed(3.15*2) )
+		cam->pitch -= floatingToFixed(3.15*2);
+	else if( cam->pitch < -floatingToFixed(3.15*2))
+		cam->pitch += floatingToFixed(3.15*2);
+	if( cam->roll > floatingToFixed(3.15*2) )
+		cam->roll -= floatingToFixed(3.15*2);
+	else if( cam->roll < -floatingToFixed(3.15*2))
+		cam->roll += floatingToFixed(3.15*2);
     
     // We've integrated time into this, so it's a velocity vector:
 	// DEBUG_PRINT( "cam->look_dir: " );
@@ -115,6 +126,21 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
         cam->roll -= 2.0f * f_elapsed_time;
 	if (sfKeyboard_isKeyPressed(sfKeyPeriod))
         cam->roll += 2.0f * f_elapsed_time;
+
+	// Clip the angles to allow for later usage of
+	// look-up tables instead of sin() and cos() functions
+	if( cam->yaw > 3.15*2 )
+		cam->yaw -= 3.15*2;
+	else if( cam->yaw < -3.15*2)
+		cam->yaw += 3.15*2;
+	if( cam->pitch > 3.15*2 )
+		cam->pitch -= 3.15*2;
+	else if( cam->pitch < -3.15*2)
+		cam->pitch += 3.15*2;
+	if( cam->roll > 3.15*2 )
+		cam->roll -= 3.15*2;
+	else if( cam->roll < -3.15*2)
+		cam->roll += 3.15*2;
     
     // We've integrated time into this, so it's a velocity vector:
 	// DEBUG_PRINT( "cam->look_dir: " );
@@ -134,15 +160,10 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
 	vec3d_t v_up = { floatingToFixed(0), floatingToFixed(1), floatingToFixed(0), floatingToFixed(1) };
 	vec3d_t v_target = { floatingToFixed(0), floatingToFixed(0), floatingToFixed(1), floatingToFixed(1) };
 #else
-    vec3d_t v_up = { 0, 1, 0, 1 };
+    // vec3d_t v_up = { 0, 1, 0, 1 };
     //vec3d_t v_target = vectorAdd( cam->pos, cam->look_dir );
     vec3d_t v_target = { 0, 0, 1, 1 };
 #endif
-
-    // My trial of implementing left and right strafing
-    // Calculate the right direction:
-    vec3d_t v_right = vectorCrossProduct( &v_up, &v_forward );
-	v_right = vectorMul( &v_right, vectorLength( &(cam->look_dir) ) );
 
 	// DEBUG_PRINT( "temp_vUp: " );
 	// vec3d_print( &temp_vUp, 1 );
@@ -153,8 +174,52 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
 	// vec3d_print( &v_right_raw, 1 );
 	// DEBUG_PRINT( "v_right: " );
 	// vec3d_print( &v_right, 1 );
-    
-    if (sfKeyboard_isKeyPressed(sfKeyW))
+
+	// DEBUG_PRINT( "cam->pos: " );
+	// vec3d_print( &(cam->pos), 1 );
+	// DEBUG_PRINT( "v_up: " );
+	// vec3d_print( &v_up, 1 );
+
+	// DEBUG_PRINT( "cam: yaw: %f, pitch: %f, roll: %f\n", fixedToFloating(cam->yaw), fixedToFloating(cam->pitch), fixedToFloating(cam->roll) );
+	
+    mat4x4_t mat_camera_rot;
+
+	// Apply camera roll: (not working yet)
+	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
+	// v_up = matrix_mulVector( &mat_camera_rot, &v_up );
+	
+	// Apply camera pitch and yaw (X -> Z -> Y, order matters):
+	// change it to Z->X->Y
+	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
+	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
+	matrix_makeRotX( &mat_camera_rot, cam->pitch );
+    cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
+	matrix_makeRotY( &mat_camera_rot, cam->yaw );
+	cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
+	
+	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
+	// DEBUG_PRINT( "cam->up_dir: " );
+	// vec3d_print( &cam->up_dir, 1 );
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	matrix_makeRotX( &mat_camera_rot, cam->pitch - floatingToFixed( 3.14/2 ) );
+#else
+	matrix_makeRotX( &mat_camera_rot, cam->pitch - 3.14/2 );
+#endif
+	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
+	matrix_makeRotZ( &mat_camera_rot, cam->roll );
+	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+	matrix_makeRotY( &mat_camera_rot, cam->yaw );
+	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+
+	// My trial of implementing left and right strafing
+    // Calculate the right direction:
+    // vec3d_t v_right = vectorCrossProduct( &v_up, &v_forward );
+	// (cam->up_dir and cam->look_dir computed below)
+	vec3d_t v_right = vectorCrossProduct( &(cam->up_dir), &v_forward );
+	v_right = vectorMul( &v_right, vectorLength( &(cam->look_dir) ) );
+
+	if (sfKeyboard_isKeyPressed(sfKeyW))
         cam->pos = vectorAdd( &(cam->pos), &v_forward );
     if (sfKeyboard_isKeyPressed(sfKeyS))
         cam->pos = vectorSub( &(cam->pos), &v_forward );
@@ -163,30 +228,14 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
     if (sfKeyboard_isKeyPressed(sfKeyD))
         cam->pos = vectorAdd( &(cam->pos), &v_right );
 
-	// DEBUG_PRINT( "cam->pos: " );
-	// vec3d_print( &(cam->pos), 1 );
-	// DEBUG_PRINT( "v_up: " );
-	// vec3d_print( &v_up, 1 );
-	// DEBUG_PRINT( "v_target: " );
-	// vec3d_print( &v_target, 1 );
-	
-    mat4x4_t mat_camera_rot;
-
-	// Apply camera roll: (not working yet)
-	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
-	// v_up = matrix_mulVector( &mat_camera_rot, &v_up );
-	
-	// Apply camera pitch and yaw (X -> Y, order matters):
-	matrix_makeRotX( &mat_camera_rot, cam->pitch );
-    cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
-	matrix_makeRotY( &mat_camera_rot, cam->yaw );
-	cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
-	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
-
     v_target = vectorAdd( &(cam->pos), &(cam->look_dir) );
 
+	// DEBUG_PRINT( "v_target: " );
+	// vec3d_print( &v_target, 1 );
+
     mat4x4_t mat_camera;
-	matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &v_up );
+	// matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &v_up );
+	matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &(cam->up_dir) );
 
     // Make view matrix from camera:
     matrix_quickInverse( mat_view, &mat_camera );
