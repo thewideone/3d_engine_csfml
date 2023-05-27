@@ -201,16 +201,17 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
 	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
 	// DEBUG_PRINT( "cam->up_dir: " );
 	// vec3d_print( &cam->up_dir, 1 );
-#ifdef USE_FIXED_POINT_ARITHMETIC
-	matrix_makeRotX( &mat_camera_rot, cam->pitch - floatingToFixed( 3.14/2 ) );
-#else
-	matrix_makeRotX( &mat_camera_rot, cam->pitch - 3.14/2 );
-#endif
-	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
-	matrix_makeRotZ( &mat_camera_rot, cam->roll );
-	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
-	matrix_makeRotY( &mat_camera_rot, cam->yaw );
-	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+	
+// #ifdef USE_FIXED_POINT_ARITHMETIC
+// 	matrix_makeRotX( &mat_camera_rot, cam->pitch - floatingToFixed( 3.14/2 ) );
+// #else
+// 	matrix_makeRotX( &mat_camera_rot, cam->pitch - 3.14/2 );
+// #endif
+// 	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
+// 	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
+// 	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+// 	matrix_makeRotY( &mat_camera_rot, cam->yaw );
+// 	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
 
 	// My trial of implementing left and right strafing
     // Calculate the right direction:

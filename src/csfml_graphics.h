@@ -31,8 +31,4 @@ void CSFML_drawLine( rtnl_t x0, rtnl_t y0, rtnl_t x1, rtnl_t y1
 #endif
             );
 
-vec3d_t findCentre( mesh_t* mesh, int face_ID );
-int getOutlineEdgeCount( mesh_t* mesh );
-// void paintPolygonContours( mesh& mesh, int face_ID, sf::Color colour, sf::RenderWindow &renderWindow );
-
 #endif /* _GRAPHICS_H_ */

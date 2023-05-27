@@ -13,10 +13,6 @@
 // Do not include this here
 // #include "stb_ds.h"
 
-// 
-// Config in "config.h".
-// 
-
 #ifndef COLOUR_MONOCHROME
 // Colour structure:
 typedef struct {
@@ -131,5 +127,10 @@ void matrix_quickInverse( mat4x4_t* out_mat, mat4x4_t* m );
 // Move these to a some other file, like hidden line related one:
 // bool areCollinear( vec3d_t* v1, vec3d_t* v2, vec3d_t* v3, bool object_num, sfRenderWindow* windowToDrawOnto );
 // void computePlaneCoefficients( float* A, float* B, float* C, float* D, vec3d_t* vert1, vec3d_t* vert2, vec3d_t* vert3 );
+
+// Not used yet:
+// vec3d_t findCentre( mesh_t* mesh, int face_ID );
+// int getOutlineEdgeCount( mesh_t* mesh );
+// void paintPolygonContours( mesh& mesh, int face_ID, sf::Color colour, sf::RenderWindow &renderWindow );
 
 #endif /* _MATH_3D_H_ */

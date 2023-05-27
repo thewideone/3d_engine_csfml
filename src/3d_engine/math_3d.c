@@ -536,3 +536,101 @@ void calcFaceBoundaries( mesh_t* mesh, int face_id, int* min_x, int* max_x, int*
     }
 }
 */
+
+
+/*
+vec3d_t findCentre( mesh_t* mesh, int face_ID ){
+    // mesh.printVisFaceIDs();
+    // mesh.printVisEdgeVec();
+    // cout << "Trying to find centre for face of ID: " << face_ID << "... ";
+
+    vec3d_t vec_avg;
+    vec_avg.x=0;
+    vec_avg.y=0;
+    int vert0_id = mesh->faces[ face_ID ].p[ 0 ];
+    assert( vert0_id >= 0 );
+    // vec_avg.z=mesh.vert2DSpaceMap.find( vert0_id )->second.z;    // just take these values
+    // vec_avg.w=mesh.vert2DSpaceMap.find( vert0_id )->second.w;    // from the 1st element
+    vmap_t* found_node_ptr = vmap_search( mesh->vert2DSpaceMap, vert0_id );
+    if( found_node_ptr != NULL ){
+        vec_avg.x = found_node_ptr->v.x;
+        vec_avg.w = found_node_ptr->v.w;
+    }
+
+    assert( face_ID >= 0 );
+
+    int vertex_cnt = mesh->faces[face_ID].p_count;
+
+    assert( vertex_cnt > 0 );
+
+    for( int i=0; i < vertex_cnt; i++ ){
+        int vert_id = mesh->faces[ face_ID ].p[ i ];
+
+        assert( vert_id >= 0 );
+
+        // vec_avg.x += mesh.vert2DSpaceMap.find( vert_id )->second.x;
+        // vec_avg.y += mesh.vert2DSpaceMap.find( vert_id )->second.y;
+
+        // float res_x = mesh.vert2DSpaceMap.find( vert_id )->second.x;
+        // float res_y = mesh.vert2DSpaceMap.find( vert_id )->second.y;
+        float res_x, res_y;
+
+        found_node_ptr = vmap_search( mesh->vert2DSpaceMap, vert0_id );
+        if( found_node_ptr != NULL ){
+            res_x = found_node_ptr->v.x;
+            res_y = found_node_ptr->v.y;
+        }
+
+        // assert( (res_x >= 0.0) && (res_y >= 0.0) );
+
+        vec_avg.x += res_x;
+        vec_avg.y += res_y;
+
+    }
+    vec_avg.x /= (float) vertex_cnt;
+    vec_avg.y /= (float) vertex_cnt;
+
+    // cout << "done." << endl;
+
+    return vec_avg;
+}
+*/
+
+// int getOutlineEdgeCount( mesh_t* mesh ){
+//     // In vis_edge_vec:
+//     // Each entry is 4x int:
+//     // 0: start_vert_ID
+//     // 1: end_vert_ID
+//     // 2: num_of_faces_which_the_edge_belongs_to (1-2)
+//     // 3: ID_of_1st_face
+
+//     int count = 0;
+
+//     for( int edge_itr = 0;
+//             edge_itr < arrlen(mesh->vis_edge_vec);
+//             edge_itr += 4 ){
+//         if( mesh->vis_edge_vec[ edge_itr + 2 ] > 1 )
+//             continue;
+//         count++;
+//     }
+
+//     return count;
+// }
+
+// NOT WORKING
+// void paintPolygonContours( mesh& mesh, int face_ID, sf::Color colour, sf::RenderWindow &windowToDrawOnto ){
+//     int vertex_cnt = mesh.faces[face_ID].p_count;
+//     for( int i=0; i < vertex_cnt - 1; i++ ){
+//         float x0 = mesh.vertices[mesh.faces[face_ID].p[i]].x;
+//         float y0 = mesh.vertices[mesh.faces[face_ID].p[i]].y;
+//         float x1 = mesh.vertices[mesh.faces[face_ID].p[i+1]].x;
+//         float y1 = mesh.vertices[mesh.faces[face_ID].p[i+1]].y;
+//         drawLine( x0 , y0, x1, y1, colour, windowToDrawOnto );
+//     }
+
+//     float x0 = mesh.vertices[mesh.faces[face_ID].p[vertex_cnt]].x;
+//     float y0 = mesh.vertices[mesh.faces[face_ID].p[vertex_cnt]].y;
+//     float x1 = mesh.vertices[mesh.faces[face_ID].p[0]].x;
+//     float y1 = mesh.vertices[mesh.faces[face_ID].p[0]].y;
+//     drawLine( x0 , y0, x1, y1, colour, windowToDrawOnto );
+// }

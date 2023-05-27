@@ -27,9 +27,11 @@
 // TODO:
 // 	- add an appriopriate comment in external_dependencies.h
 // 	- move getOutlineEdgeCount() from csfml_graphics.* to some math file
-// 	- fix view matrix multiplication in 3d_main.c
+// 	- X fix view matrix multiplication in 3d_main.c
+// 	- add camera roll control
 // 	- change the name of 3d_main.c to some more intelligent one
-// 	- make the engine available to use as a submodule in AVR project:
+// 	- make the engine available to use as a submodule in AVR/ESP project:
+// 		- test if stb_ds works in AVR/ESP projects
 // 		- separate the core of the engine from main.c on github:
 // 			- test usage of the engine from main.c directly, that is:
 // 				* add a test mesh to a queue in main() before the loop
@@ -39,7 +41,7 @@
 // 			- SFML-dependent functions:
 // 				* X whole graphics.h and *.c
 // 				* computeViewMatrix() in 3d_main.c
-// 				* drawMesh() in 3d_main.c -> drawLine()
+// 				* X drawMesh() in 3d_main.c -> drawLine()
 // 			- call this file sth like "engine tests"
 // 	- left-right movement too slow but only sometimes??
 // 	- don't draw meshes behind camera

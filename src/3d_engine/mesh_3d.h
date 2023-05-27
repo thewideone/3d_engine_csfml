@@ -12,7 +12,7 @@
 //    maybe there are more optimization possibilities?
 //  - instead of clearing and filling vert2DSpaceMap,
 //    update it with new values
-//  - add loading from program memory
+//  - X add loading from program memory
 
 // Vertex ID separator in face array in program memory
 #define F_VID_SEP 255
@@ -65,8 +65,7 @@ typedef struct {
 } mesh_t;
 
 
-// Idk if it makes sense because a mesh should be loaded
-// with info just after its declaration
+
 void mesh_makeEmpty( mesh_t* mesh );
 void mesh_free( mesh_t* mesh );
 #ifdef USE_LOADING_FROM_OBJ
