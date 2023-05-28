@@ -9,6 +9,8 @@
 // See "Hardware dependend stuff" section
 // STB_DS_IMPLEMENTATION defined in math_3d.c
 
+
+
 // 
 // Hardware dependend stuff
 // 
@@ -16,6 +18,29 @@
 
 // For CSFML:
 #define FRAMERATE 30
+
+
+
+// 
+// Engine features:
+// 
+
+// Camera control defined in external_dependencies.h
+#define USE_CAMERA
+
+// #define USE_FILLED_MESHES
+
+// #define USE_LOADING_FROM_OBJ
+
+// Render only visible edges / faces
+#define RENDER_VISIBLE_ONLY
+
+// #define REMOVE_HIDDEN_LINES
+
+// Draw only outlines of meshes
+// #define DRAW_CONTOUR_ONLY
+
+
 
 // 
 // Display:
@@ -54,17 +79,7 @@
 
 #endif  // COLOUR_MONOCHROME
 
-// 
-// Engine features:
-// 
-#define USE_CAMERA
-// #define USE_FILLED_MESHES
-// #define USE_LOADING_FROM_OBJ
-// Render only visible edges / faces
-#define RENDER_VISIBLE_ONLY
-// #define REMOVE_HIDDEN_LINES
-// Draw only outlines of meshes
-// #define DRAW_CONTOUR_ONLY
+
 
 // 
 // Math:
@@ -106,11 +121,15 @@
 #define STDO_RTNL STDO_FLT
 #endif
 
+
+
 // 
 // Mesh queue (mesh_3d_queue.*):
 // 
 #define MESH_QUEUE_FIXED_SIZE
 #define MESH_QUEUE_CAPACITY 10
+
+
 
 // 
 // Debug:

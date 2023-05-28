@@ -15,7 +15,11 @@ void setAnimateFlag( bool value ){
     animate = value;
 }
 
-void setupProjectionMatrix( mat4x4_t* mat ){
+// 
+// Set up projection matrix for mesh transformation.
+// mat	- matrix to be set up as a projection one
+// 
+void engine3D_setupProjectionMatrix( mat4x4_t* mat ){
 	#ifdef USE_FIXED_POINT_ARITHMETIC
 	matrix_makeProjection( mat,
 			floatingToFixed(90.0), floatingToFixed( (flp_t)SCREEN_HEIGHT / (flp_t)SCREEN_WIDTH ),
@@ -28,6 +32,10 @@ void setupProjectionMatrix( mat4x4_t* mat ){
 	#endif
 }
 
+// 
+// Example function of setting up a basic 3D scene,
+// that is one mesh and one camera.
+// 
 void setup3D( void ){
 	mesh_makeEmpty( &mesh );
 	// mesh_setEdgeColourByValue( &mesh, COLOUR_GREEN );
@@ -42,7 +50,7 @@ void setup3D( void ){
 		DEBUG_PRINT( "Error: in setup3D() loading mesh from file failed\n" );
 	}
 
-	setupProjectionMatrix( &mat_proj );
+	engine3D_setupProjectionMatrix( &mat_proj );
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 	camera_makeDefault( &cam0 );
 	camera_setActive( &cam0 );
@@ -57,31 +65,31 @@ void free3D( void ){
 // 
 // Compute camera and view matrices,
 // the latter of which is used for mesh transformation,
-// if using camera
+// if using camera.
 // cam				- camera "object"
 // mat_view			- view matrix
 // f_elapsed_time	- elapsed time since the last frame,
 // 					  don't ask me about the unit XD
 // 
-void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time ){
+void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time ){
     // Camera movement (WSAD hehe) and looking around (arrows)
 #ifdef USE_FIXED_POINT_ARITHMETIC
-	if (sfKeyboard_isKeyPressed(sfKeySpace))
+	if (CAMERA_MOVE_PRESSED_UP)
         cam->pos.y -= floatingToFixed( 2.0f * f_elapsed_time );
-    if (sfKeyboard_isKeyPressed(sfKeyLShift) || sfKeyboard_isKeyPressed(sfKeyRShift) )
+    if (CAMERA_MOVE_PRESSED_DOWN )
         cam->pos.y += floatingToFixed( 2.0f * f_elapsed_time );
 	
-	if (sfKeyboard_isKeyPressed(sfKeyRight))
+	if (CAMERA_LOOK_PRESSED_RIGHT)
         cam->yaw -= floatingToFixed( 2.0f * f_elapsed_time );
-    if (sfKeyboard_isKeyPressed(sfKeyLeft))
+    if (CAMERA_LOOK_PRESSED_LEFT)
         cam->yaw += floatingToFixed( 2.0f * f_elapsed_time );
-	if (sfKeyboard_isKeyPressed(sfKeyDown))
+	if (CAMERA_LOOK_PRESSED_DOWN)
         cam->pitch -= floatingToFixed( 2.0f * f_elapsed_time );
-    if (sfKeyboard_isKeyPressed(sfKeyUp))
+    if (CAMERA_LOOK_PRESSED_UP)
         cam->pitch += floatingToFixed( 2.0f * f_elapsed_time );
-	if (sfKeyboard_isKeyPressed(sfKeyComma))
+	if (CAMERA_LOOK_PRESSED_ROLL_LEFT)
         cam->roll -= floatingToFixed( 2.0f * f_elapsed_time );
-    if (sfKeyboard_isKeyPressed(sfKeyPeriod))
+    if (CAMERA_LOOK_PRESSED_ROLL_RIGHT)
         cam->roll += floatingToFixed( 2.0f * f_elapsed_time );
 	
 	// Clip the angles to allow for later usage of
@@ -107,24 +115,24 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
 
 	// DEBUG_PRINT( "cam->yaw: %f\n", (float) fixedToFloating(cam->yaw) );
 #else
-    if (sfKeyboard_isKeyPressed(sfKeySpace))
+    if (CAMERA_MOVE_PRESSED_UP)
         cam->pos.y -= 2.0f * f_elapsed_time;
-    if (sfKeyboard_isKeyPressed(sfKeyLShift) || sfKeyboard_isKeyPressed(sfKeyRShift))
+    if (CAMERA_MOVE_PRESSED_DOWN)
         cam->pos.y += 2.0f * f_elapsed_time;
 	
-    if (sfKeyboard_isKeyPressed(sfKeyRight))
+    if (CAMERA_LOOK_PRESSED_RIGHT)
         cam->yaw -= 2.0f * f_elapsed_time;
-    if (sfKeyboard_isKeyPressed(sfKeyLeft))
+    if (CAMERA_LOOK_PRESSED_LEFT)
         cam->yaw += 2.0f * f_elapsed_time;
 	
-	if (sfKeyboard_isKeyPressed(sfKeyDown))
+	if (CAMERA_LOOK_PRESSED_DOWN)
         cam->pitch -= 2.0f * f_elapsed_time;
-	if (sfKeyboard_isKeyPressed(sfKeyUp))
+	if (CAMERA_LOOK_PRESSED_UP)
         cam->pitch += 2.0f * f_elapsed_time;
 	
-	if (sfKeyboard_isKeyPressed(sfKeyComma))
+	if (CAMERA_LOOK_PRESSED_ROLL_LEFT)
         cam->roll -= 2.0f * f_elapsed_time;
-	if (sfKeyboard_isKeyPressed(sfKeyPeriod))
+	if (CAMERA_LOOK_PRESSED_ROLL_RIGHT)
         cam->roll += 2.0f * f_elapsed_time;
 
 	// Clip the angles to allow for later usage of
@@ -220,13 +228,13 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
 	vec3d_t v_right = vectorCrossProduct( &(cam->up_dir), &v_forward );
 	v_right = vectorMul( &v_right, vectorLength( &(cam->look_dir) ) );
 
-	if (sfKeyboard_isKeyPressed(sfKeyW))
+	if (CAMERA_MOVE_PRESSED_FORWARD)
         cam->pos = vectorAdd( &(cam->pos), &v_forward );
-    if (sfKeyboard_isKeyPressed(sfKeyS))
+    if (CAMERA_MOVE_PRESSED_BACKWARD)
         cam->pos = vectorSub( &(cam->pos), &v_forward );
-    if (sfKeyboard_isKeyPressed(sfKeyA))
+    if (CAMERA_MOVE_PRESSED_LEFT)
         cam->pos = vectorSub( &(cam->pos), &v_right );
-    if (sfKeyboard_isKeyPressed(sfKeyD))
+    if (CAMERA_MOVE_PRESSED_RIGHT)
         cam->pos = vectorAdd( &(cam->pos), &v_right );
 
     v_target = vectorAdd( &(cam->pos), &(cam->look_dir) );
@@ -257,7 +265,7 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
 #endif
 
 // 
-// Project a 3D mesh on 2D surface,
+// Project a 3D mesh onto 2D surface,
 // save transformed vertices in the mesh structure
 // and fill mesh's visible edge array
 // with visible vertx IDs.
@@ -267,9 +275,9 @@ void computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time 
 // rot_angle_z	- angle of rotation of the mesh (in degrees) in Z axis
 // 
 #ifdef USE_CAMERA
-void processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view, flp_t rot_angle_x, flp_t rot_angle_z ){
+void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view, flp_t rot_angle_x, flp_t rot_angle_z ){
 #else
-void processMesh( mesh_t* mesh, mat4x4_t* mat_proj, flp_t rot_angle_x, flp_t rot_angle_z ){
+void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, flp_t rot_angle_x, flp_t rot_angle_z ){
 #endif
 	// Apply rotation in Z and X axis:
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -566,11 +574,9 @@ void processMesh( mesh_t* mesh, mat4x4_t* mat_proj, flp_t rot_angle_x, flp_t rot
 }
 
 // 
-// Draw mesh on given render window.
-// Replace drawLine() function at the end with any function
-// drawing a straight line on your output device
+// Draw mesh on screen.
 // 
-void drawMesh( mesh_t* mesh ){
+void engine3D_drawMesh( mesh_t* mesh ){
     // Draw every visible edge
     // Debug (commented): print the visible edge array
     for( int i=0; i<arrlen(mesh->vis_edge_vec); i+=4 ){
@@ -637,10 +643,10 @@ void drawMesh( mesh_t* mesh ){
 #endif // VERTEX_ID_DEBUG
 
 #ifdef COLOUR_MONOCHROME
-		drawLine( vertProjected1.x, vertProjected1.y,
+		engine3D_drawLine( vertProjected1.x, vertProjected1.y,
                   vertProjected2.x, vertProjected2.y );
 #else
-		drawLine( vertProjected1.x, vertProjected1.y,
+		engine3D_drawLine( vertProjected1.x, vertProjected1.y,
                   vertProjected2.x, vertProjected2.y,
 				  &(mesh->edge_colour) );
 #endif
@@ -652,6 +658,9 @@ void drawMesh( mesh_t* mesh ){
     }
 }
 
+// 
+// Example function handling drawing a 3D-related content on screen.
+// 
 void update3DFrame( flp_t f_elapsed_time, flp_t* f_theta ){
 	// mat4x4 matRotZ, matRotX;
     // Current angle:
@@ -676,11 +685,11 @@ void update3DFrame( flp_t f_elapsed_time, flp_t* f_theta ){
 		DEBUG_PRINT( "Set active camera to update 3D frame. Skipping.\n" );
 		return;
 	}
-	computeViewMatrix( camera_getActive(), &mat_view, f_elapsed_time );
-    processMesh( &mesh, &mat_proj, &mat_view, *f_theta, (*f_theta)*0.5 );
+	engine3D_computeViewMatrix( camera_getActive(), &mat_view, f_elapsed_time );
+    engine3D_processMesh( &mesh, &mat_proj, &mat_view, *f_theta, (*f_theta)*0.5 );
 #else
-	processMesh( &mesh, &mat_proj, *f_theta, (*f_theta)*0.5 );
+	engine3D_processMesh( &mesh, &mat_proj, *f_theta, (*f_theta)*0.5 );
 #endif
 
-	drawMesh( &mesh );
+	engine3D_drawMesh( &mesh );
 }

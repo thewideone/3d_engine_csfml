@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <time.h> // for 3d_engine/3d_main.h/update3DFrame()
 
-// #include "../include/SFML/Graphics.h"
-#include <SFML/Graphics.h>
+#include "../include/SFML/Graphics.h"
+// #include <SFML/Graphics.h>
 
 #include "3d_engine/config.h"
 
@@ -25,8 +25,8 @@
 
 // 
 // TODO:
-// 	- add an appriopriate comment in external_dependencies.h
-// 	- move getOutlineEdgeCount() from csfml_graphics.* to some math file
+// 	- X add an appriopriate comment in external_dependencies.h
+// 	- X move getOutlineEdgeCount() from csfml_graphics.* to some math file
 // 	- X fix view matrix multiplication in 3d_main.c
 // 	- add camera roll control
 // 	- change the name of 3d_main.c to some more intelligent one
@@ -40,10 +40,11 @@
 // 				  to remove f_theta parameter from update3DFrame()
 // 			- SFML-dependent functions:
 // 				* X whole graphics.h and *.c
-// 				* computeViewMatrix() in 3d_main.c
+// 				* X computeViewMatrix() in 3d_main.c
 // 				* X drawMesh() in 3d_main.c -> drawLine()
 // 			- call this file sth like "engine tests"
-// 	- left-right movement too slow but only sometimes??
+// 	- left-right movement too slow but only sometimes, because of cross product
+// 			of camera->look_dir with camera->up vectors gets small when looking up/down
 // 	- don't draw meshes behind camera
 // 	- add screen clipping
 // 	- filled meshes
@@ -433,10 +434,10 @@ void graphicsTest( sfRenderWindow* renderWindow ){
 #ifndef COLOUR_MONOCHROME
 	colour_t colour;
 	colour.rgb = COLOUR_WHITE;
-	drawLine( 50, 50, 100, 100, &colour );
+	engine3D_drawLine( 50, 50, 100, 100, &colour );
 	colour.rgb = COLOUR_RED;
 #else
-	drawLine( 50, 50, 100, 100 );
+	engine3D_drawLine( 50, 50, 100, 100 );
 #endif
 
 	char str[20];
@@ -444,16 +445,16 @@ void graphicsTest( sfRenderWindow* renderWindow ){
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	// putText( str, floatingToFixed(150), floatingToFixed(150), 50, sfMagenta, renderWindow );
 #ifndef COLOUR_MONOCHROME
-	putText( str, floatingToFixed(150), floatingToFixed(150), 50, &colour );
+	engine3D_putText( str, floatingToFixed(150), floatingToFixed(150), 50, &colour );
 #else
-	putText( str, floatingToFixed(150), floatingToFixed(150), 50 );
+	engine3D_putText( str, floatingToFixed(150), floatingToFixed(150), 50 );
 #endif
 #else
 	// putText( str, 150, 150, 50, sfMagenta, renderWindow );
 #ifndef COLOUR_MONOCHROME
-	putText( str, 150, 150, 50, &colour );
+	engine3D_putText( str, 150, 150, 50, &colour );
 #else
-	putText( str, 150, 150, 50 );
+	engine3D_putText( str, 150, 150, 50 );
 #endif
 #endif
 }
