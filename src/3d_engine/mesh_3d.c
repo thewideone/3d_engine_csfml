@@ -29,7 +29,19 @@ void mesh_makeEmpty( mesh_t* mesh ){
 #endif
 #endif
 #endif
+
     vec3d_makeEmpty( &mesh->pos );
+
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    mesh->yaw = floatingToFixed( 0.0f );
+    mesh->pitch = floatingToFixed( 0.0f );
+	mesh->roll = floatingToFixed( 0.0f );
+#else
+    mesh->yaw = 0.0f;
+    mesh->pitch = 0.0f;
+    mesh->roll = 0.0f;
+#endif
+
     mesh->face_cnt = 0;
     mesh->faces = NULL;
     mesh->transformedVertices = NULL;

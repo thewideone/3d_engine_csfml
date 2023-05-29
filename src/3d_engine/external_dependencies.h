@@ -42,9 +42,9 @@ void engine3D_register_putText( void *function_ptr );
 // 
 void engine3D_putText( char* str, rtnl_t x, rtnl_t y, int size
 #ifndef COLOUR_MONOCHROME
-            , colour_t* colour
+                      , colour_t* colour
 #endif
-            );
+                      );
 
 // 
 // Draw a line on the screen.
@@ -52,9 +52,9 @@ void engine3D_putText( char* str, rtnl_t x, rtnl_t y, int size
 // 
 void engine3D_drawLine( rtnl_t x0, rtnl_t y0, rtnl_t x1, rtnl_t y1
 #ifndef COLOUR_MONOCHROME
-            , colour_t* colour
+                       , colour_t* colour
 #endif
-            );
+                      );
 
 
 #endif // _3D_ENGINE_EXTERNAL_DEPENDENCIES_H_

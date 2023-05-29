@@ -45,6 +45,7 @@
 // 			- call this file sth like "engine tests"
 // 	- left-right movement too slow but only sometimes, because of cross product
 // 			of camera->look_dir with camera->up vectors gets small when looking up/down
+// 	- add mesh_setPos(), mesh_setRot(), mesh_move() and mesh_rotate()
 // 	- don't draw meshes behind camera
 // 	- add screen clipping
 // 	- filled meshes

@@ -2,6 +2,7 @@
 
 bool animate = 0;	// for testing, toggles motion of objects caused by "f_theta"
 
+mesh_queue_t mq;
 mesh_t mesh;		// test mesh
 mat4x4_t mat_proj;	// projection matrix
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
@@ -37,6 +38,7 @@ void engine3D_setupProjectionMatrix( mat4x4_t* mat ){
 // that is one mesh and one camera.
 // 
 void setup3D( void ){
+	meshQueue_makeEmpty( &mq );
 	mesh_makeEmpty( &mesh );
 	// mesh_setEdgeColourByValue( &mesh, COLOUR_GREEN );
 #ifdef USE_LOADING_FROM_OBJ
@@ -50,6 +52,18 @@ void setup3D( void ){
 		DEBUG_PRINT( "Error: in setup3D() loading mesh from file failed\n" );
 	}
 
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
+    // vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
+#else
+    vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
+    // vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
+#endif
+
+	mesh.pos = pos1;
+
+	meshQueue_push( &mq, &mesh );
+
 	engine3D_setupProjectionMatrix( &mat_proj );
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 	camera_makeDefault( &cam0 );
@@ -58,7 +72,8 @@ void setup3D( void ){
 }
 
 void free3D( void ){
-	mesh_free( &mesh );
+	// mesh_free( &mesh );
+	meshQueue_freeAllMeshes( &mq );
 }
 
 #ifdef USE_CAMERA
@@ -275,24 +290,26 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 // rot_angle_z	- angle of rotation of the mesh (in degrees) in Z axis
 // 
 #ifdef USE_CAMERA
-void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view, flp_t rot_angle_x, flp_t rot_angle_z ){
+void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view ){
 #else
-void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, flp_t rot_angle_x, flp_t rot_angle_z ){
+void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj ){
 #endif
 	// Apply rotation in Z and X axis:
-#ifdef USE_FIXED_POINT_ARITHMETIC
 	mat4x4_t matRotZ, matRotX;
-	matrix_makeRotZ( &matRotZ, floatingToFixed( rot_angle_z ) );
-    matrix_makeRotX( &matRotX, floatingToFixed( rot_angle_x ) );
-	// DEBUG_PRINT( "rot_angle_x = %f\n", (float) rot_angle_x );
-	// DEBUG_PRINT( "rot_angle_z = %f\n", (float) rot_angle_z );
-	// printMatrix( &matRotX );
-	// printMatrix( &matRotZ );
-#else
-    mat4x4_t matRotZ, matRotX;
-	matrix_makeRotZ( &matRotZ, rot_angle_z );
-    matrix_makeRotX( &matRotX, rot_angle_x );
-#endif
+// #ifdef USE_FIXED_POINT_ARITHMETIC
+// 	matrix_makeRotZ( &matRotZ, floatingToFixed( rot_angle_z ) );
+//     matrix_makeRotX( &matRotX, floatingToFixed( rot_angle_x ) );
+// 	// DEBUG_PRINT( "rot_angle_x = %f\n", (float) rot_angle_x );
+// 	// DEBUG_PRINT( "rot_angle_z = %f\n", (float) rot_angle_z );
+// 	// printMatrix( &matRotX );
+// 	// printMatrix( &matRotZ );
+// #else
+// 	matrix_makeRotZ( &matRotZ, rot_angle_z );
+//     matrix_makeRotX( &matRotX, rot_angle_x );
+// #endif
+	matrix_makeRotZ( &matRotZ, mesh->roll );
+    matrix_makeRotX( &matRotX, mesh->pitch );
+
     // Translation matrix
     // mat4x4 matTrans;
     // mesh.matTrans = matrixMakeTranslation( 0.0f, 0.0f, 2.0f );
@@ -662,34 +679,42 @@ void engine3D_drawMesh( mesh_t* mesh ){
 // Example function handling drawing a 3D-related content on screen.
 // 
 void update3DFrame( flp_t f_elapsed_time, flp_t* f_theta ){
-	// mat4x4 matRotZ, matRotX;
-    // Current angle:
+    // Update current angle
     if( animate )
         *f_theta += 1.0 * f_elapsed_time;
 	
 	// DEBUG_PRINT( "f_theta = %f,\f_elapsed_time = %f\n", (float) (*f_theta), (float) f_elapsed_time );
-
-#ifdef USE_FIXED_POINT_ARITHMETIC
-	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
-    // vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
-#else
-    vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
-    // vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
-#endif
-
-	mesh.pos = pos1;
 	
 #ifdef USE_CAMERA
+	// Compute view matrix for the active camera
 	mat4x4_t mat_view;
 	if( camera_getActive() == NULL ){
 		DEBUG_PRINT( "Set active camera to update 3D frame. Skipping.\n" );
 		return;
 	}
 	engine3D_computeViewMatrix( camera_getActive(), &mat_view, f_elapsed_time );
-    engine3D_processMesh( &mesh, &mat_proj, &mat_view, *f_theta, (*f_theta)*0.5 );
-#else
-	engine3D_processMesh( &mesh, &mat_proj, *f_theta, (*f_theta)*0.5 );
 #endif
 
-	engine3D_drawMesh( &mesh );
+	// Process and draw every mesh in the queue
+	for( size_t i=0; i < mq.size; i++ ){
+		mesh_t* current_mesh = meshQueue_getCurrent( &mq );
+
+		// Apply rotation to each mesh
+#ifdef USE_FIXED_POINT_ARITHMETIC
+		current_mesh->pitch = floatingToFixed(*f_theta);
+		current_mesh->roll = floatingToFixed((*f_theta)*0.5);
+#else
+		current_mesh->pitch = *f_theta;
+		current_mesh->roll = (*f_theta)*0.5;
+#endif
+
+#ifdef USE_CAMERA
+    	engine3D_processMesh( current_mesh, &mat_proj, &mat_view );
+#else
+		engine3D_processMesh( current_mesh, &mat_proj );
+#endif
+		engine3D_drawMesh( current_mesh );
+
+		meshQueue_goToNext( &mq );
+	}
 }

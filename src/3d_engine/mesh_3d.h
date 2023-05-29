@@ -22,13 +22,22 @@
 // types of vertex_cnt and face_cnt variables
 // Same for polygon struct
 typedef struct {
+
 #ifndef COLOUR_MONOCHROME
     colour_t edge_colour;
 #ifdef USE_FILLED_MESHES
     colour_t fill_colour;
 #endif
 #endif
+
+    // Position vector
     vec3d_t pos;
+
+    // Rotation angles (in radians)
+    rtnl_t yaw;
+	rtnl_t pitch;
+	rtnl_t roll;
+
     // vector<polygon> faces;    // std::vector<...>, contains IDs of vertices
     polygon_t* faces;
     // vector<vec3d> vertices;

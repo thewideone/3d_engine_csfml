@@ -58,6 +58,7 @@ mesh_t* meshQueue_getCurrent( mesh_queue_t* mq );
 void meshQueue_goToNext( mesh_queue_t* mq );
 
 // 
+// Add a mesh to a queue.
 // Return true if succeeded,
 // false otherwise (e.g. the queue is full).
 // 

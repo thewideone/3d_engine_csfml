@@ -23,6 +23,7 @@
 #include "../meshes/cube.h"
 #include "../meshes/sphere.h"
 #include "../meshes/dodecahedron.h"
+#include "mesh_3d_queue.h"
 
 bool getAnimateFlag( void );
 void setAnimateFlag( bool value );
@@ -32,9 +33,9 @@ void free3D( void );
 void draw_mesh( mesh_t* mesh );
 
 #ifdef USE_CAMERA
-void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view, flp_t rot_angle_x, flp_t rot_angle_z );
+void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view );
 #else
-void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, flp_t rot_angle_x, flp_t rot_angle_z );
+void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj );
 #endif
 
 void update3DFrame( flp_t f_elapsed_time, flp_t* f_theta );
