@@ -23,8 +23,9 @@
 #include "meshes/sphere.h"
 #include "meshes/dodecahedron.h"
 
-// 
-// TODO:
+
+/* TODO:
+// 	- change mesh_t to mesh3d_t
 // 	- X add an appriopriate comment in external_dependencies.h
 // 	- X move getOutlineEdgeCount() from csfml_graphics.* to some math file
 // 	- X fix view matrix multiplication in 3d_main.c
@@ -58,8 +59,254 @@
 // 	- X move global variables and mesh processing functions to a separate file
 // 	- X coloured meshes:
 // 	- X (fill and edge colours separated)
-// 
+ */
 
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
+void example_setup3D( mesh_queue_t* mq, mesh_t* mesh, mat4x4_t* mat_proj, camera_t* cam );
+#else
+void example_setup3D( mesh_queue_t* mq, mesh_t* mesh, mat4x4_t* mat_proj );
+#endif
+
+void example_update3DFrame( mesh_queue_t* mq, mat4x4_t* mat_proj, flp_t f_elapsed_time, flp_t f_theta );
+
+
+void mathTest( void );
+void dynamicArrayTest( void );
+void binarySearchTreeMapTest( void );
+void meshTest( void );
+void meshQueueTest( void );
+void graphicsTest( sfRenderWindow* renderWindow );
+
+
+bool animate_flag = 0;	// for testing, toggles motion of objects caused by "f_theta"
+
+
+int main(){
+	// 
+	// CSFML setup
+	// 
+
+	// Create a window:
+#ifdef COLOUR_MONOCHROME
+	// Just for SFML window, the engine will work in monochrome mode
+	sfVideoMode videoMode = { SCREEN_WIDTH, SCREEN_HEIGHT, 24 };
+#else
+	sfVideoMode videoMode = { SCREEN_WIDTH, SCREEN_HEIGHT, COLOUR_DEPTH };
+#endif
+    sfRenderWindow* window;
+	sfFont* font;
+	sfText* text;
+	sfEvent event;
+
+	window = sfRenderWindow_create(videoMode, "3D engine CSFML test", sfResize | sfClose, NULL);
+    
+	if (!window){
+		printf( "Error: Could not create a window.\n" );
+        return 1;
+	}
+
+	sfRenderWindow_setFramerateLimit( window, FRAMERATE );
+
+	SFML_initGraphics( window );
+
+	/* Create a graphical text to display */
+    font = sfFont_createFromFile("Minecraft.ttf");
+    if (!font){
+		printf( "Error: Could not load a font.\n" );
+        return 1;
+	}
+    text = sfText_create();
+    sfText_setString(text, "Hello SFML");
+    sfText_setFont(text, font);
+    sfText_setCharacterSize(text, 50);
+
+	// 
+	// 3D engine setup
+	// 
+	engine3D_register_drawLine( &CSFML_drawLine );
+	engine3D_register_putText( &CSFML_putText );
+
+	mesh_queue_t mq;
+	mesh_t mesh;		// test mesh
+	mat4x4_t mat_proj;	// projection matrix
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
+	camera_t cam0;
+#endif
+
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
+	example_setup3D( &mq, &mesh, &mat_proj, &cam0 );
+#else
+	example_setup3D( &mq, &mesh, &mat_proj );
+#endif
+
+	flp_t f_theta = 0;
+	clock_t t1 = clock();
+	clock_t t2 = clock();
+
+	DEBUG_PRINT( "Setup complete %d\n", (int) 123 );
+	// printf( "Setup complete.\n" );
+
+	// mathTest();
+	// dynamicArrayTest();
+	// binarySearchTreeMapTest();
+	// meshTest();
+	// meshQueueTest();
+
+	// 
+	// Main loop
+	// 
+
+	while (sfRenderWindow_isOpen(window)){
+		/* Process events */
+        while (sfRenderWindow_pollEvent(window, &event)){
+            /* Close window : exit */
+            if (event.type == sfEvtClosed)
+                sfRenderWindow_close(window);
+			if (event.type == sfEvtMouseButtonPressed){
+                // Toggle object rotation animation
+                if (event.mouseButton.button == sfMouseRight){
+					if( animate_flag ){
+						animate_flag = 0;
+					}
+					else
+						animate_flag = 1;
+                }
+                // Reset rotation angle
+                if (event.mouseButton.button == sfMouseLeft){
+                    f_theta = 0.0f;
+                }
+            }
+            if (event.type == sfEvtMouseWheelMoved){
+                f_theta += event.mouseWheel.delta*3.14/180.0;
+            }
+        }
+
+		/* Clear the screen */
+        sfRenderWindow_clear(window, sfBlack);
+
+		/* Draw the text */
+        // sfRenderWindow_drawText(window, text, NULL);
+
+		// graphicsTest( window );
+
+		t2 = clock();
+		flp_t elapsed_time = (flp_t)(t2-t1) / CLOCKS_PER_SEC;
+		t1 = t2;
+
+		// Update current angle
+    	if( animate_flag )
+        	f_theta += 1.0 * elapsed_time;
+		
+		// DEBUG_PRINT( "f_theta = %f,\f_elapsed_time = %f\n", (float) (f_theta), (float) f_elapsed_time );
+
+		example_update3DFrame( &mq, &mat_proj, elapsed_time, f_theta );
+
+		/* Update the window */
+        sfRenderWindow_display(window);
+	}
+
+	meshQueue_freeAllMeshes( &mq );
+	SFML_freeGraphics();
+
+	sfRenderWindow_destroy(window);
+	sfText_destroy(text);
+    sfFont_destroy(font);
+
+	return (0);
+}
+
+// 
+// Example function of setting up a basic 3D scene,
+// that is one mesh and one camera.
+// 
+void example_setup3D( mesh_queue_t* mq, mesh_t* mesh, mat4x4_t* mat_proj
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
+					 , camera_t* cam
+#endif
+					){
+	meshQueue_makeEmpty( mq );
+	mesh_makeEmpty( mesh );
+	// mesh_setEdgeColourByValue( &mesh, COLOUR_GREEN );
+#ifdef USE_LOADING_FROM_OBJ
+	bool ret = mesh_loadFromObjFile( mesh, "obj_models/cube.obj" );
+#else
+	bool ret = mesh_loadFromProgmem( mesh, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
+	// bool ret = mesh_loadFromProgmem( mesh, sphere_mesh_verts, sphere_mesh_faces, SPHERE_MESH_V_CNT, SPHERE_MESH_F_CNT, false );
+	// bool ret = mesh_loadFromProgmem( mesh, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
+#endif
+	if( !ret ){
+		DEBUG_PRINT( "Error: in setup3D() loading mesh from file failed\n" );
+	}
+
+#ifdef USE_FIXED_POINT_ARITHMETIC
+	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
+    // vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
+#else
+    vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
+    // vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
+#endif
+
+	mesh->pos = pos1;
+
+	meshQueue_push( mq, mesh );
+
+	engine3D_setupProjectionMatrix( mat_proj );
+#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
+	camera_makeDefault( cam );
+	camera_setActive( cam );
+#endif
+}
+
+// 
+// Example function handling drawing a 3D-related content on screen.
+// Renders and draws all meshes in queue.
+// 
+// mq				- mesh queue containing meshes to draw on screen
+// mat_proj			- projection matrix
+// f_elapsed_time	- time elapsed since the last frame
+// void update3DFrame( flp_t f_elapsed_time, flp_t* f_theta ){
+void example_update3DFrame( mesh_queue_t* mq, mat4x4_t* mat_proj, flp_t f_elapsed_time, flp_t f_theta ){
+	
+#ifdef USE_CAMERA
+	// Compute view matrix for the active camera
+	// WARNING!!!
+	// Makes sense only if camera has moved since last framea
+	mat4x4_t mat_view;
+	if( camera_getActive() == NULL ){
+		DEBUG_PRINT( "Set active camera to update 3D frame. Skipping.\n" );
+		return;
+	}
+	engine3D_computeViewMatrix( camera_getActive(), &mat_view, f_elapsed_time );
+#endif
+
+	// Process and draw every mesh in the queue
+	for( size_t i=0; i < mq->size; i++ ){
+		mesh_t* current_mesh = meshQueue_getCurrent( mq );
+
+		// Apply rotation to each mesh
+#ifdef USE_FIXED_POINT_ARITHMETIC
+		current_mesh->pitch = floatingToFixed(f_theta);
+		current_mesh->roll = floatingToFixed((f_theta)*0.5);
+#else
+		current_mesh->pitch = f_theta;
+		current_mesh->roll = (f_theta)*0.5;
+#endif
+
+#ifdef USE_CAMERA
+    	engine3D_processMesh( current_mesh, mat_proj, &mat_view );
+#else
+		engine3D_processMesh( current_mesh, mat_proj );
+#endif
+		engine3D_drawMesh( current_mesh );
+
+		meshQueue_goToNext( mq );
+	}
+}
+
+
+// 
+// Submodules and functions tests
+// 
 void mathTest( void ){
 	printf( "===== MATH TEST =====\n" );
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -458,113 +705,4 @@ void graphicsTest( sfRenderWindow* renderWindow ){
 	engine3D_putText( str, 150, 150, 50 );
 #endif
 #endif
-}
-
-int main(){
-
-	// Create a window:
-#ifdef COLOUR_MONOCHROME
-	// Just for SFML window, the engine will work in monochrome mode
-	sfVideoMode videoMode = { SCREEN_WIDTH, SCREEN_HEIGHT, 24 };
-#else
-	sfVideoMode videoMode = { SCREEN_WIDTH, SCREEN_HEIGHT, COLOUR_DEPTH };
-#endif
-    sfRenderWindow* window;
-	sfFont* font;
-	sfText* text;
-	sfEvent event;
-
-	window = sfRenderWindow_create(videoMode, "3D engine CSFML test", sfResize | sfClose, NULL);
-    
-	if (!window){
-		printf( "Error: Could not create a window.\n" );
-        return 1;
-	}
-
-	sfRenderWindow_setFramerateLimit( window, FRAMERATE );
-
-	SFML_initGraphics( window );
-
-	/* Create a graphical text to display */
-    font = sfFont_createFromFile("Minecraft.ttf");
-    if (!font){
-		printf( "Error: Could not load a font.\n" );
-        return 1;
-	}
-    text = sfText_create();
-    sfText_setString(text, "Hello SFML");
-    sfText_setFont(text, font);
-    sfText_setCharacterSize(text, 50);
-
-	engine3D_register_drawLine( &CSFML_drawLine );
-	engine3D_register_putText( &CSFML_putText );
-
-	setup3D();
-
-	flp_t f_theta = 0;
-	clock_t t1 = clock();
-	clock_t t2 = clock();
-
-	DEBUG_PRINT( "Setup complete %d\n", (int) 123 );
-
-	// printf( "Setup complete.\n" );
-
-	// mathTest();
-	// dynamicArrayTest();
-	// binarySearchTreeMapTest();
-	// meshTest();
-	// meshQueueTest();
-
-	while (sfRenderWindow_isOpen(window)){
-		/* Process events */
-        while (sfRenderWindow_pollEvent(window, &event)){
-            /* Close window : exit */
-            if (event.type == sfEvtClosed)
-                sfRenderWindow_close(window);
-			if (event.type == sfEvtMouseButtonPressed){
-                // Toggle object rotation animation
-                if (event.mouseButton.button == sfMouseRight){
-                    if( getAnimateFlag() ){
-                        setAnimateFlag(0);
-                        // mesh_printVisEdgeVec( &mesh );
-                    }
-                    else
-                        setAnimateFlag(1);
-                }
-                // Reset rotation angle
-                if (event.mouseButton.button == sfMouseLeft){
-                    f_theta = 0.0f;
-                }
-            }
-            if (event.type == sfEvtMouseWheelMoved){
-                f_theta += event.mouseWheel.delta*3.14/180.0;
-            }
-        }
-
-		/* Clear the screen */
-        sfRenderWindow_clear(window, sfBlack);
-
-		/* Draw the text */
-        // sfRenderWindow_drawText(window, text, NULL);
-
-		// graphicsTest( window );
-
-		t2 = clock();
-		flp_t elapsed_time = (flp_t)(t2-t1) / CLOCKS_PER_SEC;
-		t1 = t2;
-
-		update3DFrame( elapsed_time, &f_theta );
-
-		/* Update the window */
-        sfRenderWindow_display(window);
-	}
-
-	sfRenderWindow_destroy(window);
-	sfText_destroy(text);
-    sfFont_destroy(font);
-
-	free3D();
-	SFML_freeGraphics();
-
-	return (0);
 }

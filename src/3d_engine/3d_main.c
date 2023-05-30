@@ -1,21 +1,5 @@
 #include "3d_main.h"
 
-bool animate = 0;	// for testing, toggles motion of objects caused by "f_theta"
-
-mesh_queue_t mq;
-mesh_t mesh;		// test mesh
-mat4x4_t mat_proj;	// projection matrix
-#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
-camera_t cam0;
-#endif
-
-bool getAnimateFlag( void ){
-    return animate;
-}
-void setAnimateFlag( bool value ){
-    animate = value;
-}
-
 // 
 // Set up projection matrix for mesh transformation.
 // mat	- matrix to be set up as a projection one
@@ -31,49 +15,6 @@ void engine3D_setupProjectionMatrix( mat4x4_t* mat ){
 			(flp_t)SCREEN_HEIGHT / (flp_t)SCREEN_WIDTH,
 			0.1f, 1000.0f );
 	#endif
-}
-
-// 
-// Example function of setting up a basic 3D scene,
-// that is one mesh and one camera.
-// 
-void setup3D( void ){
-	meshQueue_makeEmpty( &mq );
-	mesh_makeEmpty( &mesh );
-	// mesh_setEdgeColourByValue( &mesh, COLOUR_GREEN );
-#ifdef USE_LOADING_FROM_OBJ
-	bool ret = mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
-#else
-	bool ret = mesh_loadFromProgmem( &mesh, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
-	// bool ret = mesh_loadFromProgmem( &mesh, sphere_mesh_verts, sphere_mesh_faces, SPHERE_MESH_V_CNT, SPHERE_MESH_F_CNT, false );
-	// bool ret = mesh_loadFromProgmem( &mesh, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
-#endif
-	if( !ret ){
-		DEBUG_PRINT( "Error: in setup3D() loading mesh from file failed\n" );
-	}
-
-#ifdef USE_FIXED_POINT_ARITHMETIC
-	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
-    // vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
-#else
-    vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
-    // vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
-#endif
-
-	mesh.pos = pos1;
-
-	meshQueue_push( &mq, &mesh );
-
-	engine3D_setupProjectionMatrix( &mat_proj );
-#if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
-	camera_makeDefault( &cam0 );
-	camera_setActive( &cam0 );
-#endif
-}
-
-void free3D( void ){
-	// mesh_free( &mesh );
-	meshQueue_freeAllMeshes( &mq );
 }
 
 #ifdef USE_CAMERA
@@ -289,11 +230,11 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 // rot_angle_x	- angle of rotation of the mesh (in degrees) in X axis
 // rot_angle_z	- angle of rotation of the mesh (in degrees) in Z axis
 // 
+void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj
 #ifdef USE_CAMERA
-void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view ){
-#else
-void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj ){
+						  , mat4x4_t* mat_view
 #endif
+						  ){
 	// Apply rotation in Z and X axis:
 	mat4x4_t matRotZ, matRotX;
 // #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -673,48 +614,4 @@ void engine3D_drawMesh( mesh_t* mesh ){
 #endif
 
     }
-}
-
-// 
-// Example function handling drawing a 3D-related content on screen.
-// 
-void update3DFrame( flp_t f_elapsed_time, flp_t* f_theta ){
-    // Update current angle
-    if( animate )
-        *f_theta += 1.0 * f_elapsed_time;
-	
-	// DEBUG_PRINT( "f_theta = %f,\f_elapsed_time = %f\n", (float) (*f_theta), (float) f_elapsed_time );
-	
-#ifdef USE_CAMERA
-	// Compute view matrix for the active camera
-	mat4x4_t mat_view;
-	if( camera_getActive() == NULL ){
-		DEBUG_PRINT( "Set active camera to update 3D frame. Skipping.\n" );
-		return;
-	}
-	engine3D_computeViewMatrix( camera_getActive(), &mat_view, f_elapsed_time );
-#endif
-
-	// Process and draw every mesh in the queue
-	for( size_t i=0; i < mq.size; i++ ){
-		mesh_t* current_mesh = meshQueue_getCurrent( &mq );
-
-		// Apply rotation to each mesh
-#ifdef USE_FIXED_POINT_ARITHMETIC
-		current_mesh->pitch = floatingToFixed(*f_theta);
-		current_mesh->roll = floatingToFixed((*f_theta)*0.5);
-#else
-		current_mesh->pitch = *f_theta;
-		current_mesh->roll = (*f_theta)*0.5;
-#endif
-
-#ifdef USE_CAMERA
-    	engine3D_processMesh( current_mesh, &mat_proj, &mat_view );
-#else
-		engine3D_processMesh( current_mesh, &mat_proj );
-#endif
-		engine3D_drawMesh( current_mesh );
-
-		meshQueue_goToNext( &mq );
-	}
 }

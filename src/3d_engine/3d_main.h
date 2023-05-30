@@ -25,12 +25,8 @@
 #include "../meshes/dodecahedron.h"
 #include "mesh_3d_queue.h"
 
-bool getAnimateFlag( void );
-void setAnimateFlag( bool value );
-
-void setup3D( void );
-void free3D( void );
-void draw_mesh( mesh_t* mesh );
+void engine3D_setupProjectionMatrix( mat4x4_t* mat );
+void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time );
 
 #ifdef USE_CAMERA
 void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view );
@@ -38,6 +34,6 @@ void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view 
 void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj );
 #endif
 
-void update3DFrame( flp_t f_elapsed_time, flp_t* f_theta );
+void engine3D_drawMesh( mesh_t* mesh );
 
 #endif // _3D_ENGINE_MAIN_H_

@@ -6,7 +6,8 @@
 // 
 // Info
 // 
-// See "Hardware dependend stuff" section
+// Before use, see "Hardware dependend stuff" section.
+// 
 // STB_DS_IMPLEMENTATION defined in math_3d.c
 
 
@@ -14,7 +15,10 @@
 // 
 // Hardware dependend stuff
 // 
-// For application-specific functions, see external_dependencies.h
+// See external_dependencies.h
+// To avoid circular dependencies, hardware dependent
+// functions and definitions were moved into
+// external_dependencies.h and *.c files.
 
 // For CSFML:
 #define FRAMERATE 30
