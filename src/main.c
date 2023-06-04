@@ -8,8 +8,8 @@
 
 #include "3d_engine/math_3d.h"
 #include "3d_engine/vmap/vmap.h"
-#include "3d_engine/mesh_3d.h"
-#include "3d_engine/mesh_3d_queue.h"
+#include "3d_engine/mesh3d.h"
+#include "3d_engine/mesh3d_queue.h"
 
 #include "3d_engine/stb_ds.h"
 
@@ -25,7 +25,7 @@
 
 
 /* TODO:
-// 	- change mesh_t to mesh3d_t
+// 	- X change mesh_t to mesh3d_t
 // 	- X add an appriopriate comment in external_dependencies.h
 // 	- X move getOutlineEdgeCount() from csfml_graphics.* to some math file
 // 	- X fix view matrix multiplication in 3d_main.c

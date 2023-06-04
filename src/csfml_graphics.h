@@ -5,7 +5,7 @@
 
 #include "3d_engine/config.h"
 #include "3d_engine/math_3d.h"
-#include "3d_engine/mesh_3d.h"
+#include "3d_engine/mesh3d.h"
 
 // #include <vector>
 #include <math.h>

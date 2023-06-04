@@ -9,7 +9,7 @@
 
 #include "math_3d.h"
 #include "vmap/vmap.h"
-#include "mesh_3d.h"
+#include "mesh3d.h"
 
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 #include "camera.h"
@@ -23,7 +23,7 @@
 #include "../meshes/cube.h"
 #include "../meshes/sphere.h"
 #include "../meshes/dodecahedron.h"
-#include "mesh_3d_queue.h"
+#include "mesh3d_queue.h"
 
 void engine3D_setupProjectionMatrix( mat4x4_t* mat );
 void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time );

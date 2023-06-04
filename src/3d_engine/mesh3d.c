@@ -1,4 +1,4 @@
-#include "mesh_3d.h"
+#include "mesh3d.h"
 
 #include "stb_ds.h" // for dynmic arrays
 

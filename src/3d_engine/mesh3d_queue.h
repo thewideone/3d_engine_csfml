@@ -1,9 +1,9 @@
-#ifndef _MESH_3D_QUEUE_H_
-#define _MESH_3D_QUEUE_H_
+#ifndef _MESH3D_QUEUE_H_
+#define _MESH3D_QUEUE_H_
 
 #include "config.h"
 
-#include "mesh_3d.h"
+#include "mesh3d.h"
 #include "math_3d.h"    // for bool type
 
 // 
@@ -84,4 +84,4 @@ bool meshQueue_removeAt( mesh_queue_t* mq, size_t idx );
 bool meshQueue_freeMesh( mesh_queue_t* mq, mesh3d_t* mesh );
 bool meshQueue_freeMeshAt( mesh_queue_t* mq, size_t idx );
 
-#endif // _MESH_3D_QUEUE_H_
+#endif // _MESH3D_QUEUE_H_

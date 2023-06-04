@@ -1,5 +1,5 @@
-#ifndef _MESH_3D_H_
-#define _MESH_3D_H_
+#ifndef _MESH3D_H_
+#define _MESH3D_H_
 
 #include "config.h"
 #include "vmap/vmap.h"
@@ -104,4 +104,4 @@ void mesh_printVisEdgeVec( mesh3d_t* mesh );
 
 void calcFaceBoundaries( mesh3d_t* mesh, int face_id, int* min_x, int* max_x, int* min_y, int* max_y );
 
-#endif /* _MESH_3D_H_ */
+#endif /* _MESH3D_H_ */
