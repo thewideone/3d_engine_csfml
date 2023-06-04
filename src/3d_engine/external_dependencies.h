@@ -56,5 +56,13 @@ void engine3D_drawLine( rtnl_t x0, rtnl_t y0, rtnl_t x1, rtnl_t y1
 #endif
                       );
 
+#ifdef USE_LOADING_FROM_OBJ
+#include <stdlib.h>      // for reading files
+#include <stdio.h>
+#include <errno.h>
+// Used only by getline() below
+ssize_t getdelim(char **linep, size_t *n, int delim, FILE *fp);
+ssize_t getline(char **linep, size_t *n, FILE *fp);
+#endif
 
 #endif // _3D_ENGINE_EXTERNAL_DEPENDENCIES_H_

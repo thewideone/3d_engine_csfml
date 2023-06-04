@@ -1,14 +1,6 @@
 #include "mesh3d.h"
 
-#include "stb_ds.h" // for dynmic arrays
-
-#include <stdlib.h>      // for reading files
-#include <stdio.h>
-
-#ifdef USE_LOADING_FROM_OBJ
-#include <errno.h>
-ssize_t getline(char **linep, size_t *n, FILE *fp);
-#endif
+#include "stb_ds.h" // for dynamic arrays
 
 void mesh_makeEmpty( mesh3d_t* mesh ){
 #ifndef COLOUR_MONOCHROME
@@ -76,7 +68,86 @@ void mesh_free( mesh3d_t* mesh ){
     // printf( "Done.\n" );
 }
 
+// 
+// Load mesh from program memory.
+// mesh                 - pointer to a mesh object
+// vert_arr       - array of vertex values
+// face_arr       - array of vertex IDs for each face
+// vert_cnt         - number of vertices
+// faxe_cnt         - number of faces
+// fixed_face_size  - number of vertices if each face of the mesh
+//                    has got the same
+// 
+bool mesh_loadFromProgmem( mesh3d_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size ){
+    // Load vertices
+    // printf( "Loading vertices..." );
+
+    size_t idx=0;
+    for( size_t v_itr=0; v_itr < vert_cnt; v_itr++ ){
+        
+        vec3d_t v;
+        v.x = vert_arr[ idx ];
+        v.y = vert_arr[ idx+1 ];
+        v.z = vert_arr[ idx+2 ];
+        #ifdef USE_FIXED_POINT_ARITHMETIC
+        v.w = floatingToFixed( (flp_t)(1) );
+        #else
+        v.w = 1;    // default value for 'w' member
+        #endif
+
+        // printf( " -> v%lld: ", v_itr );
+        // printf( "(%d, %d, %d)", idx, idx+1, idx+2 );
+        // vec3d_printAsFixed( &v, true );
+        
+        arrput( mesh->vertices, v );
+        idx+=3;
+    }
+    mesh->vertex_cnt = vert_cnt;
+
+    // printf( "done. mesh->vertex_cnt = %d\n\n", mesh->vertex_cnt );
+
+    // Load faces
+    // printf( "\nLoading faces...\n" );
+    if( fixed_face_size ){
+        for( size_t f_itr=0; f_itr < face_cnt; f_itr++ ){
+            polygon_t face = polygonMakeEmpty();
+
+            for( size_t v_itr=0; v_itr < fixed_face_size; v_itr++ )
+                arrput( face.p, face_arr[ f_itr % fixed_face_size + v_itr ] );
+        }
+    }
+    else {
+        size_t v_itr=0;
+
+        for( size_t f_itr=0; f_itr < face_cnt; f_itr++ ){
+            // printf( "Face %d:\n", f_itr );
+
+            polygon_t face = polygonMakeEmpty();
+            
+            // printf( "\tPushing vertices: " );
+            while( face_arr[ v_itr ] != F_VID_SEP ){
+                // printf( "%d (v%d), ", v_itr, face_arr[ v_itr ] );
+
+                arrput( face.p, face_arr[ v_itr ] );
+                face.p_count++;
+                
+                v_itr++;
+            }
+            // printf( "\n" );
+            
+            arrput( mesh->faces, face );
+            v_itr++;
+        }
+    }
+    mesh->face_cnt = face_cnt;
+
+    // printf( "Loading faces done. mesh->face_cnt = %d\n", mesh->face_cnt );
+
+    return true;
+}
+
 #ifdef USE_LOADING_FROM_OBJ
+#include "external_dependencies.h"
 // 
 // Load mesh from .obj file.
 // mesh     - mesh structure to be loaded into
@@ -195,84 +266,6 @@ bool mesh_loadFromObjFile( mesh3d_t* mesh, char* filename ){
 }
 #endif
 
-// 
-// Load mesh from program memory.
-// mesh                 - pointer to a mesh object
-// vert_arr       - array of vertex values
-// face_arr       - array of vertex IDs for each face
-// vert_cnt         - number of vertices
-// faxe_cnt         - number of faces
-// fixed_face_size  - number of vertices if each face of the mesh
-//                    has got the same
-// 
-bool mesh_loadFromProgmem( mesh3d_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size ){
-    // Load vertices
-    // printf( "Loading vertices..." );
-
-    size_t idx=0;
-    for( size_t v_itr=0; v_itr < vert_cnt; v_itr++ ){
-        
-        vec3d_t v;
-        v.x = vert_arr[ idx ];
-        v.y = vert_arr[ idx+1 ];
-        v.z = vert_arr[ idx+2 ];
-        #ifdef USE_FIXED_POINT_ARITHMETIC
-        v.w = floatingToFixed( (flp_t)(1) );
-        #else
-        v.w = 1;    // default value for 'w' member
-        #endif
-
-        // printf( " -> v%lld: ", v_itr );
-        // printf( "(%d, %d, %d)", idx, idx+1, idx+2 );
-        // vec3d_printAsFixed( &v, true );
-        
-        arrput( mesh->vertices, v );
-        idx+=3;
-    }
-    mesh->vertex_cnt = vert_cnt;
-
-    // printf( "done. mesh->vertex_cnt = %d\n\n", mesh->vertex_cnt );
-
-    // Load faces
-    // printf( "\nLoading faces...\n" );
-    if( fixed_face_size ){
-        for( size_t f_itr=0; f_itr < face_cnt; f_itr++ ){
-            polygon_t face = polygonMakeEmpty();
-
-            for( size_t v_itr=0; v_itr < fixed_face_size; v_itr++ )
-                arrput( face.p, face_arr[ f_itr % fixed_face_size + v_itr ] );
-        }
-    }
-    else {
-        size_t v_itr=0;
-
-        for( size_t f_itr=0; f_itr < face_cnt; f_itr++ ){
-            // printf( "Face %d:\n", f_itr );
-
-            polygon_t face = polygonMakeEmpty();
-            
-            // printf( "\tPushing vertices: " );
-            while( face_arr[ v_itr ] != F_VID_SEP ){
-                // printf( "%d (v%d), ", v_itr, face_arr[ v_itr ] );
-
-                arrput( face.p, face_arr[ v_itr ] );
-                face.p_count++;
-                
-                v_itr++;
-            }
-            // printf( "\n" );
-            
-            arrput( mesh->faces, face );
-            v_itr++;
-        }
-    }
-    mesh->face_cnt = face_cnt;
-
-    // printf( "Loading faces done. mesh->face_cnt = %d\n", mesh->face_cnt );
-
-    return true;
-}
-
 void mesh_printVisFaceIDs( mesh3d_t* mesh ){
     // cout << "IDs of visible faces (" << visFaceIDs.size() << " in total):" << endl;
     // for( int i=0; i < visFaceIDs.size(); i++ )
@@ -347,44 +340,4 @@ void mesh_setFillColourByValue( mesh3d_t* mesh, uint8_t r, uint8_t g, uint8_t b 
 }
 #endif
 #endif
-#endif
-
-#ifdef USE_LOADING_FROM_OBJ
-// Used only by getline() below
-ssize_t getdelim(char **linep, size_t *n, int delim, FILE *fp){
-    int ch;
-    size_t i = 0;
-    if(!linep || !n || !fp){
-        errno = EINVAL;
-        return -1;
-    }
-    if(*linep == NULL){
-        if(NULL==(*linep = malloc(*n=128))){
-            *n = 0;
-            errno = ENOMEM;
-            return -1;
-        }
-    }
-    while((ch = fgetc(fp)) != EOF){
-        if(i + 1 >= *n){
-            char *temp = realloc(*linep, *n + 128);
-            if(!temp){
-                errno = ENOMEM;
-                return -1;
-            }
-            *n += 128;
-            *linep = temp;
-        }
-        (*linep)[i++] = ch;
-        if(ch == delim)
-            break;
-    }
-    (*linep)[i] = '\0';
-    return !i && ch == EOF ? -1 : i;
-}
-
-// Used only for loading meshes from .obj files
-ssize_t getline(char **linep, size_t *n, FILE *fp){
-    return getdelim(linep, n, '\n', fp);
-}
 #endif

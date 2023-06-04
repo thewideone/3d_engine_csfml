@@ -34,16 +34,16 @@
 // 	- make the engine available to use as a submodule in AVR/ESP project:
 // 		- test if stb_ds works in AVR/ESP projects
 // 		- separate the core of the engine from main.c on github:
-// 			- test usage of the engine from main.c directly, that is:
-// 				* add a test mesh to a queue in main() before the loop
-// 				  and call update3DFrame() for that queue
-// 				* update f_theta in the main loop and apply it for the test mesh
-// 				  to remove f_theta parameter from update3DFrame()
-// 			- SFML-dependent functions:
+// 			- X test usage of the engine from main.c directly, that is:
+// 				* X add a test mesh to a queue in main() before the loop
+// 				  X and call update3DFrame() for that queue
+// 				* X update f_theta in the main loop and apply it for the test mesh
+// 				  X to remove f_theta parameter from update3DFrame()
+// 			- X SFML-dependent functions:
 // 				* X whole graphics.h and *.c
 // 				* X computeViewMatrix() in 3d_main.c
 // 				* X drawMesh() in 3d_main.c -> drawLine()
-// 			- call this file sth like "engine tests"
+// 			- call this file sth like "engine tests" and move it out of the project i guess
 // 	- left-right movement too slow but only sometimes, because of cross product
 // 			of camera->look_dir with camera->up vectors gets small when looking up/down
 // 	- add mesh_setPos(), mesh_setRot(), mesh_move() and mesh_rotate()

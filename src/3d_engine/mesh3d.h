@@ -77,10 +77,11 @@ typedef struct {
 
 void mesh_makeEmpty( mesh3d_t* mesh );
 void mesh_free( mesh3d_t* mesh );
+bool mesh_loadFromProgmem( mesh3d_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size );
 #ifdef USE_LOADING_FROM_OBJ
 bool mesh_loadFromObjFile( mesh3d_t* mesh, char* filename );
 #endif
-bool mesh_loadFromProgmem( mesh3d_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size );
+
 void mesh_printVisFaceIDs( mesh3d_t* mesh );
 void mesh_printVisEdgeVec( mesh3d_t* mesh );
 
@@ -102,6 +103,7 @@ void mesh_printVisEdgeVec( mesh3d_t* mesh );
     #endif
 #endif
 
-void calcFaceBoundaries( mesh3d_t* mesh, int face_id, int* min_x, int* max_x, int* min_y, int* max_y );
+
+// void calcFaceBoundaries( mesh3d_t* mesh, int face_id, int* min_x, int* max_x, int* min_y, int* max_y );
 
 #endif /* _MESH3D_H_ */
