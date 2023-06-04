@@ -129,8 +129,8 @@ void matrix_quickInverse( mat4x4_t* out_mat, mat4x4_t* m );
 // void computePlaneCoefficients( float* A, float* B, float* C, float* D, vec3d_t* vert1, vec3d_t* vert2, vec3d_t* vert3 );
 
 // Not used yet:
-// vec3d_t findCentre( mesh_t* mesh, int face_ID );
-// int getOutlineEdgeCount( mesh_t* mesh );
+// vec3d_t findCentre( mesh3d_t* mesh, int face_ID );
+// int getOutlineEdgeCount( mesh3d_t* mesh );
 // void paintPolygonContours( mesh& mesh, int face_ID, sf::Color colour, sf::RenderWindow &renderWindow );
 
 #endif /* _MATH_3D_H_ */

@@ -41,7 +41,7 @@ bool meshQueue_isFull( mesh_queue_t* mq ){
     return ( mq->size == MESH_QUEUE_CAPACITY );
 }
 
-mesh_t* meshQueue_getCurrent( mesh_queue_t* mq ){
+mesh3d_t* meshQueue_getCurrent( mesh_queue_t* mq ){
     if( mq->size == 0 )
         return NULL;
     return mq->array[ mq->cursor ];
@@ -62,7 +62,7 @@ void meshQueue_goToNext( mesh_queue_t* mq ){
     } while( mq->array[ mq->cursor ] == NULL );
 }
 
-bool meshQueue_push( mesh_queue_t* mq, mesh_t* mesh ){
+bool meshQueue_push( mesh_queue_t* mq, mesh3d_t* mesh ){
 
     // If the queue is full
     if( mq->size == MESH_QUEUE_CAPACITY ){
@@ -91,7 +91,7 @@ bool meshQueue_push( mesh_queue_t* mq, mesh_t* mesh ){
     return true;
 }
 
-bool meshQueue_remove( mesh_queue_t* mq, mesh_t* mesh ){
+bool meshQueue_remove( mesh_queue_t* mq, mesh3d_t* mesh ){
     if( mq->size == 0 )
         return false;
     
@@ -122,7 +122,7 @@ bool meshQueue_removeAt( mesh_queue_t* mq, size_t idx ){
     return true;
 }
 
-bool meshQueue_freeMesh( mesh_queue_t* mq, mesh_t* mesh ){
+bool meshQueue_freeMesh( mesh_queue_t* mq, mesh3d_t* mesh ){
     if( mq->size == 0 )
         return false;
     

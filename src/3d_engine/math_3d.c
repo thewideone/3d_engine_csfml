@@ -507,7 +507,7 @@ void computePlaneCoefficients( float* A, float* B, float* C, float* D, vec3d_t* 
     *D = -1*(*A)*vert1->x - (*B)*vert1->y - (*C)*vert1->z;
 }
 
-void calcFaceBoundaries( mesh_t* mesh, int face_id, int* min_x, int* max_x, int* min_y, int* max_y ){
+void calcFaceBoundaries( mesh3d_t* mesh, int face_id, int* min_x, int* max_x, int* min_y, int* max_y ){
     // min_x = SCREEN_WIDTH;  max_x = 0;
     // min_y = SCREEN_HEIGHT; max_y = 0;
 
@@ -539,7 +539,7 @@ void calcFaceBoundaries( mesh_t* mesh, int face_id, int* min_x, int* max_x, int*
 
 
 /*
-vec3d_t findCentre( mesh_t* mesh, int face_ID ){
+vec3d_t findCentre( mesh3d_t* mesh, int face_ID ){
     // mesh.printVisFaceIDs();
     // mesh.printVisEdgeVec();
     // cout << "Trying to find centre for face of ID: " << face_ID << "... ";
@@ -596,7 +596,7 @@ vec3d_t findCentre( mesh_t* mesh, int face_ID ){
 }
 */
 
-// int getOutlineEdgeCount( mesh_t* mesh ){
+// int getOutlineEdgeCount( mesh3d_t* mesh ){
 //     // In vis_edge_vec:
 //     // Each entry is 4x int:
 //     // 0: start_vert_ID

@@ -18,7 +18,7 @@
 
 typedef struct {
     // Array of pointers to meshes
-    mesh_t* array[MESH_QUEUE_CAPACITY];
+    mesh3d_t* array[MESH_QUEUE_CAPACITY];
     // Actual size
     size_t size;
     // Points on the first element
@@ -49,7 +49,7 @@ bool meshQueue_isFull( mesh_queue_t* mq );
 // Return a pointer to a mesh pointed by the cursor
 // or void if queue empty.
 // 
-mesh_t* meshQueue_getCurrent( mesh_queue_t* mq );
+mesh3d_t* meshQueue_getCurrent( mesh_queue_t* mq );
 
 // 
 // Move the cursor forward one step
@@ -62,7 +62,7 @@ void meshQueue_goToNext( mesh_queue_t* mq );
 // Return true if succeeded,
 // false otherwise (e.g. the queue is full).
 // 
-bool meshQueue_push( mesh_queue_t* mq, mesh_t* mesh );
+bool meshQueue_push( mesh_queue_t* mq, mesh3d_t* mesh );
 
 // 
 // Remove a mesh from a queue.
@@ -71,7 +71,7 @@ bool meshQueue_push( mesh_queue_t* mq, mesh_t* mesh );
 // Return true if mesh found and removed
 // from the queue, false otherwise.
 // 
-bool meshQueue_remove( mesh_queue_t* mq, mesh_t* mesh );
+bool meshQueue_remove( mesh_queue_t* mq, mesh3d_t* mesh );
 bool meshQueue_removeAt( mesh_queue_t* mq, size_t idx );
 
 // 
@@ -81,7 +81,7 @@ bool meshQueue_removeAt( mesh_queue_t* mq, size_t idx );
 // Return true if mesh found and removed
 // from queue, false otherwise.
 // 
-bool meshQueue_freeMesh( mesh_queue_t* mq, mesh_t* mesh );
+bool meshQueue_freeMesh( mesh_queue_t* mq, mesh3d_t* mesh );
 bool meshQueue_freeMeshAt( mesh_queue_t* mq, size_t idx );
 
 #endif // _MESH_3D_QUEUE_H_

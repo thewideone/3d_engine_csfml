@@ -62,9 +62,9 @@
  */
 
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
-void example_setup3D( mesh_queue_t* mq, mesh_t* mesh, mat4x4_t* mat_proj, camera_t* cam );
+void example_setup3D( mesh_queue_t* mq, mesh3d_t* mesh, mat4x4_t* mat_proj, camera_t* cam );
 #else
-void example_setup3D( mesh_queue_t* mq, mesh_t* mesh, mat4x4_t* mat_proj );
+void example_setup3D( mesh_queue_t* mq, mesh3d_t* mesh, mat4x4_t* mat_proj );
 #endif
 
 void example_update3DFrame( mesh_queue_t* mq, mat4x4_t* mat_proj, flp_t f_elapsed_time, flp_t f_theta );
@@ -127,7 +127,7 @@ int main(){
 	engine3D_register_putText( &CSFML_putText );
 
 	mesh_queue_t mq;
-	mesh_t mesh;		// test mesh
+	mesh3d_t mesh;		// test mesh
 	mat4x4_t mat_proj;	// projection matrix
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 	camera_t cam0;
@@ -219,7 +219,7 @@ int main(){
 // Example function of setting up a basic 3D scene,
 // that is one mesh and one camera.
 // 
-void example_setup3D( mesh_queue_t* mq, mesh_t* mesh, mat4x4_t* mat_proj
+void example_setup3D( mesh_queue_t* mq, mesh3d_t* mesh, mat4x4_t* mat_proj
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
 					 , camera_t* cam
 #endif
@@ -281,7 +281,7 @@ void example_update3DFrame( mesh_queue_t* mq, mat4x4_t* mat_proj, flp_t f_elapse
 
 	// Process and draw every mesh in the queue
 	for( size_t i=0; i < mq->size; i++ ){
-		mesh_t* current_mesh = meshQueue_getCurrent( mq );
+		mesh3d_t* current_mesh = meshQueue_getCurrent( mq );
 
 		// Apply rotation to each mesh
 #ifdef USE_FIXED_POINT_ARITHMETIC
@@ -521,7 +521,7 @@ void binarySearchTreeMapTest( void ){
 void meshTest( void ){
 	printf( "===== MESH TEST =====\n" );
 #ifdef USE_LOADING_FROM_OBJ
-	mesh_t mesh;
+	mesh3d_t mesh;
 	mesh_makeEmpty( &mesh );
 	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
 
@@ -545,7 +545,7 @@ void meshTest( void ){
 #endif
 
 	
-	mesh_t mesh_prgm;
+	mesh3d_t mesh_prgm;
 	mesh_makeEmpty( &mesh_prgm );
 	mesh_loadFromProgmem( &mesh_prgm, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
 
@@ -567,7 +567,7 @@ void meshTest( void ){
 
 	
 	// Dynamic mesh
-	mesh_t* mesh_prgm_dyn = (mesh_t*)malloc( sizeof(mesh_t) );
+	mesh3d_t* mesh_prgm_dyn = (mesh3d_t*)malloc( sizeof(mesh3d_t) );
 	mesh_makeEmpty( mesh_prgm_dyn );
 	mesh_loadFromProgmem( mesh_prgm_dyn, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
 
@@ -594,8 +594,8 @@ void meshQueueTest( void ){
 	mesh_queue_t mq;
 	meshQueue_makeEmpty( &mq );
 
-	mesh_t mesh1, mesh2;
-	mesh_t* mesh3 = (mesh_t*)malloc( sizeof(mesh_t) );
+	mesh3d_t mesh1, mesh2;
+	mesh3d_t* mesh3 = (mesh3d_t*)malloc( sizeof(mesh3d_t) );
 
 	mesh_makeEmpty( &mesh1 );
 	mesh_makeEmpty( &mesh2 );
@@ -622,7 +622,7 @@ void meshQueueTest( void ){
 		printf( "Error: in meshQueueTest(): failed to push mesh3 into mq.\n" );
 
 	for( size_t mi=0; mi < mq.size; mi++ ){
-		mesh_t* mptr = meshQueue_getCurrent( &mq );
+		mesh3d_t* mptr = meshQueue_getCurrent( &mq );
 
 		if( mptr == NULL ){
 			printf( "null\n" );
@@ -641,7 +641,7 @@ void meshQueueTest( void ){
 	printf( "Removed 2nd mesh, size = %lld.\n", mq.size );
 
 	for( size_t mi=0; mi < mq.size; mi++ ){
-		mesh_t* mptr = meshQueue_getCurrent( &mq );
+		mesh3d_t* mptr = meshQueue_getCurrent( &mq );
 
 		if( mptr == NULL ){
 			printf( "null\n" );
@@ -658,7 +658,7 @@ void meshQueueTest( void ){
 	meshQueue_push( &mq, &mesh2 );
 
 	for( size_t mi=0; mi < mq.size; mi++ ){
-		mesh_t* mptr = meshQueue_getCurrent( &mq );
+		mesh3d_t* mptr = meshQueue_getCurrent( &mq );
 
 		if( mptr == NULL ){
 			printf( "null\n" );

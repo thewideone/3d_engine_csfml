@@ -230,7 +230,7 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 // rot_angle_x	- angle of rotation of the mesh (in degrees) in X axis
 // rot_angle_z	- angle of rotation of the mesh (in degrees) in Z axis
 // 
-void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj
+void engine3D_processMesh( mesh3d_t* mesh, mat4x4_t* mat_proj
 #ifdef USE_CAMERA
 						  , mat4x4_t* mat_view
 #endif
@@ -534,7 +534,7 @@ void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj
 // 
 // Draw mesh on screen.
 // 
-void engine3D_drawMesh( mesh_t* mesh ){
+void engine3D_drawMesh( mesh3d_t* mesh ){
     // Draw every visible edge
     // Debug (commented): print the visible edge array
     for( int i=0; i<arrlen(mesh->vis_edge_vec); i+=4 ){

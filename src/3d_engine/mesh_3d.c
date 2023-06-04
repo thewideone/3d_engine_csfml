@@ -10,7 +10,7 @@
 ssize_t getline(char **linep, size_t *n, FILE *fp);
 #endif
 
-void mesh_makeEmpty( mesh_t* mesh ){
+void mesh_makeEmpty( mesh3d_t* mesh ){
 #ifndef COLOUR_MONOCHROME
     // Default full white
 #ifdef COLOUR_SINGLE_BYTE
@@ -57,7 +57,7 @@ void mesh_makeEmpty( mesh_t* mesh ){
     mesh->visFaceIDs = NULL;
 }
 
-void mesh_free( mesh_t* mesh ){
+void mesh_free( mesh3d_t* mesh ){
     // printf( "Freeing polygons...\n" );
     for( size_t i=0; i < mesh->face_cnt; i++ )
         polygon_free( &mesh->faces[i] );
@@ -82,7 +82,7 @@ void mesh_free( mesh_t* mesh ){
 // mesh     - mesh structure to be loaded into
 // filename - name of the .obj file
 // 
-bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
+bool mesh_loadFromObjFile( mesh3d_t* mesh, char* filename ){
     
     FILE* file_ptr;
     file_ptr = fopen( filename, "r" );
@@ -205,7 +205,7 @@ bool mesh_loadFromObjFile( mesh_t* mesh, char* filename ){
 // fixed_face_size  - number of vertices if each face of the mesh
 //                    has got the same
 // 
-bool mesh_loadFromProgmem( mesh_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size ){
+bool mesh_loadFromProgmem( mesh3d_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size ){
     // Load vertices
     // printf( "Loading vertices..." );
 
@@ -273,7 +273,7 @@ bool mesh_loadFromProgmem( mesh_t* mesh, const rtnl_t vert_arr[], const size_t f
     return true;
 }
 
-void mesh_printVisFaceIDs( mesh_t* mesh ){
+void mesh_printVisFaceIDs( mesh3d_t* mesh ){
     // cout << "IDs of visible faces (" << visFaceIDs.size() << " in total):" << endl;
     // for( int i=0; i < visFaceIDs.size(); i++ )
     //     cout << visFaceIDs[i] << ", ";
@@ -292,7 +292,7 @@ void mesh_printVisFaceIDs( mesh_t* mesh ){
     STDO_CHR( '\n' );
 }
 
-void mesh_printVisEdgeVec( mesh_t* mesh ){
+void mesh_printVisEdgeVec( mesh3d_t* mesh ){
     // cout << vis_edge_vec.size()/4 << " visible edges:" << endl;
     // cout << "E1 E2 C S" << endl;
     // for( int i=0; i < vis_edge_vec.size(); i+=4 ){
@@ -316,31 +316,31 @@ void mesh_printVisEdgeVec( mesh_t* mesh ){
 }
 
 #ifndef COLOUR_MONOCHROME
-void mesh_setEdgeColour( mesh_t* mesh, colour_t colour ){
+void mesh_setEdgeColour( mesh3d_t* mesh, colour_t colour ){
     mesh->edge_colour = colour;
 }
 #ifdef USE_FILLED_MESHES
-void mesh_setFillColour( mesh_t* mesh, colour_t colour ){
+void mesh_setFillColour( mesh3d_t* mesh, colour_t colour ){
     mesh->fill_colour = colour;
 }
 #endif
 #ifdef COLOUR_SINGLE_BYTE
-void mesh_setEdgeColourByValue( mesh_t* mesh, uint8_t colour ){
+void mesh_setEdgeColourByValue( mesh3d_t* mesh, uint8_t colour ){
     mesh->edge_colour.rgb = colour;
 }
 #ifdef USE_FILLED_MESHES
-void mesh_setFillColourByValue( mesh_t* mesh, uint8_t colour ){
+void mesh_setFillColourByValue( mesh3d_t* mesh, uint8_t colour ){
     mesh->fill_colour.rgb = colour;
 }
 #endif
 #else
-void mesh_setEdgeColourByValue( mesh_t* mesh, uint8_t r, uint8_t g, uint8_t b ){
+void mesh_setEdgeColourByValue( mesh3d_t* mesh, uint8_t r, uint8_t g, uint8_t b ){
     mesh->edge_colour.r = r;
     mesh->edge_colour.g = g;
     mesh->edge_colour.b = b;
 }
 #ifdef USE_FILLED_MESHES
-void mesh_setFillColourByValue( mesh_t* mesh, uint8_t r, uint8_t g, uint8_t b ){
+void mesh_setFillColourByValue( mesh3d_t* mesh, uint8_t r, uint8_t g, uint8_t b ){
     mesh->fill_colour.r = r;
     mesh->fill_colour.g = g;
     mesh->fill_colour.b = b;

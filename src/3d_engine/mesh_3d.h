@@ -71,37 +71,37 @@ typedef struct {
     // Functionality of the visVertexMap replaced by
     // storing "visible" flag in vmap_t type
 // #endif
-} mesh_t;
+} mesh3d_t;
 
 
 
-void mesh_makeEmpty( mesh_t* mesh );
-void mesh_free( mesh_t* mesh );
+void mesh_makeEmpty( mesh3d_t* mesh );
+void mesh_free( mesh3d_t* mesh );
 #ifdef USE_LOADING_FROM_OBJ
-bool mesh_loadFromObjFile( mesh_t* mesh, char* filename );
+bool mesh_loadFromObjFile( mesh3d_t* mesh, char* filename );
 #endif
-bool mesh_loadFromProgmem( mesh_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size );
-void mesh_printVisFaceIDs( mesh_t* mesh );
-void mesh_printVisEdgeVec( mesh_t* mesh );
+bool mesh_loadFromProgmem( mesh3d_t* mesh, const rtnl_t vert_arr[], const size_t face_arr[], const size_t vert_cnt, const size_t face_cnt, const size_t fixed_face_size );
+void mesh_printVisFaceIDs( mesh3d_t* mesh );
+void mesh_printVisEdgeVec( mesh3d_t* mesh );
 
 #ifndef COLOUR_MONOCHROME
-    void mesh_setEdgeColour( mesh_t* mesh, colour_t colour );
+    void mesh_setEdgeColour( mesh3d_t* mesh, colour_t colour );
     #ifdef USE_FILLED_MESHES
-        void mesh_setFillColour( mesh_t* mesh, colour_t colour );
+        void mesh_setFillColour( mesh3d_t* mesh, colour_t colour );
     #endif
     #ifdef COLOUR_SINGLE_BYTE
-        void mesh_setEdgeColourByValue( mesh_t* mesh, uint8_t colour );
+        void mesh_setEdgeColourByValue( mesh3d_t* mesh, uint8_t colour );
         #ifdef USE_FILLED_MESHES
-            void mesh_setFillColourByValue( mesh_t* mesh, uint8_t colour );
+            void mesh_setFillColourByValue( mesh3d_t* mesh, uint8_t colour );
         #endif
     #else
-        void mesh_setEdgeColourByValue( mesh_t* mesh, uint8_t r, uint8_t g, uint8_t b );
+        void mesh_setEdgeColourByValue( mesh3d_t* mesh, uint8_t r, uint8_t g, uint8_t b );
         #ifdef USE_FILLED_MESHES
-            void mesh_setFillColourByValue( mesh_t* mesh, uint8_t r, uint8_t g, uint8_t b );
+            void mesh_setFillColourByValue( mesh3d_t* mesh, uint8_t r, uint8_t g, uint8_t b );
         #endif
     #endif
 #endif
 
-void calcFaceBoundaries( mesh_t* mesh, int face_id, int* min_x, int* max_x, int* min_y, int* max_y );
+void calcFaceBoundaries( mesh3d_t* mesh, int face_id, int* min_x, int* max_x, int* min_y, int* max_y );
 
 #endif /* _MESH_3D_H_ */

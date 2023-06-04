@@ -29,11 +29,11 @@ void engine3D_setupProjectionMatrix( mat4x4_t* mat );
 void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elapsed_time );
 
 #ifdef USE_CAMERA
-void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view );
+void engine3D_processMesh( mesh3d_t* mesh, mat4x4_t* mat_proj, mat4x4_t* mat_view );
 #else
-void engine3D_processMesh( mesh_t* mesh, mat4x4_t* mat_proj );
+void engine3D_processMesh( mesh3d_t* mesh, mat4x4_t* mat_proj );
 #endif
 
-void engine3D_drawMesh( mesh_t* mesh );
+void engine3D_drawMesh( mesh3d_t* mesh );
 
 #endif // _3D_ENGINE_MAIN_H_
