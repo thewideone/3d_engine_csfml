@@ -82,6 +82,16 @@ bool mesh_loadFromProgmem( mesh3d_t* mesh, const rtnl_t vert_arr[], const size_t
 bool mesh_loadFromObjFile( mesh3d_t* mesh, char* filename );
 #endif
 
+void mesh_setPos( mesh3d_t* mesh, rtnl_t x, rtnl_t y, rtnl_t z );
+void mesh_setPosByVec( mesh3d_t* mesh, vec3d_t* pos );
+void mesh_setRot( mesh3d_t* mesh, rtnl_t yaw, rtnl_t pitch, rtnl_t roll );
+void mesh_setRotByVec( mesh3d_t* mesh, vec3d_t* rot );
+
+void mesh_move( mesh3d_t* mesh, rtnl_t x, rtnl_t y, rtnl_t z );
+void mesh_moveByVec( mesh3d_t* mesh, vec3d_t* pos );
+void mesh_rotate( mesh3d_t* mesh, rtnl_t yaw, rtnl_t pitch, rtnl_t roll );
+void mesh_rotateByVec( mesh3d_t* mesh, vec3d_t* rot );
+
 void mesh_printVisFaceIDs( mesh3d_t* mesh );
 void mesh_printVisEdgeVec( mesh3d_t* mesh );
 

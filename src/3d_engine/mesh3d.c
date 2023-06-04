@@ -266,6 +266,89 @@ bool mesh_loadFromObjFile( mesh3d_t* mesh, char* filename ){
 }
 #endif
 
+
+// 
+// Set position of mesh.
+// mesh     - mesh pointer
+// x, y, z  - 3D space coordinates
+// 
+void mesh_setPos( mesh3d_t* mesh, rtnl_t x, rtnl_t y, rtnl_t z ){
+    mesh->pos.x = x;
+    mesh->pos.y = y;
+    mesh->pos.z = z;
+}
+// 
+// Set position of mesh.
+// mesh     - mesh pointer
+// pos      - 3D space vector of coordinates
+// 
+void mesh_setPosByVec( mesh3d_t* mesh, vec3d_t* pos ){
+    mesh->pos.x = pos->x;
+    mesh->pos.y = pos->y;
+    mesh->pos.z = pos->z;
+}
+// 
+// Set rotation of mesh.
+// mesh              - mesh pointer
+// yaw, pitch, roll  - angles in radians
+// 
+void mesh_setRot( mesh3d_t* mesh, rtnl_t yaw, rtnl_t pitch, rtnl_t roll ){
+    mesh->yaw = yaw;
+    mesh->pitch = pitch;
+    mesh->roll = roll;
+}
+// 
+// Set rotation of mesh.
+// mesh - mesh pointer
+// rot  - 3D vector of angles in radians
+// 
+void mesh_setRotByVec( mesh3d_t* mesh, vec3d_t* rot ){
+    mesh->yaw = rot->x;
+    mesh->pitch = rot->y;
+    mesh->roll = rot->z;
+}
+
+// 
+// Move mesh.
+// mesh     - mesh pointer
+// x, y, z  - 3D space coordinates
+// 
+void mesh_move( mesh3d_t* mesh, rtnl_t x, rtnl_t y, rtnl_t z ){
+    mesh->pos.x += x;
+    mesh->pos.y += y;
+    mesh->pos.z += z;
+}
+// 
+// Move mesh by vector.
+// mesh     - mesh pointer
+// pos      - 3D space vector of coordinates
+// 
+void mesh_moveByVec( mesh3d_t* mesh, vec3d_t* pos ){
+    mesh->pos.x += pos->x;
+    mesh->pos.y += pos->y;
+    mesh->pos.z += pos->z;
+}
+// 
+// Rotate mesh.
+// mesh              - mesh pointer
+// yaw, pitch, roll  - angles in radians
+// 
+void mesh_rotate( mesh3d_t* mesh, rtnl_t yaw, rtnl_t pitch, rtnl_t roll ){
+    mesh->yaw += yaw;
+    mesh->pitch += pitch;
+    mesh->roll += roll;
+}
+// 
+// Rotate mesh by vector of angles.
+// mesh - mesh pointer
+// rot  - 3D vector of angles in radians
+// 
+void mesh_rotateByVec( mesh3d_t* mesh, vec3d_t* rot ){
+    mesh->yaw += rot->x;
+    mesh->pitch += rot->y;
+    mesh->roll += rot->z;
+}
+
 void mesh_printVisFaceIDs( mesh3d_t* mesh ){
     // cout << "IDs of visible faces (" << visFaceIDs.size() << " in total):" << endl;
     // for( int i=0; i < visFaceIDs.size(); i++ )

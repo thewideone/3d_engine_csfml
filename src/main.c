@@ -46,7 +46,7 @@
 // 			- call this file sth like "engine tests" and move it out of the project i guess
 // 	- left-right movement too slow but only sometimes, because of cross product
 // 			of camera->look_dir with camera->up vectors gets small when looking up/down
-// 	- add mesh_setPos(), mesh_setRot(), mesh_move() and mesh_rotate()
+// 	- X add mesh_setPos(), mesh_setRot(), mesh_move() and mesh_rotate()
 // 	- don't draw meshes behind camera
 // 	- add screen clipping
 // 	- filled meshes
@@ -199,6 +199,8 @@ int main(){
 		
 		// DEBUG_PRINT( "f_theta = %f,\f_elapsed_time = %f\n", (float) (f_theta), (float) f_elapsed_time );
 
+
+
 		example_update3DFrame( &mq, &mat_proj, elapsed_time, f_theta );
 
 		/* Update the window */
@@ -246,7 +248,8 @@ void example_setup3D( mesh_queue_t* mq, mesh3d_t* mesh, mat4x4_t* mat_proj
     // vec3d_t pos2 = { 0.0f, 0.0f, 4.0f, 0.0f };
 #endif
 
-	mesh->pos = pos1;
+	// mesh->pos = pos1;
+	mesh_setPosByVec( mesh, &pos1 );
 
 	meshQueue_push( mq, mesh );
 
@@ -285,11 +288,13 @@ void example_update3DFrame( mesh_queue_t* mq, mat4x4_t* mat_proj, flp_t f_elapse
 
 		// Apply rotation to each mesh
 #ifdef USE_FIXED_POINT_ARITHMETIC
-		current_mesh->pitch = floatingToFixed(f_theta);
-		current_mesh->roll = floatingToFixed((f_theta)*0.5);
+		mesh_setRot( current_mesh, floatingToFixed(0), floatingToFixed(f_theta), floatingToFixed((f_theta)*0.5) );
+		// current_mesh->pitch = floatingToFixed(f_theta);
+		// current_mesh->roll = floatingToFixed((f_theta)*0.5);
 #else
-		current_mesh->pitch = f_theta;
-		current_mesh->roll = (f_theta)*0.5;
+		mesh_setRot( current_mesh, 0, f_theta, f_theta*0.5 );
+		// current_mesh->pitch = f_theta;
+		// current_mesh->roll = (f_theta)*0.5;
 #endif
 
 #ifdef USE_CAMERA
