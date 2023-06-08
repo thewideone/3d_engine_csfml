@@ -55,7 +55,7 @@
 
 #ifndef COLOUR_MONOCHROME
     // Number of bits per R/G/B channel
-    #define COLOUR_DEPTH 1
+    #define COLOUR_DEPTH 2
     #if COLOUR_DEPTH <= 2
         #define COLOUR_SINGLE_BYTE
         #define COLOUR_WHITE   0xff

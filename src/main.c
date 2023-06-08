@@ -228,7 +228,7 @@ void example_setup3D( mesh_queue_t* mq, mesh3d_t* mesh, mat4x4_t* mat_proj
 					){
 	meshQueue_makeEmpty( mq );
 	mesh_makeEmpty( mesh );
-	// mesh_setEdgeColourByValue( &mesh, COLOUR_GREEN );
+	// mesh_setEdgeColourByValue( mesh, COLOUR_GREEN );
 #ifdef USE_LOADING_FROM_OBJ
 	bool ret = mesh_loadFromObjFile( mesh, "obj_models/cube.obj" );
 #else
