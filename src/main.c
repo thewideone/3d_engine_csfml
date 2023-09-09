@@ -29,7 +29,10 @@
 // 	- X add an appriopriate comment in external_dependencies.h
 // 	- X move getOutlineEdgeCount() from csfml_graphics.* to some math file
 // 	- X fix view matrix multiplication in 3d_main.c
-// 	- add camera roll control
+// 	- add camera roll control:
+// 		- coordinate system is diffrenent than I thought XD;
+// 			change camera orientation (v_up, v_look_dir, camera control key binds etc.)
+// 				invert camera in upside-down (Y axis)
 // 	- change the name of 3d_main.c to some more intelligent one
 // 	- make the engine available to use as a submodule in AVR/ESP project:
 // 		- test if stb_ds works in AVR/ESP projects
@@ -79,7 +82,6 @@ void graphicsTest( sfRenderWindow* renderWindow );
 
 
 bool animate_flag = 0;	// for testing, toggles motion of objects caused by "f_theta"
-
 
 int main(){
 	// 
@@ -199,7 +201,48 @@ int main(){
 		
 		// DEBUG_PRINT( "f_theta = %f,\f_elapsed_time = %f\n", (float) (f_theta), (float) f_elapsed_time );
 
+		mesh3d_t* curr_mesh = meshQueue_getCurrent( &mq );
+		// Direction vectors
+		vec3d_t v_xn = { floatingToFixed(-1), floatingToFixed(0), floatingToFixed(0), floatingToFixed(1) };
+		vec3d_t v_xp = { floatingToFixed(1), floatingToFixed(0), floatingToFixed(0), floatingToFixed(1) };
+		vec3d_t v_yn = { floatingToFixed(0), floatingToFixed(-1), floatingToFixed(0), floatingToFixed(1) };
+		vec3d_t v_yp = { floatingToFixed(0), floatingToFixed(1), floatingToFixed(0), floatingToFixed(1) };
+		vec3d_t v_zn = { floatingToFixed(0), floatingToFixed(0), floatingToFixed(-1), floatingToFixed(1) };
+		vec3d_t v_zp = { floatingToFixed(0), floatingToFixed(0), floatingToFixed(1), floatingToFixed(1) };
 
+		#define VEL_MULTIPLIER 2.0
+		v_xn = vectorMul( &(v_xn), floatingToFixed( VEL_MULTIPLIER * elapsed_time ) );
+		v_xp = vectorMul( &(v_xp), floatingToFixed( VEL_MULTIPLIER * elapsed_time ) );
+		v_yn = vectorMul( &(v_yn), floatingToFixed( VEL_MULTIPLIER * elapsed_time ) );
+		v_yp = vectorMul( &(v_yp), floatingToFixed( VEL_MULTIPLIER * elapsed_time ) );
+		v_zn = vectorMul( &(v_zn), floatingToFixed( VEL_MULTIPLIER * elapsed_time ) );
+		v_zp = vectorMul( &(v_zp), floatingToFixed( VEL_MULTIPLIER * elapsed_time ) );
+
+		// DEBUG_PRINT( "mesh->pos: " );
+		// vec3d_print( &(curr_mesh->pos), 1 );
+
+		// DEBUG_PRINT( "v_xn: " );
+		// vec3d_print( &v_xn, 1 );
+
+
+		// Move X-
+		if( sfKeyboard_isKeyPressed(sfKeyNumpad1) )
+			curr_mesh->pos = vectorAdd( &(curr_mesh->pos), &v_xn );
+		// Move X+
+		else if( sfKeyboard_isKeyPressed(sfKeyNumpad3) )
+			curr_mesh->pos = vectorAdd( &(curr_mesh->pos), &v_xp );
+		// Move Y-
+		if( sfKeyboard_isKeyPressed(sfKeyNumpad4) )
+			curr_mesh->pos = vectorAdd( &(curr_mesh->pos), &v_yn );
+		// Move Y+
+		else if( sfKeyboard_isKeyPressed(sfKeyNumpad6) )
+			curr_mesh->pos = vectorAdd( &(curr_mesh->pos), &v_yp );
+		// Move Z-
+		if( sfKeyboard_isKeyPressed(sfKeyNumpad7) )
+			curr_mesh->pos = vectorAdd( &(curr_mesh->pos), &v_zn );
+		// Move Z+
+		else if( sfKeyboard_isKeyPressed(sfKeyNumpad9) )
+			curr_mesh->pos = vectorAdd( &(curr_mesh->pos), &v_zp );
 
 		example_update3DFrame( &mq, &mat_proj, elapsed_time, f_theta );
 
@@ -230,7 +273,7 @@ void example_setup3D( mesh_queue_t* mq, mesh3d_t* mesh, mat4x4_t* mat_proj
 	mesh_makeEmpty( mesh );
 	// mesh_setEdgeColourByValue( mesh, COLOUR_GREEN );
 #ifdef USE_LOADING_FROM_OBJ
-	bool ret = mesh_loadFromObjFile( mesh, "obj_models/cube.obj" );
+	bool ret = mesh_loadFromObjFile( mesh, "obj_models/axes.obj" );
 #else
 	bool ret = mesh_loadFromProgmem( mesh, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
 	// bool ret = mesh_loadFromProgmem( mesh, sphere_mesh_verts, sphere_mesh_faces, SPHERE_MESH_V_CNT, SPHERE_MESH_F_CNT, false );
@@ -241,7 +284,7 @@ void example_setup3D( mesh_queue_t* mq, mesh3d_t* mesh, mat4x4_t* mat_proj
 	}
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
-	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(2.0f), floatingToFixed(0.0f) };
+	vec3d_t pos1 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(0.0f) };
     // vec3d_t pos2 = { floatingToFixed(0.0f), floatingToFixed(0.0f), floatingToFixed(4.0f), floatingToFixed(0.0f) };
 #else
     vec3d_t pos1 = { 0.0f, 0.0f, 2.0f, 0.0f };
@@ -608,7 +651,7 @@ void meshQueueTest( void ){
 #ifdef USE_LOADING_FROM_OBJ
 	mesh_loadFromObjFile( &mesh1, "obj_models/cube.obj" );
 	mesh_loadFromObjFile( &mesh2, "obj_models/dodecahedron.obj" );
-	mesh_loadFromObjFile( &mesh3, "obj_models/sphere.obj" );
+	mesh_loadFromObjFile( mesh3, "obj_models/sphere.obj" );
 #else
 	mesh_loadFromProgmem( &mesh1, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
 	mesh_loadFromProgmem( &mesh2, sphere_mesh_verts, sphere_mesh_faces, SPHERE_MESH_V_CNT, SPHERE_MESH_F_CNT, false );

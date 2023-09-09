@@ -31,9 +31,9 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
     // Camera movement (WSAD hehe) and looking around (arrows)
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	if (CAMERA_MOVE_PRESSED_UP)
-        cam->pos.y -= floatingToFixed( 2.0f * f_elapsed_time );
+        cam->pos.z += floatingToFixed( 2.0f * f_elapsed_time );
     if (CAMERA_MOVE_PRESSED_DOWN )
-        cam->pos.y += floatingToFixed( 2.0f * f_elapsed_time );
+        cam->pos.z -= floatingToFixed( 2.0f * f_elapsed_time );
 	
 	if (CAMERA_LOOK_PRESSED_RIGHT)
         cam->yaw -= floatingToFixed( 2.0f * f_elapsed_time );
@@ -122,10 +122,11 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	vec3d_t v_up = { floatingToFixed(0), floatingToFixed(1), floatingToFixed(0), floatingToFixed(1) };
-	vec3d_t v_target = { floatingToFixed(0), floatingToFixed(0), floatingToFixed(1), floatingToFixed(1) };
+	// vec3d_t v_target = { floatingToFixed(0), floatingToFixed(0), floatingToFixed(1), floatingToFixed(1) };
+	vec3d_t v_target = vectorAdd( &(cam->pos), &(cam->look_dir) );
 #else
     // vec3d_t v_up = { 0, 1, 0, 1 };
-    //vec3d_t v_target = vectorAdd( cam->pos, cam->look_dir );
+    // vec3d_t v_target = vectorAdd( &(cam->pos), &(cam->look_dir) );
     vec3d_t v_target = { 0, 0, 1, 1 };
 #endif
 
@@ -154,26 +155,69 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 	
 	// Apply camera pitch and yaw (X -> Z -> Y, order matters):
 	// change it to Z->X->Y
+	// working was pitch (X) -> yaw (Y) with no roll (Z)
+	// Compute look direction of the camera
 	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
 	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
+
+	// cam->look_dir = v_target;
+	cam->look_dir.x = floatingToFixed(0);
+	cam->look_dir.y = floatingToFixed(1);
+	cam->look_dir.z = floatingToFixed(0);
+	cam->look_dir.w = floatingToFixed(1);
+
+	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
+	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
+	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
 	matrix_makeRotX( &mat_camera_rot, cam->pitch );
-    cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
+    // cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
+	cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
 	matrix_makeRotY( &mat_camera_rot, cam->yaw );
 	cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
+	// matrix_makeRotY( &mat_camera_rot, cam->yaw );
+	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
+	// matrix_makeRotX( &mat_camera_rot, cam->pitch );
+    // cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
+	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
+	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
+
 	
 	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
 	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
 	// DEBUG_PRINT( "cam->up_dir: " );
 	// vec3d_print( &cam->up_dir, 1 );
 	
+	// Compute up direction of the camera
+	// (perpendicular to the look direction)
+
+	cam->up_dir.x = floatingToFixed(0);
+	cam->up_dir.y = floatingToFixed(0);
+	cam->up_dir.z = floatingToFixed(1);
+	cam->up_dir.w = floatingToFixed(1);
+
+	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+	// matrix_makeRotX( &mat_camera_rot, cam->pitch - floatingToFixed( 3.14/2 ) );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+	// matrix_makeRotY( &mat_camera_rot, cam->yaw );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+
+	// matrix_makeRotX( &mat_camera_rot, cam->pitch - floatingToFixed( 3.14/2 ) );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
+	// matrix_makeRotY( &mat_camera_rot, cam->yaw );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+	
+
 // #ifdef USE_FIXED_POINT_ARITHMETIC
 // 	matrix_makeRotX( &mat_camera_rot, cam->pitch - floatingToFixed( 3.14/2 ) );
 // #else
 // 	matrix_makeRotX( &mat_camera_rot, cam->pitch - 3.14/2 );
 // #endif
 // 	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
-// 	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
-// 	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+// 	matrix_makeRotZ( &mat_camera_rot, cam->roll );
+// 	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
 // 	matrix_makeRotY( &mat_camera_rot, cam->yaw );
 // 	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
 

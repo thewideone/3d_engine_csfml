@@ -1,7 +1,7 @@
 #ifndef _CUBE_MESH_H_
 #define _CUBE_MESH_H_
 
-#include "../3d_engine/mesh3d.h"   // for F_VID_SEP
+#include "../3d_engine/mesh3d.h"    // for F_VID_SEP
 #include "../3d_engine/math_3d.h"   // for fxp_t and flp_t
 #include "../3d_engine/config.h"    // for fixed point arithmetic and
                                     // optional size_t definitions
