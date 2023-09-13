@@ -18,6 +18,9 @@ void engine3D_setupProjectionMatrix( mat4x4_t* mat ){
 }
 
 #ifdef USE_CAMERA
+
+#define CAMERA_MOV_MUL 8.0f
+
 // 
 // Compute camera and view matrices,
 // the latter of which is used for mesh transformation,
@@ -31,22 +34,22 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
     // Camera movement (WSAD hehe) and looking around (arrows)
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	if (CAMERA_MOVE_PRESSED_UP)
-        cam->pos.z += floatingToFixed( 2.0f * f_elapsed_time );
+        cam->pos.y += floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
     if (CAMERA_MOVE_PRESSED_DOWN )
-        cam->pos.z -= floatingToFixed( 2.0f * f_elapsed_time );
+        cam->pos.y -= floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
 	
 	if (CAMERA_LOOK_PRESSED_RIGHT)
-        cam->yaw -= floatingToFixed( 2.0f * f_elapsed_time );
+        cam->yaw -= floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
     if (CAMERA_LOOK_PRESSED_LEFT)
-        cam->yaw += floatingToFixed( 2.0f * f_elapsed_time );
+        cam->yaw += floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
 	if (CAMERA_LOOK_PRESSED_DOWN)
-        cam->pitch -= floatingToFixed( 2.0f * f_elapsed_time );
+        cam->pitch -= floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
     if (CAMERA_LOOK_PRESSED_UP)
-        cam->pitch += floatingToFixed( 2.0f * f_elapsed_time );
+        cam->pitch += floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
 	if (CAMERA_LOOK_PRESSED_ROLL_LEFT)
-        cam->roll -= floatingToFixed( 2.0f * f_elapsed_time );
+        cam->roll -= floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
     if (CAMERA_LOOK_PRESSED_ROLL_RIGHT)
-        cam->roll += floatingToFixed( 2.0f * f_elapsed_time );
+        cam->roll += floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
 	
 	// Clip the angles to allow for later usage of
 	// look-up tables instead of sin() and cos() functions
@@ -123,7 +126,8 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 #ifdef USE_FIXED_POINT_ARITHMETIC
 	vec3d_t v_up = { floatingToFixed(0), floatingToFixed(1), floatingToFixed(0), floatingToFixed(1) };
 	// vec3d_t v_target = { floatingToFixed(0), floatingToFixed(0), floatingToFixed(1), floatingToFixed(1) };
-	vec3d_t v_target = vectorAdd( &(cam->pos), &(cam->look_dir) );
+	vec3d_t v_target = { floatingToFixed(0), floatingToFixed(0), floatingToFixed(1), floatingToFixed(1) };
+	// vec3d_t v_target = vectorAdd( &(cam->pos), &(cam->look_dir) );
 #else
     // vec3d_t v_up = { 0, 1, 0, 1 };
     // vec3d_t v_target = vectorAdd( &(cam->pos), &(cam->look_dir) );
@@ -161,27 +165,29 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
 
 	// cam->look_dir = v_target;
-	cam->look_dir.x = floatingToFixed(0);
-	cam->look_dir.y = floatingToFixed(1);
-	cam->look_dir.z = floatingToFixed(0);
-	cam->look_dir.w = floatingToFixed(1);
+	// cam->look_dir.x = floatingToFixed(0);
+	// cam->look_dir.y = floatingToFixed(0);
+	// cam->look_dir.z = floatingToFixed(1);
+	// cam->look_dir.w = floatingToFixed(1);
 
+	// matrix_makeRotX( &mat_camera_rot, cam->pitch );
+    // cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
 	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
 	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
 	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
-	matrix_makeRotX( &mat_camera_rot, cam->pitch );
+	// matrix_makeRotX( &mat_camera_rot, cam->pitch );
     // cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
-	cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
+	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
 	matrix_makeRotY( &mat_camera_rot, cam->yaw );
-	cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
+	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
 	// matrix_makeRotY( &mat_camera_rot, cam->yaw );
-	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
+	cam->look_dir = matrix_mulVector( &mat_camera_rot, &v_target );
 	// matrix_makeRotX( &mat_camera_rot, cam->pitch );
     // cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
 	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
 	// cam->look_dir = matrix_mulVector( &mat_camera_rot, &cam->look_dir );
 
-	
+	cam->up_dir = v_up;
 	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
 	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
 	// DEBUG_PRINT( "cam->up_dir: " );
@@ -190,10 +196,10 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 	// Compute up direction of the camera
 	// (perpendicular to the look direction)
 
-	cam->up_dir.x = floatingToFixed(0);
-	cam->up_dir.y = floatingToFixed(0);
-	cam->up_dir.z = floatingToFixed(1);
-	cam->up_dir.w = floatingToFixed(1);
+	// cam->up_dir.x = floatingToFixed(0);
+	// cam->up_dir.y = floatingToFixed(0);
+	// cam->up_dir.z = floatingToFixed(1);
+	// cam->up_dir.w = floatingToFixed(1);
 
 	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
 	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
@@ -209,23 +215,39 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
 	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
 	
+	// For up to be up, cam->up_dir and v_up have to be .z = -1. Why?? CrossProduct?
+
+	// DEBUG_PRINT( "cam->up_dir i: " );
+	// vec3d_print( &cam->up_dir, 1 );
 
 // #ifdef USE_FIXED_POINT_ARITHMETIC
-// 	matrix_makeRotX( &mat_camera_rot, cam->pitch - floatingToFixed( 3.14/2 ) );
+	// matrix_makeRotX( &mat_camera_rot, cam->pitch - floatingToFixed( 3.14/2 ) );
+	// matrix_makeRotX( &mat_camera_rot, cam->pitch );
 // #else
 // 	matrix_makeRotX( &mat_camera_rot, cam->pitch - 3.14/2 );
 // #endif
-// 	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
-// 	matrix_makeRotZ( &mat_camera_rot, cam->roll );
-// 	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
-// 	matrix_makeRotY( &mat_camera_rot, cam->yaw );
-// 	cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(v_up) );
+
+	// DEBUG_PRINT( "cam->up_dir p: " );
+	// vec3d_print( &cam->up_dir, 1 );
+
+	// matrix_makeRotZ( &mat_camera_rot, cam->roll );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+
+	// DEBUG_PRINT( "cam->up_dir pr: " );
+	// vec3d_print( &cam->up_dir, 1 );
+
+	// matrix_makeRotY( &mat_camera_rot, cam->yaw );
+	// cam->up_dir = matrix_mulVector( &mat_camera_rot, &(cam->up_dir) );
+
+	// DEBUG_PRINT( "cam->up_dir pry: " );
+	// vec3d_print( &cam->up_dir, 1 );
 
 	// My trial of implementing left and right strafing
     // Calculate the right direction:
-    // vec3d_t v_right = vectorCrossProduct( &v_up, &v_forward );
+    vec3d_t v_right = vectorCrossProduct( &v_up, &v_forward );
 	// (cam->up_dir and cam->look_dir computed below)
-	vec3d_t v_right = vectorCrossProduct( &(cam->up_dir), &v_forward );
+	// vec3d_t v_right = vectorCrossProduct( &(cam->up_dir), &v_forward );
 	v_right = vectorMul( &v_right, vectorLength( &(cam->look_dir) ) );
 
 	if (CAMERA_MOVE_PRESSED_FORWARD)
@@ -242,9 +264,12 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 	// DEBUG_PRINT( "v_target: " );
 	// vec3d_print( &v_target, 1 );
 
+	// Camera transformation matrix
     mat4x4_t mat_camera;
-	// matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &v_up );
-	matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &(cam->up_dir) );
+	matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &v_up );
+	// Take a look at this function,
+	// this may be the cause of the problems:
+	// matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &(cam->up_dir) );
 
     // Make view matrix from camera:
     matrix_quickInverse( mat_view, &mat_camera );

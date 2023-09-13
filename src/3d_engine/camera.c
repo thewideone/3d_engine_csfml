@@ -19,10 +19,10 @@ void camera_makeDefault( camera_t* cam ){
 	#ifdef USE_CAMERA
 		cam->look_dir.x = floatingToFixed(0);
 		cam->look_dir.y = floatingToFixed(0);
-		cam->look_dir.z = floatingToFixed(1);
+		cam->look_dir.z = floatingToFixed(0);
 		cam->look_dir.w = floatingToFixed(1);
 		cam->up_dir.x = floatingToFixed(0);
-		cam->up_dir.y = floatingToFixed(-1);
+		cam->up_dir.y = floatingToFixed(1);
 		cam->up_dir.z = floatingToFixed(0);
 		cam->up_dir.w = floatingToFixed(1);
 		cam->roll = floatingToFixed(0);

@@ -73,7 +73,7 @@ vec3d_t vectorAdd( vec3d_t* v1, vec3d_t* v2 ){
     return (vec3d_t){ v1->x + v2->x, v1->y + v2->y, v1->z + v2->z, 1 };
 #endif
 }
-// Subtract:
+// Subtract (v1-v2):
 vec3d_t vectorSub( vec3d_t* v1, vec3d_t* v2 ){
     // vec3d_t v;
     // v.x = v1->x - v2->x;
@@ -338,14 +338,22 @@ void matrix_mulMatrix( mat4x4_t* out_m, mat4x4_t* m1, mat4x4_t* m2 ){
 //  up - "up" vector
 void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up ){
     // Calculate new forward direction:
-    vec3d_t newForward = vectorSub( target, pos );
-    // DEBUG_PRINT( "newForward init:\n" );
-	// vec3d_print( &newForward, 1 );
+    // Z-axis
+    // vec3d_t newForward = vectorSub( target, pos );
+    vec3d_t newForward = vectorSub( pos, target );
     newForward = vectorNormalise( &newForward );
-    // DEBUG_PRINT( "newForward after norm:\n" );
-	// vec3d_print( &newForward, 1 );
+    // X-axis
+    vec3d_t newRight = vectorCrossProduct( up, &newForward );
+    // vec3d_t newRight = vectorCrossProduct( &newForward, up );
+    newRight = vectorNormalise( &newRight );
+    // Y-axis
+    vec3d_t newUp = vectorCrossProduct( &newForward, &newRight );
+    // vec3d_t newUp = vectorCrossProduct( &newRight, &newForward );
+    newUp = vectorNormalise( &newUp );
 
+    /*
     // Calculate new up direction:
+    // Y-axis
     vec3d_t a = vectorMul( &newForward, vectorDotProduct( up, &newForward ) );
     // DEBUG_PRINT( "a:\n" );
 	// vec3d_print( &a, 1 );
@@ -357,9 +365,11 @@ void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up
 	// vec3d_print( &newUp, 1 );
 
     // Calculate new right direction:
+    // X-axis
     vec3d_t newRight = vectorCrossProduct( &newUp, &newForward );
     // DEBUG_PRINT( "newRight:\n" );
 	// vec3d_print( &newRight, 1 );
+    */
 
     // Construct Dimensioning and Translation Matrix	
 #ifdef USE_FIXED_POINT_ARITHMETIC

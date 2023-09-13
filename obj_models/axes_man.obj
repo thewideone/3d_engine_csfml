@@ -1,0 +1,28 @@
+# My trial of manually creating an obj file of world axes.
+# 
+o Cube.006_Cube.008
+# X (square)
+v 0.8 -0.2 0.0
+v 0.8 0.2 0.0
+v 1.2 -0.2 0.0
+v 1.2 0.2 0.0
+# Y (upside-down Delta triangle)
+v 0.2 0.8 0.0
+v -0.2 1.0 0.0
+v 0.2 1.2 0.0
+# Z (right triangle)
+v -0.2 0.0 0.8
+v 0.2 0.0 0.8
+v 0.2 0.0 1.2
+# 
+s off
+# Counter-clockwise vertex order
+# X (both sides of the plane)
+f 1 3 4 2
+f 1 2 4 3
+# Y (both sides of the plane)
+f 5 7 6
+f 5 6 7
+# Z (both sides of the plane)
+f 9 10 8
+f 9 8 10

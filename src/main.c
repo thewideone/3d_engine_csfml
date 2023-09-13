@@ -22,6 +22,8 @@
 #include "meshes/cube.h"
 #include "meshes/sphere.h"
 #include "meshes/dodecahedron.h"
+#include "meshes/axes.h"
+#include "meshes/axes_man.h"
 
 
 /* TODO:
@@ -275,7 +277,9 @@ void example_setup3D( mesh_queue_t* mq, mesh3d_t* mesh, mat4x4_t* mat_proj
 #ifdef USE_LOADING_FROM_OBJ
 	bool ret = mesh_loadFromObjFile( mesh, "obj_models/axes.obj" );
 #else
-	bool ret = mesh_loadFromProgmem( mesh, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
+	// bool ret = mesh_loadFromProgmem( mesh, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
+	// bool ret = mesh_loadFromProgmem( mesh, axes_mesh_verts, axes_mesh_faces, AXES_MESH_V_CNT, AXES_MESH_F_CNT, false );
+	bool ret = mesh_loadFromProgmem( mesh, axes_man_mesh_verts, axes_man_mesh_faces, AXES_MAN_MESH_V_CNT, AXES_MAN_MESH_F_CNT, false );
 	// bool ret = mesh_loadFromProgmem( mesh, sphere_mesh_verts, sphere_mesh_faces, SPHERE_MESH_V_CNT, SPHERE_MESH_F_CNT, false );
 	// bool ret = mesh_loadFromProgmem( mesh, dodecahedron_mesh_verts, dodecahedron_mesh_faces, DODECAHEDRON_MESH_V_CNT, DODECAHEDRON_MESH_F_CNT, false );
 #endif
