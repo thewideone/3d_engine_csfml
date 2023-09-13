@@ -266,7 +266,10 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 
 	// Camera transformation matrix
     mat4x4_t mat_camera;
-	matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &v_up );
+	// matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &v_up );
+	DEBUG_PRINT( "Computing matrix_FPS...\n" );
+	matrix_FPS( &mat_camera, &(cam->pos), (cam->pitch), (cam->yaw) );
+	DEBUG_PRINT( "done.\n" );
 	// Take a look at this function,
 	// this may be the cause of the problems:
 	// matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &(cam->up_dir) );

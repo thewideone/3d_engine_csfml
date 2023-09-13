@@ -120,6 +120,8 @@ void matrix_mulMatrix( mat4x4_t* out_m, mat4x4_t* m1, mat4x4_t* m2 );
 //  up - "up" vector
 void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up );
 
+void matrix_FPS( mat4x4_t* out_m, vec3d_t* pos, rtnl_t pitch, rtnl_t yaw );
+
 // Works only for Rotation/Translation Matrices
 void matrix_quickInverse( mat4x4_t* out_mat, mat4x4_t* m );
 #endif

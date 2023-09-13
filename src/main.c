@@ -461,7 +461,7 @@ void dynamicArrayTest( void ){
 		vec3d_print( &v_ret, true );
 	}
 
-	printf( "vertices: cap = %lld, len = %lld\n", arrcap(vertices), arrlen(vertices) );
+	printf( "vertices: cap = %lu, len = %lu\n", arrcap(vertices), arrlen(vertices) );
 
 	printf( "vertices:\n" );
 	for( int i=0; i<arrlen( vertices ); i++ ){

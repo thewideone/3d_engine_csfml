@@ -385,6 +385,42 @@ void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up
 #endif
 }
 
+void matrix_FPS( mat4x4_t* out_m, vec3d_t* pos, rtnl_t pitch, rtnl_t yaw ){
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    flp_t cos_pitch = cosf( fixedToFloating( pitch ) );
+    flp_t sin_pitch = sinf( fixedToFloating( pitch ) );
+    flp_t cos_yaw = cosf( fixedToFloating( yaw ) );
+    flp_t sin_yaw = sinf( fixedToFloating( yaw ) );
+#else
+    flp_t cos_pitch = cosf( pitch );
+    flp_t sin_pitch = sinf( ( pitch ) );
+    flp_t cos_yaw = cosf( yaw );
+    flp_t sin_yaw = sinf( yaw );
+#endif
+
+    vec3d_t xaxis = { cos_yaw, 0, -sin_yaw, 1 };
+    vec3d_t yaxis = { sin_yaw * sin_pitch, cos_pitch, cos_yaw * sin_pitch, 1 };
+    vec3d_t zaxis = { sin_yaw * cos_pitch, -sin_pitch, cos_pitch * cos_yaw, 1 };
+
+#ifdef USE_FIXED_POINT_ARITHMETIC
+    out_m->m[0][0] = floatingToFixed(xaxis.x);	    out_m->m[0][1] = floatingToFixed(xaxis.y);	    out_m->m[0][2] = floatingToFixed(xaxis.z);	    out_m->m[0][3] = floatingToFixed(0.0f);
+	out_m->m[1][0] = floatingToFixed(yaxis.x);		out_m->m[1][1] = floatingToFixed(yaxis.y);		out_m->m[1][2] = floatingToFixed(yaxis.z);		out_m->m[1][3] = floatingToFixed(0.0f);
+	out_m->m[2][0] = floatingToFixed(zaxis.x);	    out_m->m[2][1] = floatingToFixed(zaxis.y);	    out_m->m[2][2] = floatingToFixed(zaxis.z);	    out_m->m[2][3] = floatingToFixed(0.0f);
+	out_m->m[3][0] = -vectorDotProduct( &xaxis, pos );
+    out_m->m[3][1] = -vectorDotProduct( &yaxis, pos );
+    out_m->m[3][2] = -vectorDotProduct( &zaxis, pos );
+    out_m->m[3][3] = floatingToFixed(1.0f);
+#else
+	out_m->m[0][0] = xaxis.x;	    out_m->m[0][1] = xaxis.y;	    out_m->m[0][2] = xaxis.z;	    out_m->m[0][3] = floatingToFixed(0.0f);
+	out_m->m[1][0] = yaxis.x;		out_m->m[1][1] = yaxis.y;		out_m->m[1][2] = yaxis.z;		out_m->m[1][3] = floatingToFixed(0.0f);
+	out_m->m[2][0] = zaxis.x;	    out_m->m[2][1] = zaxis.y;	    out_m->m[2][2] = zaxis.z;	    out_m->m[2][3] = floatingToFixed(0.0f);
+	out_m->m[3][0] = -vectorDotProduct( &xaxis, pos );
+    out_m->m[3][1] = -vectorDotProduct( &yaxis, pos );
+    out_m->m[3][2] = -vectorDotProduct( &zaxis, pos );
+    out_m->m[3][3] = 1.0f;
+#endif
+}
+
 // Works only for Rotation/Translation Matrices
 void matrix_quickInverse( mat4x4_t* out_mat, mat4x4_t* m ){
 	matrix_makeEmpty( out_mat );
