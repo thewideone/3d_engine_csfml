@@ -577,19 +577,19 @@ void meshTest( void ){
 	mesh_makeEmpty( &mesh );
 	mesh_loadFromObjFile( &mesh, "obj_models/cube.obj" );
 
-	printf( "mesh.vertices: cap = %lld, len = %lld\n", arrcap(mesh.vertices), arrlen(mesh.vertices) );
+	printf( "mesh.vertices: cap = %ld, len = %ld\n", arrcap(mesh.vertices), arrlen(mesh.vertices) );
 
-	printf( "mesh.vertices (%lld):\n", mesh.vertex_cnt );
+	printf( "mesh.vertices (%ld):\n", mesh.vertex_cnt );
 	for( size_t i=0; i < mesh.vertex_cnt; i++ ){
 		vec3d_t loop_vec = mesh.vertices[i];
-		printf( " -> v%lld: ", i );
+		printf( " -> v%ld: ", i );
 		vec3d_print( &loop_vec, true );
 	}
 
-	printf( "mesh.faces (%lld):\n", mesh.face_cnt );
+	printf( "mesh.faces (%ld):\n", mesh.face_cnt );
 	for( size_t i=0; i < mesh.face_cnt; i++ ){
 		polygon_t poly = mesh.faces[i];
-		printf( "Face %lld: ", i );
+		printf( "Face %ld: ", i );
 		polygon_print( &poly );
 	}
 
@@ -601,16 +601,16 @@ void meshTest( void ){
 	mesh_makeEmpty( &mesh_prgm );
 	mesh_loadFromProgmem( &mesh_prgm, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
 
-	printf( "mesh_prgm.vertices (%lld):\n", mesh_prgm.vertex_cnt );
+	printf( "mesh_prgm.vertices (%ld):\n", mesh_prgm.vertex_cnt );
 	for( size_t i=0; i < mesh_prgm.vertex_cnt; i++ ){
 		vec3d_t loop_vec = mesh_prgm.vertices[i];
-		printf( " -> v%lld: ", i );
+		printf( " -> v%ld: ", i );
 		vec3d_print( &loop_vec, true );
 	}	
-	printf( "mesh_prgm.faces (%lld):\n", mesh_prgm.face_cnt );
+	printf( "mesh_prgm.faces (%ld):\n", mesh_prgm.face_cnt );
 	for( size_t i=0; i < mesh_prgm.face_cnt; i++ ){
 		polygon_t poly = mesh_prgm.faces[i];
-		printf( "Face %lld: ", i );
+		printf( "Face %ld: ", i );
 		polygon_print( &poly );
 	}
 
@@ -623,16 +623,16 @@ void meshTest( void ){
 	mesh_makeEmpty( mesh_prgm_dyn );
 	mesh_loadFromProgmem( mesh_prgm_dyn, cube_mesh_verts, cube_mesh_faces, CUBE_MESH_V_CNT, CUBE_MESH_F_CNT, false );
 
-	printf( "mesh_prgm_dyn->vertices (%lld):\n", mesh_prgm_dyn->vertex_cnt );
+	printf( "mesh_prgm_dyn->vertices (%ld):\n", mesh_prgm_dyn->vertex_cnt );
 	for( size_t i=0; i < mesh_prgm_dyn->vertex_cnt; i++ ){
 		vec3d_t loop_vec = mesh_prgm_dyn->vertices[i];
-		printf( " -> v%lld: ", i );
+		printf( " -> v%ld: ", i );
 		vec3d_print( &loop_vec, true );
 	}	
-	printf( "mesh_prgm_dyn->faces (%lld):\n", mesh_prgm_dyn->face_cnt );
+	printf( "mesh_prgm_dyn->faces (%ld):\n", mesh_prgm_dyn->face_cnt );
 	for( size_t i=0; i < mesh_prgm_dyn->face_cnt; i++ ){
 		polygon_t poly = mesh_prgm_dyn->faces[i];
-		printf( "Face %lld: ", i );
+		printf( "Face %ld: ", i );
 		polygon_print( &poly );
 	}
 
@@ -681,16 +681,16 @@ void meshQueueTest( void ){
 			continue;
 		}
 
-		printf( "mesh%lld.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
+		printf( "mesh%ld.vertices (%ld):\n", mi+1, mptr->vertex_cnt );
 
-		printf( "mesh%lld.faces (%lld):\n", mi+1, mptr->face_cnt );
+		printf( "mesh%ld.faces (%ld):\n", mi+1, mptr->face_cnt );
 
 		meshQueue_goToNext( &mq );
 	}
 
 	meshQueue_removeAt( &mq, 1 );
 
-	printf( "Removed 2nd mesh, size = %lld.\n", mq.size );
+	printf( "Removed 2nd mesh, size = %ld.\n", mq.size );
 
 	for( size_t mi=0; mi < mq.size; mi++ ){
 		mesh3d_t* mptr = meshQueue_getCurrent( &mq );
@@ -700,9 +700,9 @@ void meshQueueTest( void ){
 			continue;
 		}
 
-		printf( "mesh%lld.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
+		printf( "mesh%ld.vertices (%ld):\n", mi+1, mptr->vertex_cnt );
 
-		printf( "mesh%lld.faces (%lld):\n", mi+1, mptr->face_cnt );
+		printf( "mesh%ld.faces (%ld):\n", mi+1, mptr->face_cnt );
 
 		meshQueue_goToNext( &mq );
 	}
@@ -717,9 +717,9 @@ void meshQueueTest( void ){
 			continue;
 		}
 
-		printf( "mesh%lld.vertices (%lld):\n", mi+1, mptr->vertex_cnt );
+		printf( "mesh%ld.vertices (%ld):\n", mi+1, mptr->vertex_cnt );
 
-		printf( "mesh%lld.faces (%lld):\n", mi+1, mptr->face_cnt );
+		printf( "mesh%ld.faces (%ld):\n", mi+1, mptr->face_cnt );
 
 		meshQueue_goToNext( &mq );
 	}

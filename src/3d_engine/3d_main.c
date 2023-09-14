@@ -39,9 +39,9 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
         cam->pos.y -= floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
 	
 	if (CAMERA_LOOK_PRESSED_RIGHT)
-        cam->yaw -= floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
-    if (CAMERA_LOOK_PRESSED_LEFT)
         cam->yaw += floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
+    if (CAMERA_LOOK_PRESSED_LEFT)
+        cam->yaw -= floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
 	if (CAMERA_LOOK_PRESSED_DOWN)
         cam->pitch -= floatingToFixed( CAMERA_MOV_MUL * f_elapsed_time );
     if (CAMERA_LOOK_PRESSED_UP)
@@ -269,13 +269,15 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 	// matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &v_up );
 	DEBUG_PRINT( "Computing matrix_FPS...\n" );
 	matrix_FPS( &mat_camera, &(cam->pos), (cam->pitch), (cam->yaw) );
-	DEBUG_PRINT( "done.\n" );
+	DEBUG_PRINT( "Done.\n" );
 	// Take a look at this function,
 	// this may be the cause of the problems:
 	// matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &(cam->up_dir) );
 
     // Make view matrix from camera:
+	DEBUG_PRINT( "Computing quick inverse...\n" );
     matrix_quickInverse( mat_view, &mat_camera );
+	DEBUG_PRINT( "Done.\n" );
 
 	
 	// DEBUG_PRINT( "mat_camera_rot:\n" );

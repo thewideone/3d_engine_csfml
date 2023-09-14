@@ -119,7 +119,7 @@ vec3d_t vectorDiv( vec3d_t* v, rtnl_t k ){
     return (vec3d_t){ v->x / k, v->y / k, v->z / k, v->w };
 #endif
 }
-// Dot product:
+// Dot product of fixed or floating point type vectors:
 rtnl_t vectorDotProduct( vec3d_t* v1, vec3d_t* v2 ){
 #ifdef USE_FIXED_POINT_ARITHMETIC
     return fixedMul(v1->x, v2->x) + fixedMul( v1->y, v2->y ) + fixedMul( v1->z, v2->z );
@@ -307,6 +307,10 @@ void matrix_makeProjection( mat4x4_t* matrix, rtnl_t fFovDegrees, rtnl_t fAspect
     matrix->m[1][1] = fFovRad;
     matrix->m[2][2] = fixedDiv( fFar, ( fFar - fNear ) );
     matrix->m[3][2] = fixedDiv( fixedMul( -fFar, fNear ), ( fFar - fNear ) );
+    // According to an answer here:
+    // https://stackoverflow.com/questions/67184218/how-do-i-use-a-left-handed-coordinate-system-for-rendering
+    //  matrix->m[2][3] =  1 for left-handed  coordinate system
+    //  matrix->m[2][3] = -1 for right-handed coordinate system
     matrix->m[2][3] = floatingToFixed( 1.0f );
     matrix->m[3][3] = floatingToFixed( 0.0f );
 #else
@@ -385,35 +389,61 @@ void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up
 #endif
 }
 
+// pitch in (-90*, +90*)
+// yaw in (0*, 360*)
+// both in radians
 void matrix_FPS( mat4x4_t* out_m, vec3d_t* pos, rtnl_t pitch, rtnl_t yaw ){
+
+    DEBUG_PRINT( "pos:\t" );
+    vec3d_print( pos, 1 );
+    DEBUG_PRINT( "pitch:\t%f\n", fixedToFloating( pitch ) );
+    DEBUG_PRINT( "yaw:\t%f\n", fixedToFloating( yaw ) );
+
 #ifdef USE_FIXED_POINT_ARITHMETIC
     flp_t cos_pitch = cosf( fixedToFloating( pitch ) );
     flp_t sin_pitch = sinf( fixedToFloating( pitch ) );
     flp_t cos_yaw = cosf( fixedToFloating( yaw ) );
     flp_t sin_yaw = sinf( fixedToFloating( yaw ) );
+
+    vec3d_t xaxis = { floatingToFixed( cos_yaw ), 0, floatingToFixed( -sin_yaw), floatingToFixed(1.0f) };
+    vec3d_t yaxis = { floatingToFixed( sin_yaw * sin_pitch ), floatingToFixed( cos_pitch ), floatingToFixed( cos_yaw * sin_pitch ), floatingToFixed(1.0f) };
+    vec3d_t zaxis = { floatingToFixed( sin_yaw * cos_pitch ), floatingToFixed( -sin_pitch ), floatingToFixed( cos_pitch * cos_yaw ), floatingToFixed(1.0f) };
 #else
     flp_t cos_pitch = cosf( pitch );
     flp_t sin_pitch = sinf( ( pitch ) );
     flp_t cos_yaw = cosf( yaw );
     flp_t sin_yaw = sinf( yaw );
+
+    vec3d_t xaxis = { cos_yaw, 0, -sin_yaw, 1.0f };
+    vec3d_t yaxis = { sin_yaw * sin_pitch, cos_pitch, cos_yaw * sin_pitch, 1.0f };
+    vec3d_t zaxis = { sin_yaw * cos_pitch, -sin_pitch, cos_pitch * cos_yaw, 1.0f };
 #endif
 
-    vec3d_t xaxis = { cos_yaw, 0, -sin_yaw, 1 };
-    vec3d_t yaxis = { sin_yaw * sin_pitch, cos_pitch, cos_yaw * sin_pitch, 1 };
-    vec3d_t zaxis = { sin_yaw * cos_pitch, -sin_pitch, cos_pitch * cos_yaw, 1 };
+    DEBUG_PRINT( "cos_pitch:\t%f\n", cos_pitch );
+    DEBUG_PRINT( "sin_pitch:\t%f\n", sin_pitch );
+    DEBUG_PRINT( "cos_yaw:\t%f\n", cos_yaw );
+    DEBUG_PRINT( "sin_yaw:\t%f\n", sin_yaw );
+
+    DEBUG_PRINT( "xaxis:\t" );
+    vec3d_print( &xaxis, 1 );
+    DEBUG_PRINT( "yaxis:\t" );
+    vec3d_print( &yaxis, 1 );
+    DEBUG_PRINT( "zaxis:\t" );
+    vec3d_print( &zaxis, 1 );
+
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
-    out_m->m[0][0] = floatingToFixed(xaxis.x);	    out_m->m[0][1] = floatingToFixed(xaxis.y);	    out_m->m[0][2] = floatingToFixed(xaxis.z);	    out_m->m[0][3] = floatingToFixed(0.0f);
-	out_m->m[1][0] = floatingToFixed(yaxis.x);		out_m->m[1][1] = floatingToFixed(yaxis.y);		out_m->m[1][2] = floatingToFixed(yaxis.z);		out_m->m[1][3] = floatingToFixed(0.0f);
-	out_m->m[2][0] = floatingToFixed(zaxis.x);	    out_m->m[2][1] = floatingToFixed(zaxis.y);	    out_m->m[2][2] = floatingToFixed(zaxis.z);	    out_m->m[2][3] = floatingToFixed(0.0f);
+    out_m->m[0][0] = (xaxis.x);	    out_m->m[0][1] = (xaxis.y);	    out_m->m[0][2] = (xaxis.z);	    out_m->m[0][3] = floatingToFixed(0.0f);
+	out_m->m[1][0] = (yaxis.x);		out_m->m[1][1] = (yaxis.y);		out_m->m[1][2] = (yaxis.z);		out_m->m[1][3] = floatingToFixed(0.0f);
+	out_m->m[2][0] = (zaxis.x);	    out_m->m[2][1] = (zaxis.y);	    out_m->m[2][2] = (zaxis.z);	    out_m->m[2][3] = floatingToFixed(0.0f);
 	out_m->m[3][0] = -vectorDotProduct( &xaxis, pos );
     out_m->m[3][1] = -vectorDotProduct( &yaxis, pos );
     out_m->m[3][2] = -vectorDotProduct( &zaxis, pos );
     out_m->m[3][3] = floatingToFixed(1.0f);
 #else
-	out_m->m[0][0] = xaxis.x;	    out_m->m[0][1] = xaxis.y;	    out_m->m[0][2] = xaxis.z;	    out_m->m[0][3] = floatingToFixed(0.0f);
-	out_m->m[1][0] = yaxis.x;		out_m->m[1][1] = yaxis.y;		out_m->m[1][2] = yaxis.z;		out_m->m[1][3] = floatingToFixed(0.0f);
-	out_m->m[2][0] = zaxis.x;	    out_m->m[2][1] = zaxis.y;	    out_m->m[2][2] = zaxis.z;	    out_m->m[2][3] = floatingToFixed(0.0f);
+	out_m->m[0][0] = xaxis.x;	    out_m->m[0][1] = xaxis.y;	    out_m->m[0][2] = xaxis.z;	    out_m->m[0][3] = (0.0f);
+	out_m->m[1][0] = yaxis.x;		out_m->m[1][1] = yaxis.y;		out_m->m[1][2] = yaxis.z;		out_m->m[1][3] = (0.0f);
+	out_m->m[2][0] = zaxis.x;	    out_m->m[2][1] = zaxis.y;	    out_m->m[2][2] = zaxis.z;	    out_m->m[2][3] = (0.0f);
 	out_m->m[3][0] = -vectorDotProduct( &xaxis, pos );
     out_m->m[3][1] = -vectorDotProduct( &yaxis, pos );
     out_m->m[3][2] = -vectorDotProduct( &zaxis, pos );
