@@ -19,7 +19,7 @@ void engine3D_setupProjectionMatrix( mat4x4_t* mat ){
 
 #ifdef USE_CAMERA
 
-#define CAMERA_MOV_MUL 8.0f
+#define CAMERA_MOV_MUL 2.0f
 
 // 
 // Compute camera and view matrices,
@@ -267,17 +267,18 @@ void engine3D_computeViewMatrix( camera_t* cam, mat4x4_t* mat_view, flp_t f_elap
 	// Camera transformation matrix
     mat4x4_t mat_camera;
 	// matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &v_up );
-	DEBUG_PRINT( "Computing matrix_FPS...\n" );
-	matrix_FPS( &mat_camera, &(cam->pos), (cam->pitch), (cam->yaw) );
-	DEBUG_PRINT( "Done.\n" );
+	matrix_lookAtRH( &mat_camera, &(cam->pos), &v_target, &v_up );
+	// DEBUG_PRINT( "Computing matrix_FPS...\n" );
+	// matrix_FPS( &mat_camera, &(cam->pos), (cam->pitch), (cam->yaw) );
+	// DEBUG_PRINT( "Done.\n" );
 	// Take a look at this function,
 	// this may be the cause of the problems:
 	// matrix_pointAt( &mat_camera, &(cam->pos), &v_target, &(cam->up_dir) );
 
     // Make view matrix from camera:
-	DEBUG_PRINT( "Computing quick inverse...\n" );
+	// DEBUG_PRINT( "Computing quick inverse...\n" );
     matrix_quickInverse( mat_view, &mat_camera );
-	DEBUG_PRINT( "Done.\n" );
+	// DEBUG_PRINT( "Done.\n" );
 
 	
 	// DEBUG_PRINT( "mat_camera_rot:\n" );

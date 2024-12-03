@@ -375,8 +375,33 @@ void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up
 	// vec3d_print( &newRight, 1 );
     */
 
+   vec3d_t neye;    // -eye (negative eye) vector
+   neye.x = -pos->x;
+   neye.y = -pos->y;
+   neye.z = -pos->z;
+
     // Construct Dimensioning and Translation Matrix	
 #ifdef USE_FIXED_POINT_ARITHMETIC
+    // Results in drawing horizontal lines:
+    // out_m->m[0][0] = newRight.x;	    out_m->m[0][1] = newRight.y;	    out_m->m[0][2] = newRight.z;	    out_m->m[0][3] = vectorDotProduct( &newRight, &neye );
+	// out_m->m[1][0] = newUp.x;		    out_m->m[1][1] = newUp.y;		    out_m->m[1][2] = newUp.z;		    out_m->m[1][3] = vectorDotProduct( &newUp, &neye );
+	// out_m->m[2][0] = newForward.x;	    out_m->m[2][1] = newForward.y;	    out_m->m[2][2] = newForward.z;	    out_m->m[2][3] = vectorDotProduct( &newForward, &neye );
+	// out_m->m[3][0] = floatingToFixed(0.0f);     out_m->m[3][1] = floatingToFixed(0.0f);     out_m->m[3][2] = floatingToFixed(0.0f);     out_m->m[3][3] = floatingToFixed(1.0f);
+
+    // Inverted up-down steering and yaw; fixed forward-backward and left-right movement axes.
+    // out_m->m[0][0] = newRight.x;	    out_m->m[0][1] = newRight.y;	    out_m->m[0][2] = newRight.z;	    out_m->m[0][3] = floatingToFixed(0.0f);
+	// out_m->m[1][0] = newUp.x;		    out_m->m[1][1] = newUp.y;		    out_m->m[1][2] = newUp.z;		    out_m->m[1][3] = floatingToFixed(0.0f);
+	// out_m->m[2][0] = newForward.x;	    out_m->m[2][1] = newForward.y;	    out_m->m[2][2] = newForward.z;	    out_m->m[2][3] = floatingToFixed(0.0f);
+	// out_m->m[3][0] = vectorDotProduct( &newRight, &neye );			out_m->m[3][1] = vectorDotProduct( &newUp, &neye );			out_m->m[3][2] = vectorDotProduct( &newForward, &neye );			out_m->m[3][3] = floatingToFixed(1.0f);
+
+    // Yields an interesting result:
+    // out_m->m[0][0] = newRight.x;	    out_m->m[0][1] = newUp.x;	    out_m->m[0][2] = newForward.x;	    out_m->m[0][3] = floatingToFixed(0.0f);
+	// out_m->m[1][0] = newRight.y;		out_m->m[1][1] = newUp.y;		out_m->m[1][2] = newForward.y;      out_m->m[1][3] = floatingToFixed(0.0f);
+	// out_m->m[2][0] = newRight.z;	    out_m->m[2][1] = newUp.z;	    out_m->m[2][2] = newForward.z;	    out_m->m[2][3] = floatingToFixed(0.0f);
+	// out_m->m[3][0] = vectorDotProduct( &newRight, &neye );			out_m->m[3][1] = vectorDotProduct( &newUp, &neye );			out_m->m[3][2] = vectorDotProduct( &newForward, &neye );			out_m->m[3][3] = floatingToFixed(1.0f);
+
+    // Original:
+    // Looks okay except inverted yaw steering.
     out_m->m[0][0] = newRight.x;	    out_m->m[0][1] = newRight.y;	    out_m->m[0][2] = newRight.z;	    out_m->m[0][3] = floatingToFixed(0.0f);
 	out_m->m[1][0] = newUp.x;		    out_m->m[1][1] = newUp.y;		    out_m->m[1][2] = newUp.z;		    out_m->m[1][3] = floatingToFixed(0.0f);
 	out_m->m[2][0] = newForward.x;	    out_m->m[2][1] = newForward.y;	    out_m->m[2][2] = newForward.z;	    out_m->m[2][3] = floatingToFixed(0.0f);
@@ -389,15 +414,74 @@ void matrix_pointAt( mat4x4_t* out_m, vec3d_t* pos, vec3d_t* target, vec3d_t* up
 #endif
 }
 
+// 
+// 1. Make lookAtRH.
+// 2. Make lookAtLH.
+// 3. Test whether they work as intended.
+// 4. Make matrixFPSRH.
+// 5. Make matrixFPSLH.
+// 
+// eye == pos
+void matrix_lookAtRH( mat4x4_t* out_m, vec3d_t* eye, vec3d_t* target, vec3d_t* up ){
+    // Forward vector
+    vec3d_t zaxis = vectorSub( eye, target );
+    zaxis = vectorNormalise( &zaxis );
+
+    // Right vector
+    vec3d_t xaxis = vectorCrossProduct( &up, &zaxis );
+    xaxis = vectorNormalise( &xaxis );
+
+    // Up vector
+    vec3d_t yaxis = vectorCrossProduct( &zaxis, &xaxis );
+
+    #ifdef USE_FIXED_POINT_ARITHMETIC
+    out_m->m[0][0] = (xaxis.x);	    out_m->m[0][1] = (xaxis.y);	    out_m->m[0][2] = (xaxis.z);	    out_m->m[0][3] = floatingToFixed(0.0f);
+	out_m->m[1][0] = (yaxis.x);		out_m->m[1][1] = (yaxis.y);		out_m->m[1][2] = (yaxis.z);		out_m->m[1][3] = floatingToFixed(0.0f);
+	out_m->m[2][0] = (zaxis.x);	    out_m->m[2][1] = (zaxis.y);	    out_m->m[2][2] = (zaxis.z);	    out_m->m[2][3] = floatingToFixed(0.0f);
+	out_m->m[3][0] = -vectorDotProduct( &xaxis, eye );
+    out_m->m[3][1] = -vectorDotProduct( &yaxis, eye );
+    out_m->m[3][2] = -vectorDotProduct( &zaxis, eye );
+    out_m->m[3][3] = floatingToFixed(1.0f);
+    #else
+
+    #endif
+}
+
+// eye == pos
+void matrix_lookAtLH( mat4x4_t* out_m, vec3d_t* eye, vec3d_t* target, vec3d_t* up ){
+    // Forward vector
+    vec3d_t zaxis = vectorSub( target, eye );
+    zaxis = vectorNormalise( &zaxis );
+
+    // Right vector
+    vec3d_t xaxis = vectorCrossProduct( &up, &zaxis );
+    xaxis = vectorNormalise( &xaxis );
+
+    // Up vector
+    vec3d_t yaxis = vectorCrossProduct( &zaxis, &xaxis );
+
+    #ifdef USE_FIXED_POINT_ARITHMETIC
+    out_m->m[0][0] = (xaxis.x);	    out_m->m[0][1] = (xaxis.y);	    out_m->m[0][2] = (xaxis.z);	    out_m->m[0][3] = floatingToFixed(0.0f);
+	out_m->m[1][0] = (yaxis.x);		out_m->m[1][1] = (yaxis.y);		out_m->m[1][2] = (yaxis.z);		out_m->m[1][3] = floatingToFixed(0.0f);
+	out_m->m[2][0] = (zaxis.x);	    out_m->m[2][1] = (zaxis.y);	    out_m->m[2][2] = (zaxis.z);	    out_m->m[2][3] = floatingToFixed(0.0f);
+	out_m->m[3][0] = -vectorDotProduct( &xaxis, eye );
+    out_m->m[3][1] = -vectorDotProduct( &yaxis, eye );
+    out_m->m[3][2] = -vectorDotProduct( &zaxis, eye );
+    out_m->m[3][3] = floatingToFixed(1.0f);
+    #else
+
+    #endif
+}
+
 // pitch in (-90*, +90*)
 // yaw in (0*, 360*)
 // both in radians
 void matrix_FPS( mat4x4_t* out_m, vec3d_t* pos, rtnl_t pitch, rtnl_t yaw ){
 
-    DEBUG_PRINT( "pos:\t" );
-    vec3d_print( pos, 1 );
-    DEBUG_PRINT( "pitch:\t%f\n", fixedToFloating( pitch ) );
-    DEBUG_PRINT( "yaw:\t%f\n", fixedToFloating( yaw ) );
+    // DEBUG_PRINT( "pos:\t" );
+    // vec3d_print( pos, 1 );
+    // DEBUG_PRINT( "pitch:\t%f\n", fixedToFloating( pitch ) );
+    // DEBUG_PRINT( "yaw:\t%f\n", fixedToFloating( yaw ) );
 
 #ifdef USE_FIXED_POINT_ARITHMETIC
     flp_t cos_pitch = cosf( fixedToFloating( pitch ) );
@@ -419,17 +503,17 @@ void matrix_FPS( mat4x4_t* out_m, vec3d_t* pos, rtnl_t pitch, rtnl_t yaw ){
     vec3d_t zaxis = { sin_yaw * cos_pitch, -sin_pitch, cos_pitch * cos_yaw, 1.0f };
 #endif
 
-    DEBUG_PRINT( "cos_pitch:\t%f\n", cos_pitch );
-    DEBUG_PRINT( "sin_pitch:\t%f\n", sin_pitch );
-    DEBUG_PRINT( "cos_yaw:\t%f\n", cos_yaw );
-    DEBUG_PRINT( "sin_yaw:\t%f\n", sin_yaw );
+    // DEBUG_PRINT( "cos_pitch:\t%f\n", cos_pitch );
+    // DEBUG_PRINT( "sin_pitch:\t%f\n", sin_pitch );
+    // DEBUG_PRINT( "cos_yaw:\t%f\n", cos_yaw );
+    // DEBUG_PRINT( "sin_yaw:\t%f\n", sin_yaw );
 
-    DEBUG_PRINT( "xaxis:\t" );
-    vec3d_print( &xaxis, 1 );
-    DEBUG_PRINT( "yaxis:\t" );
-    vec3d_print( &yaxis, 1 );
-    DEBUG_PRINT( "zaxis:\t" );
-    vec3d_print( &zaxis, 1 );
+    // DEBUG_PRINT( "xaxis:\t" );
+    // vec3d_print( &xaxis, 1 );
+    // DEBUG_PRINT( "yaxis:\t" );
+    // vec3d_print( &yaxis, 1 );
+    // DEBUG_PRINT( "zaxis:\t" );
+    // vec3d_print( &zaxis, 1 );
 
 
 #ifdef USE_FIXED_POINT_ARITHMETIC

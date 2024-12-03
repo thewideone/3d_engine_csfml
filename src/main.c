@@ -64,6 +64,9 @@
 // 	- X move global variables and mesh processing functions to a separate file
 // 	- X coloured meshes:
 // 	- X (fill and edge colours separated)
+// 
+// Rotation matrix simplification (18:00):
+// https://youtu.be/hFRlnNci3Rs?si=eOnFZNV2NvxgDOUU
  */
 
 #if defined(RENDER_VISIBLE_ONLY) || defined(USE_CAMERA)
